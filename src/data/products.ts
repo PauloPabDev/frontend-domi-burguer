@@ -85,8 +85,8 @@ export const PRODUCTS: Product[] = [
   {
     id: 43,
     name: "CHEESECAKE DE FRESA",
-    basePrice: 12500,
-    price: 12500,
+    basePrice: 14000,
+    price: 14000,
     body: "Nuestro delicioso Cheesecake de fresa cremoso con base crocante y cobertura de fresas, un deleite para tu paladar.",
     bigImage: "/cheesecakeFresa.png",
     image1: "/cheesecakeFresa.png",
