@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCartStore } from '@/store/cartStore';
 import { Address } from '@/types/address';
+import { track } from '@/utils/analytics';
 
 export const useAddressManagement = () => {
   const { address: addressStore, removeAddress } = useCartStore();
@@ -11,6 +12,7 @@ export const useAddressManagement = () => {
   );
 
   const handleEditAddress = () => {
+    track('address_modal_opened', { trigger: 'cart_edit_address' });
     setAddressToEdit(addressStore);
     setIsModalOpen(true);
   };
@@ -21,6 +23,7 @@ export const useAddressManagement = () => {
   };
 
   const handleOpenModal = () => {
+    track('address_modal_opened', { trigger: 'cart_address_section' });
     setIsModalOpen(true);
   };
 

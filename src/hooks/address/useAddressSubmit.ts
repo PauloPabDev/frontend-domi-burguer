@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Location } from '@/types/locations';
 import { LocationService } from '@/services/locationService';
+import { track } from '@/utils/analytics';
 
 export const useAddressSubmit = (
   onSuccess: (location: Location) => void,
@@ -17,6 +18,7 @@ export const useAddressSubmit = (
       // Solo crear la location, el cálculo del delivery se hace en el contexto
       const { body: location } = await LocationService.addLocation({ token, location: locationData });
 
+      track('address_saved', { property_type: (locationData as { propertyType?: string }).propertyType || 'unknown' });
       onSuccess(location);
       return location;
     } catch (err) {

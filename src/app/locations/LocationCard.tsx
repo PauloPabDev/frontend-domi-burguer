@@ -6,6 +6,7 @@ import { ExternalLink, Heart, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getIdToken } from "firebase/auth";
 import { LocationService } from "@/services/locationService";
+import { track } from "@/utils/analytics";
 import { ConfirmModal } from "@/components/ui/modal/presets/ConfirmModal";
 
 interface LocationCardProps {
@@ -45,6 +46,7 @@ export const LocationCard: React.FC<LocationCardProps> = ({
         try {
             const token = await getIdToken(user);
             await LocationService.deleteLocation(token, location.id);
+            track('address_deleted', { address_name: location.name });
             onRefresh();
         } catch (error) {
             console.error("Error deleting location:", error);

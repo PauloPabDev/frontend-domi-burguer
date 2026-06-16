@@ -9,6 +9,7 @@ import { PaymentMethod } from "@/types/paymentMethod";
 import { OrderPayload } from "@/types/OrderPayload";
 import { Address } from "@/types/address";
 import { useRouter } from "next/navigation";
+import { track } from "@/utils/analytics";
 
 
 function useFormCart() {
@@ -43,10 +44,22 @@ function useFormCart() {
       clearAppliedCode();
 
       // Redirigir a la página de confirmación
+      track('order_success', {
+        order_id: result.id,
+        total: getTotal(),
+        subtotal: getSubtotal(),
+        payment_method: formData.paymentMethod,
+        item_count: items.length,
+      });
       router.push("/thankyou");
     },
     (apiError) => {
       console.error("Error submitting order:", apiError);
+      track('order_failed', {
+        error: apiError.message || 'unknown',
+        item_count: items.length,
+        payment_method: formData.paymentMethod,
+      });
       setError(apiError.message || "Error al procesar la orden");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -185,6 +198,13 @@ function useFormCart() {
       setError("Debes agregar una dirección de entrega");
       return;
     }
+
+    track('checkout_submitted', {
+      item_count: items.length,
+      payment_method: formData.paymentMethod,
+      has_address: true,
+      is_authenticated: !!user,
+    });
 
     const orderPayload = buildOrderPayload({ formData, address, items });
 

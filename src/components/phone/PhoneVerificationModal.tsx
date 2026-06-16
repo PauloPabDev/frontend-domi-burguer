@@ -13,6 +13,7 @@ import {
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Modal } from "@/components/ui/modal";
+import { track } from "@/utils/analytics";
 import { ConfirmModal } from "@/components/ui/modal/presets/ConfirmModal";
 import { modalErrorVariants } from "@/components/ui/modal/variants";
 import { cn } from "@/lib/utils";
@@ -88,6 +89,7 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
 
   useEffect(() => {
     if (open) {
+      track('phone_verification_opened', { mode });
       // Intentar restaurar estado previo de verificación
       const savedVerificationId = sessionStorage.getItem(STORAGE_KEY_VERIFICATION_ID);
       const savedPhone = sessionStorage.getItem(STORAGE_KEY_PHONE);

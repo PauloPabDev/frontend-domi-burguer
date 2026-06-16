@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { GoogleIcon } from "../ui/icons";
 import { useAuth } from "@/contexts/AuthContext";
+import { track } from "@/utils/analytics";
 
 interface GoogleLoginProps {
     onClose: () => void;
@@ -28,6 +29,7 @@ export const GoogleLogin = ({
     const { signInWithGoogle, clearError } = useAuth();
 
     const handleGoogleSignIn = async () => {
+        track('google_signin_clicked');
         try {
             clearError();
             await signInWithGoogle();

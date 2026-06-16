@@ -10,6 +10,7 @@ import { Kitchen } from "@/types/kitchens";
 import { Location } from "@/types/locations";
 import { Delivery } from "@/types/orders";
 import { parseOpeningHours, formatTimeUntilClose, OpeningHoursResult } from "@/utils/openingHoursParser";
+import { track } from "@/utils/analytics";
 
 interface UseKitchenModalOptions {
   isOpen: boolean;
@@ -65,6 +66,13 @@ export function useKitchenModal({ isOpen }: UseKitchenModalOptions): UseKitchenM
     }, 60000); // Cada minuto
 
     return () => clearInterval(interval);
+  }, [isOpen]);
+
+  // Trackear apertura del modal
+  useEffect(() => {
+    if (isOpen) {
+      track('kitchen_modal_opened');
+    }
   }, [isOpen]);
 
   // Obtener token
@@ -189,6 +197,7 @@ export function useKitchenModal({ isOpen }: UseKitchenModalOptions): UseKitchenM
     const kitchen = kitchens.find(k => k.id === kitchenId);
     if (kitchen) {
       setSelectedKitchen(kitchen);
+      track('kitchen_selected', { kitchen_id: kitchenId, kitchen_name: kitchen.name });
     }
   }, [kitchens]);
 

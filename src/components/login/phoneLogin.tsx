@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "../ui/input";
 import { ConfirmationResult } from "firebase/auth";
 import { useAuth } from "@/contexts/AuthContext";
+import { track } from "@/utils/analytics";
 
 interface PhoneLoginProps {
     onClose: () => void;
@@ -111,6 +112,7 @@ export const PhoneLogin = ({ onClose, onSuccess, redirectTo = "/profile" }: Phon
 
             setConfirmationResult(result);
             setStep("code");
+            track('phone_login_code_sent');
         } catch (error) {
             console.error("Error al enviar código:", error);
         } finally {
@@ -136,6 +138,7 @@ export const PhoneLogin = ({ onClose, onSuccess, redirectTo = "/profile" }: Phon
             if (onSuccess) onSuccess(normalizePhone(phone));
 
             // Cerrar el modal y redirigir
+            track('phone_login_verified');
             onClose();
             if (redirectTo) router.push(redirectTo);
         } catch (error) {

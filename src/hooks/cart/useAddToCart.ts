@@ -1,6 +1,7 @@
 import { useCartStore } from "@/store/cartStore";
 import { Product } from "@/types/products";
 import { generateCartItemId, calculateTotalPrice } from "@/lib/utils";
+import { track } from "@/utils/analytics";
 
 export const useAddToCart = () => {
   const { addItem } = useCartStore();
@@ -29,7 +30,14 @@ export const useAddToCart = () => {
     };
     
     addItem(cartItem);
-    
+    track('product_added_to_cart', {
+      product_name: product.name,
+      product_id: product.id,
+      quantity: product.quantity,
+      price: totalPrice,
+      complements_count: product.complements.length,
+    });
+
     console.log('✅ Producto añadido al carrito:', {
       id: uniqueId,
       productName: product.name,

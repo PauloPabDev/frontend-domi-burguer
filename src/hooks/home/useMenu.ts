@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Product, Complement } from "@/types/products";
 import { PRODUCTS } from "@/data/products";
+import { track } from "@/utils/analytics";
 
 // ============================================
 // HELPER FUNCTIONS - LÓGICA DE COMPLEMENTOS
@@ -281,6 +282,14 @@ export function useMenu() {
         };
       })
     );
+
+    track('complement_changed', {
+      action,
+      complement_id: String(ingredient.id),
+      complement_name: ingredient.name || '',
+      complement_type: ingredient.type || '',
+      new_quantity: action === 'plus' ? ingredient.quantity + 1 : ingredient.quantity - 1,
+    });
   };
 
 
@@ -294,6 +303,10 @@ export function useMenu() {
 
         if (!complementToRemove) return product;
 
+        track('complement_removed', {
+          complement_id: String(complementId),
+          complement_name: complementToRemove.name || '',
+        });
         console.log("Eliminando complemento:", complementToRemove);
 
         // Filtrar el complemento del array

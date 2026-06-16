@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import { PaymentMethod } from "@/types/paymentMethod";
+import { track } from "@/utils/analytics";
 
 interface PaymentMethodsSectionProps {
     paymentMethods: PaymentMethod[];
@@ -45,6 +48,11 @@ function PaymentMethodOption({
         <label
             className={`cursor-pointer inline-flex flex-col items-start justify-center p-3 flex-[0_0_auto] rounded-[8px] transition-colors ${isSelected ? "bg-accent-yellow-10" : "bg-[#FFFFFF]"
                 }`}
+            onClick={() => {
+                if (!isSelected) {
+                    track('payment_method_selected', { method: method.id });
+                }
+            }}
         >
             <input
                 type="radio"

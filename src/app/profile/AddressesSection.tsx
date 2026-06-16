@@ -9,6 +9,7 @@ import { LocationService } from "@/services/locationService";
 import { LocationCard } from "@/app/locations/LocationCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { getIdToken } from "firebase/auth";
+import { track } from "@/utils/analytics";
 
 const ModalAddress = dynamic(
     () => import("@/components/cart/modalAddress").then((mod) => mod.ModalAddress),
@@ -64,6 +65,7 @@ export function AddressesSection() {
     };
 
     const handleOpenCreate = () => {
+        track('address_modal_opened', { trigger: 'profile_new_address' });
         setAddressToEdit(null);
         setIsModalOpen(true);
     };

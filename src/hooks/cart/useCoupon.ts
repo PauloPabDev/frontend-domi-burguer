@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Code } from "@/types/codes";
+import { track } from "@/utils/analytics";
 import { CodesService } from "@/services/codesService";
 import { getIdToken } from "firebase/auth";
 import { useAuth } from "@/contexts/AuthContext";
@@ -107,6 +108,7 @@ export const useCoupon = (): UseCouponReturn => {
 
       if (code.status !== "active") {
         setError("Este código no está activo");
+        track('coupon_error', { code: couponCode.trim(), reason: 'inactive' });
         return false;
       }
 
@@ -114,22 +116,26 @@ export const useCoupon = (): UseCouponReturn => {
         setError(
           "Este código ya expiró. Mantente atento a nuestras próximas promos"
         );
+        track('coupon_error', { code: couponCode.trim(), reason: 'expired' });
         return false;
       }
 
       if (code.usageLimit && code.usageCount >= code.usageLimit) {
         setError("Este código ha alcanzado su límite de uso");
+        track('coupon_error', { code: couponCode.trim(), reason: 'usage_limit' });
         return false;
       }
 
       // Guardar el código validado en el store persistente
       setAppliedCode(code);
       setError(null);
+      track('coupon_applied', { code: couponCode.trim() });
       return true;
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Error al validar el cupón";
       setError(message);
+      track('coupon_error', { code: couponCode.trim(), reason: message });
       return false;
     } finally {
       setIsLoading(false);
@@ -142,10 +148,11 @@ export const useCoupon = (): UseCouponReturn => {
 
   const removeCoupon = useCallback(() => {
     console.log("Removiendo cupón aplicado");
+    track('coupon_removed', { code: couponCode });
     removeAppliedCode();
     setCouponCode("");
     setError(null);
-  }, [removeAppliedCode]);
+  }, [couponCode, removeAppliedCode]);
 
   return {
     couponCode,

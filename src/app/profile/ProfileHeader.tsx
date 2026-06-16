@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { track } from "@/utils/analytics";
 
 export function ProfileHeader() {
     const { user, logout } = useAuth();
@@ -14,6 +15,7 @@ export function ProfileHeader() {
     const handleLogout = async () => {
         try {
             setIsLoggingOut(true);
+            track('logout_clicked');
             await logout();
             router.push("/");
         } catch (error) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { track } from "@/utils/analytics";
 import { QRCodeCanvas } from "qrcode.react";
 import { Download, Share2, Check } from "lucide-react";
 import { addToast } from "@heroui/toast";
@@ -29,6 +30,7 @@ export function QRShare({ url, title = "Código QR", fileName = "qr-code" }: QRS
         link.download = `${fileName}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
+        track('qr_downloaded', { file_name: `${fileName}.png` });
 
         setDownloaded(true);
         setTimeout(() => setDownloaded(false), 2000);
@@ -66,6 +68,7 @@ export function QRShare({ url, title = "Código QR", fileName = "qr-code" }: QRS
                     text: `Escanea este código QR: ${url}`,
                     files: [file],
                 });
+                track('qr_shared', { method: 'web_share_api_files' });
             } else if (navigator.share) {
                 // Fallback: compartir solo el enlace
                 await navigator.share({
@@ -73,6 +76,7 @@ export function QRShare({ url, title = "Código QR", fileName = "qr-code" }: QRS
                     text: `Escanea este código QR o visita: ${url}`,
                     url: url,
                 });
+                track('qr_shared', { method: 'web_share_api_url' });
             } else {
                 // Fallback para navegadores sin Web Share API: descargar
                 handleDownload();

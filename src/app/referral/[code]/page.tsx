@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CodesService } from "@/services/codesService";
 import { Code } from "@/types/codes";
 import { Loader2, Gift, ArrowRight, QrCode, Users } from "lucide-react";
+import { track } from "@/utils/analytics";
 import Image from "next/image";
 import { QRShare } from "@/components/QRShare";
 import { SpikesIcon } from "@/components/ui/icons";
@@ -39,6 +40,10 @@ export default function ReferralPage() {
                 if (!isCodeExpired && !isCodeInactive) {
                     localStorage.setItem("pendingReferralCode", fetchedCode.code);
                 }
+                track('referral_page_visited', {
+                    referral_code: fetchedCode.code,
+                    is_valid: !isCodeExpired && !isCodeInactive,
+                });
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : "Código no encontrado";
                 setError(errorMessage);
@@ -53,6 +58,7 @@ export default function ReferralPage() {
     }, [codeParam]);
 
     const handleGoToMenu = () => {
+        track('referral_go_to_menu_clicked', { referral_code: code?.code || codeParam });
         router.push("/");
     };
 

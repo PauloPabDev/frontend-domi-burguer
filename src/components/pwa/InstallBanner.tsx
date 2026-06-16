@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { track } from "@/utils/analytics";
 import { LogoMobile } from "@/components/ui/icons";
 
 export function InstallBanner() {
@@ -23,13 +24,16 @@ export function InstallBanner() {
   }, []);
 
   const handleDismiss = () => {
+    track('pwa_banner_dismissed');
     setIsDismissed(true);
     localStorage.setItem("pwa-banner-dismissed", Date.now().toString());
   };
 
   const handleInstall = async () => {
+    track('pwa_install_clicked');
     const success = await installApp();
     if (success) {
+      track('pwa_installed');
       setIsDismissed(true);
     }
   };

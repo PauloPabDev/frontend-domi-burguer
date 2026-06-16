@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { track } from "@/utils/analytics";
 
 interface AccountButtonProps {
   isModalOpen: boolean;
@@ -19,6 +20,7 @@ export const AccountButton = ({ isModalOpen, onOpenModal }: AccountButtonProps) 
     if (user) {
       router.push("/profile");
     } else {
+      track('login_modal_opened', { trigger: 'navbar_account_button' });
       onOpenModal();
     }
   };

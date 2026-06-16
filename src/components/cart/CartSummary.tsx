@@ -20,6 +20,7 @@ import { useCheckoutFormStore } from "@/store/checkoutFormStore";
 import { ProductGridModal } from "@/components/cart/ProductGridModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { track } from "@/utils/analytics";
 import {
   Dialog,
   DialogContent,
@@ -131,7 +132,10 @@ export const CartSummary = ({ }) => {
                         size="lg"
                         leftIcon={<Plus />}
                         className="w-[260px] mt-4 shadow-none"
-                        onClick={() => setIsProductModalOpen(true)}
+                        onClick={() => {
+                          track('add_more_products_opened', { trigger: 'empty_cart' });
+                          setIsProductModalOpen(true);
+                        }}
                       >
                         AGREGAR PRODUCTOS
                       </Button>
@@ -148,7 +152,10 @@ export const CartSummary = ({ }) => {
                 size="lg"
                 leftIcon={<Plus />}
                 className="w-full shadow-none"
-                onClick={() => setIsProductModalOpen(true)}
+                onClick={() => {
+                  track('add_more_products_opened', { trigger: 'add_more_button' });
+                  setIsProductModalOpen(true);
+                }}
               >
                 AGREGAR MÁS PRODUCTOS
               </Button>

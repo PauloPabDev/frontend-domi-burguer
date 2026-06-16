@@ -6,13 +6,15 @@ import Image from "next/image";
 import { ArrowIcon, EditarIcon, HamburgerIcon } from "@/components/ui/icons";
 import { Plus } from "lucide-react";
 import { useMenu } from "@/hooks/home/useMenu";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { QuantitySelector } from "@/components/ui/quantitySelector";
 import { showFoodToast } from "../toastFood";
 import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
 import { useAddToCart } from "@/hooks/cart/useAddToCart";
 import { ComplementsLarge } from "../ui/complementsLarge";
+import { track } from "@/utils/analytics";
+import { useTrackSectionView } from "@/hooks/useTrackSectionView";
 
 // Lazy load modal pesado
 const CustomizationModalSection = dynamic(
@@ -36,6 +38,9 @@ export default function MenuSection() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { handleAddToCart } = useAddToCart();
+  const menuSectionRef = useTrackSectionView('menu_products');
+  const currentProductRef = useRef(currentProduct);
+  currentProductRef.current = currentProduct;
 
   // Configurar Embla Carousel para el carrusel principal
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -72,22 +77,25 @@ export default function MenuSection() {
   const scrollPrev = useCallback(() => {
     if (emblaApi) {
       emblaApi.scrollPrev();
+      track('carousel_navigated', { direction: 'prev', from_product: currentProductRef.current.name });
     }
   }, [emblaApi]);
 
   const scrollNext = useCallback(() => {
     if (emblaApi) {
       emblaApi.scrollNext();
+      track('carousel_navigated', { direction: 'next', from_product: currentProductRef.current.name });
     }
   }, [emblaApi]);
 
   const handleEditProduct = () => {
+    track('product_customization_opened', { product_name: currentProduct.name, product_id: currentProduct.id });
     setIsModalOpen(true);
   };
 
   return (
     <>
-      <section className="grid grid-cols-1 xl:grid-cols-2 gap-0 max-w-[1440px] w-screen">
+      <section ref={menuSectionRef} className="grid grid-cols-1 xl:grid-cols-2 gap-0 max-w-[1440px] w-screen">
         {/* Columna 1 - Carrusel Principal */}
         <div className="flex flex-col items-start justify-center gap-2 bg-[linear-gradient(45deg,rgba(255,194,5,1)_0%,rgba(255,194,5,0.4)_100%)] max-w-[720px] w-full mx-auto relative overflow-hidden">
           <div className="w-full h-[30px] xl:h-[14px]" />

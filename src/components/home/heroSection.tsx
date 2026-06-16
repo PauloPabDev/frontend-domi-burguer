@@ -1,6 +1,7 @@
 "use client";
 
 import { LogoMobileRed } from "@/components/ui/icons";
+import { useTrackSectionView } from "@/hooks/useTrackSectionView";
 
 const heroStyle = {
   "--hero-fs": "clamp(3.5rem, 12vw, 7.5rem)",
@@ -12,8 +13,9 @@ const headingStyle: React.CSSProperties = {
 };
 
 export default function HeroSection() {
+  const sectionRef = useTrackSectionView('hero');
   return (
-    <section className="w-full py-8 sm:py-14 md:py-20 lg:py-[110px]">
+    <section ref={sectionRef} className="w-full py-8 sm:py-14 md:py-20 lg:py-[110px]">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col text-left" style={heroStyle}>
           {/* Fila 1: HOY! COMEMOS — columna en móvil, fila en lg+ */}

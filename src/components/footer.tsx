@@ -79,6 +79,8 @@ export const Footer = () => {
             <Link
               key={link.link}
               href={link.link}
+              data-umami-event="footer_link_clicked"
+              data-umami-event-link={link.name}
               className={`relative self-stretch font-semibold text-accentmikado-10 text-lg tracking-[0] leading-6 h-auto p-0 hover:bg-transparent`}
             >
               {link.name}
@@ -88,6 +90,7 @@ export const Footer = () => {
             href={`https://wa.me/573506186772?text=${encodeURIComponent("¡Hola! me gustaria contratar sus servicios para un evento😊")}`}
             target="_blank"
             rel="noopener noreferrer"
+            data-umami-event="footer_events_whatsapp_clicked"
             className="relative self-stretch font-semibold text-accentmikado-10 text-lg tracking-[0] leading-6 h-auto p-0 hover:bg-transparent flex items-center gap-2"
           >
             PEDIDOS PARA EVENTOS
@@ -99,6 +102,8 @@ export const Footer = () => {
             <Link
               key={legal.link}
               href={legal.link}
+              data-umami-event="footer_legal_clicked"
+              data-umami-event-link={legal.name}
               className={`relative self-stretch font-semibold text-accentmikado-10 text-lg tracking-[0] leading-6 h-auto p-0 hover:bg-transparent`}
             >
               {legal.name}
@@ -111,6 +116,7 @@ export const Footer = () => {
             href="https://www.instagram.com/domiburguer_"
             target="_blank"
             rel="noopener noreferrer"
+            data-umami-event="footer_instagram_clicked"
             className="focus:outline-0! focus:ring-0!"
           >
             <Button variant="yellow" size="icon-lg">
@@ -121,6 +127,7 @@ export const Footer = () => {
             href={`https://wa.me/573506186772?text=${encodeURIComponent("Hola, estaba en la pagina de Domi Burger y quiero más información")}`}
             target="_blank"
             rel="noopener noreferrer"
+            data-umami-event="footer_whatsapp_clicked"
             className="focus:outline-0! focus:ring-0!"
           >
             <Button

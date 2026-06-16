@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { track } from '@/utils/analytics';
 import { useCartStore } from '@/store/cartStore';
 import { useCartModalItemDeleteStore } from '@/store/cartModalItemDeleteStore';
 import { useAppliedCodeStore } from '@/store/appliedCodeStore';
@@ -247,6 +248,7 @@ export const useCartActions = () => {
 
   const handleIncrease = (id: string, quantity: number) => {
     updateQuantity(id, quantity + 1);
+    track('cart_item_quantity_increased', { item_id: id, new_quantity: quantity + 1 });
   };
 
   const handleDecrease = (id: string, quantity: number) => {
@@ -257,6 +259,7 @@ export const useCartActions = () => {
       }
     } else {
       updateQuantity(id, quantity - 1);
+      track('cart_item_quantity_decreased', { item_id: id, new_quantity: quantity - 1 });
     }
   };
 
@@ -269,6 +272,11 @@ export const useCartActions = () => {
     if (itemToDelete.rewardCode) {
       useAppliedCodeStore.getState().removeAppliedCode();
     }
+    track('cart_item_deleted', {
+      item_id: itemToDelete.id,
+      item_name: itemToDelete.name,
+      was_reward: !!itemToDelete.rewardCode,
+    });
     updateQuantity(itemToDelete.id, 0);
     closeDeleteModal();
   };
