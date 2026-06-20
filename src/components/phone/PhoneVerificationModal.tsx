@@ -25,10 +25,6 @@ interface PhoneVerificationModalProps {
   onSuccess?: (phoneNumber: string) => void;
 }
 
-type WindowWithRecaptcha = Window & {
-  recaptchaVerifier?: RecaptchaVerifier;
-};
-
 export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
   open,
   onOpenChange,
@@ -56,6 +52,7 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
   const otpAbortRef = useRef<AbortController | null>(null);
 
   const recaptchaContainerId = "phone-modal-recaptcha";
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
   // Claves para sessionStorage
   const STORAGE_KEY_VERIFICATION_ID = "phone_verification_id";
@@ -87,6 +84,23 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
     return remaining > 0 ? remaining : 0;
   };
 
+  const clearRecaptcha = () => {
+    if (recaptchaVerifierRef.current) {
+      try {
+        recaptchaVerifierRef.current.clear();
+      } catch {
+        // ignore
+      }
+      recaptchaVerifierRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      clearRecaptcha();
+    };
+  }, []);
+
   useEffect(() => {
     if (open) {
       track('phone_verification_opened', { mode });
@@ -116,6 +130,7 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
       }
       clearError();
     } else {
+      clearRecaptcha();
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -180,21 +195,18 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
   };
 
   const getOrCreateRecaptcha = (): RecaptchaVerifier => {
-    const w = window as WindowWithRecaptcha;
+    clearRecaptcha();
 
-    if (w.recaptchaVerifier) {
-      try {
-        w.recaptchaVerifier.clear();
-      } catch {
-        // Ignorar errores al limpiar
-      }
+    const container = document.getElementById(recaptchaContainerId);
+    if (container) {
+      container.innerHTML = "";
     }
 
-    w.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerId, {
+    recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerId, {
       size: "invisible",
     });
 
-    return w.recaptchaVerifier;
+    return recaptchaVerifierRef.current;
   };
 
   const handleSendCode = async () => {
