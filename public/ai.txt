@@ -1,15 +1,24 @@
-# AI Access Policy for Domi Burguer
+# AI Access Policy — Domi Burguer
 # https://domiburguer.com
+# Última actualización: 2026-06-20
 
+# ── Política general ──────────────────────────────────────────────────────────
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /db-status
 Disallow: /profile
 Disallow: /orders
 Disallow: /info-order
 Disallow: /cart
 
-# Content usage
+# ── Uso de contenido ──────────────────────────────────────────────────────────
+# Entrenar modelos de IA con el contenido de este sitio no está permitido.
+# Indexar el contenido para responder consultas de usuarios sí está permitido.
 Training: disallowed
 Indexing: allowed
-Scraping: allowed for informational purposes only
+Scraping: allowed for informational and assistive purposes only
+
+# ── Contacto ──────────────────────────────────────────────────────────────────
+Contact: https://wa.me/573506186772
+Info: https://domiburguer.com/llms.txt

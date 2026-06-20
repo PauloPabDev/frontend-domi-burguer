@@ -1,3 +1,7 @@
+# robots.txt — Domi Burguer
+# https://domiburguer.com
+
+# ── Todos los crawlers (regla base) ──────────────────────────────────────────
 User-agent: *
 Allow: /
 Disallow: /api/
@@ -7,5 +11,102 @@ Disallow: /orders
 Disallow: /info-order
 Disallow: /cart
 
+# ── Agentes LLM / asistentes de IA (indexación permitida) ────────────────────
+# OpenAI — ChatGPT / SearchGPT
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+Disallow: /db-status
+Disallow: /profile
+Disallow: /orders
+Disallow: /info-order
+Disallow: /cart
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+Disallow: /db-status
+Disallow: /profile
+Disallow: /orders
+Disallow: /info-order
+Disallow: /cart
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+Disallow: /db-status
+Disallow: /profile
+Disallow: /orders
+Disallow: /info-order
+Disallow: /cart
+
+# Anthropic — Claude
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+Disallow: /db-status
+Disallow: /profile
+Disallow: /orders
+Disallow: /info-order
+Disallow: /cart
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /api/
+Disallow: /db-status
+Disallow: /profile
+Disallow: /orders
+Disallow: /info-order
+Disallow: /cart
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+Disallow: /db-status
+Disallow: /profile
+Disallow: /orders
+Disallow: /info-order
+Disallow: /cart
+
+# Google — Gemini / AI Overviews
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+Disallow: /db-status
+Disallow: /profile
+Disallow: /orders
+Disallow: /info-order
+Disallow: /cart
+
+# Meta — Llama AI
+User-agent: meta-externalagent
+Allow: /
+Disallow: /api/
+Disallow: /db-status
+Disallow: /profile
+Disallow: /orders
+Disallow: /info-order
+Disallow: /cart
+
+# ── Scrapers de entrenamiento masivo (bloqueados) ─────────────────────────────
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+# ── Recursos de descubrimiento ────────────────────────────────────────────────
 Sitemap: https://domiburguer.com/sitemap.xml
-Host: https://domiburguer.com

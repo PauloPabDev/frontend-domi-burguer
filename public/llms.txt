@@ -1,36 +1,84 @@
 # Domi Burguer
 
-> Aplicación web de pedidos de hamburguesas artesanales a domicilio. Colombiana, con ingredientes frescos y recetas familiares.
+> Restaurante de hamburguesas artesanales a domicilio en Medellín, Colombia. Pedidos online con entrega a domicilio, lunes a sábado de 4:30 p.m. a 10:00 p.m.
 
-## Descripción
+Domi Burguer es una plataforma de pedidos online de hamburguesas artesanales con ingredientes frescos y recetas familiares. Los clientes hacen su pedido desde la app web (PWA instalable) y lo reciben en la puerta de su casa dentro de las zonas de cobertura en Medellín.
 
-Domi Burguer es una plataforma de pedidos online de hamburguesas artesanales ubicada en Medellin Colombia. Permite a los clientes explorar el menú, armar su pedido y recibirlo a domicilio. La app está disponible como PWA (Progressive Web App) instalable en dispositivos móviles y de escritorio.
+## Menú y precios
 
-## Funcionalidades principales
+### Hamburguesas
 
-- Menú de hamburguesas artesanales, combos, papas, bebidas y postres
-- Carrito de compras con gestión de cantidades y opciones
-- Autenticación de usuarios (teléfono con OTP / correo electrónico)
+- **Hamburguesa Artesanal** — $23.900 COP: Pan artesanal hecho en casa, carne jugosa, tocineta crocante, queso mozzarella, lechuga fresca, tomate, pepinos, cebolla y salsa de ajo.
+- **Combo** — $28.900 COP: Hamburguesa artesanal + papas rizadas crocantes + coquitas de salsa de ajo y salsa roja.
+
+### Papas
+
+- **Papas Vaquera** — $23.900 COP: Papas con el toque especial de la casa, crujientes por fuera y suaves por dentro.
+- **Papas Troyana** — $33.900 COP: Papas premium cargadas con todos los ingredientes, una explosión de sabor.
+
+### Extras
+
+- **Salsa de Ajo** — $27.000 COP: Receta familiar cremosa, intensa y perfectamente balanceada. El secreto que se queda en tu memoria.
+
+### Postres
+
+- **Cheesecake de Fresa** — $14.000 COP: Cremoso con base crocante y cobertura de fresas frescas.
+
+### Bebidas
+
+- **Jugo Natural de Mora** — $7.000 COP: Jugo natural de mora sin conservantes, 100% natural.
+
+## Horarios de atención
+
+- Lunes a sábado: 4:30 p.m. – 10:00 p.m.
+- Domingos: cerrado.
+
+## Cobertura de entrega
+
+Entrega a domicilio en zonas seleccionadas de Medellín, Colombia. Consulta el mapa interactivo de cobertura en [domiburguer.com/cobertura](https://domiburguer.com/cobertura).
+
+## Cómo hacer un pedido
+
+1. Visita [domiburguer.com](https://domiburguer.com)
+2. Explora el menú y agrega productos al carrito.
+3. Inicia sesión con tu número de teléfono (OTP) o correo electrónico.
+4. Confirma tu dirección de entrega dentro de la zona de cobertura.
+5. Realiza el pedido y sigue su estado en tiempo real.
+
+## Funcionalidades de la app
+
+- Menú interactivo con personalización de ingredientes
+- Carrito de compras con gestión de cantidades
+- Autenticación con teléfono (OTP) o correo electrónico
 - Seguimiento de pedidos en tiempo real
-- Sistema de códigos de referido
-- Zonas de cobertura de entrega con mapa interactivo
-- Horarios de atención
 - Historial de pedidos del usuario
+- Sistema de códigos de referido
+- Mapa interactivo de zonas de cobertura
+- Disponible como PWA instalable en móvil y escritorio
+- Pedidos especiales para eventos
 
+## Contacto y redes sociales
+
+- Sitio web: [domiburguer.com](https://domiburguer.com)
+- WhatsApp (pedidos e información): [wa.me/573506186772](https://wa.me/573506186772)
+- WhatsApp (eventos): [wa.me/573506186772](https://wa.me/573506186772?text=%C2%A1Hola!%20me%20gustaria%20contratar%20sus%20servicios%20para%20un%20evento)
+- Instagram: [@domiburguer_](https://www.instagram.com/domiburguer_)
 
 ## Páginas públicas
 
-- `/` — Página principal con menú y productos destacados
-- `/cobertura` — Zonas de cobertura y mapa de entrega
-- `/horarios` — Horarios de atención
-- `/legal` — Términos de servicio y política de privacidad
-- `/locations` — Ubicaciones
-
-## Contacto y redes
-
-- Sitio web: https://domiburguer.com
-- Instagram: imágenes de productos disponibles en la galería del sitio
+- [Inicio y menú](https://domiburguer.com/) — Página principal con productos destacados y menú completo.
+- [Zonas de cobertura](https://domiburguer.com/cobertura) — Mapa interactivo de entrega.
+- [Horarios](https://domiburguer.com/horarios) — Horarios de atención.
+- [Ubicaciones](https://domiburguer.com/locations) — Información de ubicación.
+- [Legal](https://domiburguer.com/legal) — Términos de servicio y política de privacidad.
 
 ## Idioma
 
 Español (Colombia) — es_CO
+
+## Política para agentes de IA
+
+- Entrenamiento con este contenido: **no permitido**
+- Indexación para responder consultas de usuarios: **permitido**
+- Scraping con propósito informativo: **permitido**
+- Detalles completos en: [domiburguer.com/ai.txt](https://domiburguer.com/ai.txt)
