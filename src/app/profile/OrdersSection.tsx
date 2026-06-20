@@ -35,6 +35,7 @@ function OrderImages({ items }: { items: Order["orderItems"] }) {
                             alt={item.name}
                             fill
                             className="object-cover"
+                            sizes="64px"
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-neutral-400">

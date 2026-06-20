@@ -114,7 +114,7 @@ export default function MenuSection() {
                       fill
                       className="object-contain"
                       priority={index === 0}
-                      sizes="(max-width: 768px) 400px, 720px"
+                      sizes="(max-width: 1279px) 100vw, 720px"
                     />
                   </div>
                 </div>
@@ -248,7 +248,7 @@ export default function MenuSection() {
           >
             {/* Imagen flotante del producto */}
             <Image
-              src="/Burger1.png"
+              src="/images/products/burger-card.webp"
               alt="Burger"
               width={140}
               height={220}
@@ -280,7 +280,7 @@ export default function MenuSection() {
             }}
           >
             <Image
-              src="/Burger1.png"
+              src="/images/products/burger-card.webp"
               alt="Burger"
               width={140}
               height={220}
@@ -288,8 +288,8 @@ export default function MenuSection() {
             />
 
             <Image
-              src="/DomiburgerPapitas.png"
-              alt="Burger"
+              src="/images/products/fries-card.webp"
+              alt="Papas del combo"
               width={119}
               height={178}
               className="absolute top-[35px] left-[68px] lg:top-[23px] lg:left-[121px] w-[84px] h-[126px] lg:w-[119px] lg:h-[178px] object-cover"
@@ -320,10 +320,9 @@ export default function MenuSection() {
             <Image
               className="absolute top-[28px] lg:top-[-30px] w-[178px] h-[128px] lg:w-[308px] lg:h-[221px]"
               alt="Burger"
-              src="/DomiburgerSalsa.png"
+              src="/images/products/sauce-card.webp"
               width={308}
               height={221}
-              priority
             />
 
             <Button
@@ -350,7 +349,7 @@ export default function MenuSection() {
         >
           <div className={`${"relative gap-[4.47px]"} p-0 h-full`}>
             <Image
-              src="/papaCayendo2.png"
+              src="/images/products/vaquera-card.webp"
               alt="Papas Vaquera"
               width={153}
               height={230}
@@ -382,7 +381,7 @@ export default function MenuSection() {
         >
           <div className={`${"relative gap-[4.47px]"} p-0 h-full`}>
             <Image
-              src="/papaTroyana3.png"
+              src="/images/products/troyana-card.webp"
               alt="Papas Troyana"
               width={153}
               height={230}
@@ -415,7 +414,7 @@ export default function MenuSection() {
         >
           <div className={`${"relative gap-[4.47px]"} p-0 h-full`}>
             <Image
-              src="/cheesecakeFresa.png"
+              src="/images/products/cheesecake-card.webp"
               alt="Cheesecake de Fresa"
               width={153}
               height={230}
@@ -448,7 +447,7 @@ export default function MenuSection() {
         >
           <div className={`${"relative gap-[4.47px]"} p-0 h-full`}>
             <Image
-              src="/JugoDeMora.png"
+              src="/images/products/blackberry-juice-card.webp"
               alt="Jugo Natural de Mora"
               width={153}
               height={230}

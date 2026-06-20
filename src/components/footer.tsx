@@ -48,19 +48,19 @@ export const Footer = () => {
     <footer className="flex flex-col w-full items-start relative text-accent-yellow-10">
       <Image
         className="relative self-stretch w-full hidden md:block"
-        alt="Sec"
-        src="/footerDesktop.png"
-        width={1920}
-        height={500}
-        priority
+        alt=""
+        src="/images/layout/footer-desktop.webp"
+        width={1440}
+        height={399}
+        sizes="100vw"
       />
       <Image
         className="relative self-stretch w-full md:hidden"
-        alt="Sec"
-        src="/footerMobile.png"
-        width={500}
-        height={700}
-        priority
+        alt=""
+        src="/images/layout/footer-mobile.webp"
+        width={375}
+        height={306}
+        sizes="100vw"
       />
       <div className=" lg:items-start relative flex flex-col lg:flex-row justify-between px-6 py-16 lg:p-16 lg:px-10 lg:space-x-3 lg:20 self-stretch w-full bg-primary-red border-b border-solid border-[#fff9e6] h-[522px] lg:h-auto">
         <div

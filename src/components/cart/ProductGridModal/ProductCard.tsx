@@ -36,7 +36,7 @@ export function ProductCard({
           alt={product.name}
           fill
           className="object-contain p-2"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
         />
       </div>
 

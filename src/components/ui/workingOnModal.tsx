@@ -56,11 +56,12 @@ export const WorkingOnModal = ({ isOpen, onClose }: ModalProps) => {
         </div>
         <div className="flex justify-center">
           <Image
-            src="/catWork.jpg"
+            src="/images/misc/working-cat.webp"
             alt="Gato trabajando"
             className="w-[200px] h-[200px] md:w-[250px] md:h-[250px] object-contain"
-            width={200}
-            height={400}
+            width={500}
+            height={492}
+            sizes="(max-width: 767px) 200px, 250px"
           />
         </div>
       </div>

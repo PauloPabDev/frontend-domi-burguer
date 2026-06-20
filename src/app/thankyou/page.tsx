@@ -14,11 +14,12 @@ export default function Thankyou() {
         <div className="flex flex-col items-start justify-center gap-2 max-w-[720px] w-full mx-auto relative">
           <div className="w-full aspect-[1/1] relative h-full">
             <Image
-              src={"/productos-gracias.jpg"}
+              src="/images/misc/order-thank-you.webp"
               alt={"Hamburguesa"}
               fill
               className="object-cover"
               priority
+              sizes="(max-width: 1279px) 100vw, 720px"
             />
           </div>
         </div>

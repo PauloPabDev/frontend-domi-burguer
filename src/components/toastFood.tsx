@@ -35,7 +35,7 @@ export const showFoodToast = (productName: string) => {
           {productName === "COMBO ESPECIAL" && (
             <>
               <Image
-                src="/burgerSmall.png"
+                src="/images/products/burger-thumbnail.webp"
                 alt="Burger"
                 width={67}
                 height={105}
@@ -43,8 +43,8 @@ export const showFoodToast = (productName: string) => {
               />
 
               <Image
-                src="/papitasSmall.png"
-                alt="Burger"
+                src="/images/products/fries-thumbnail.webp"
+                alt="Papas"
                 width={56}
                 height={85}
                 className="absolute top-[18px] left-[40px] w-[56px] h-[85px] object-cover"
@@ -53,8 +53,8 @@ export const showFoodToast = (productName: string) => {
           )}
           {productName === "HAMBURGUESA ARTESANAL" && (
             <Image
-              src="/burgerSmall.png"
-              alt="Burger"
+              src="/images/products/burger-thumbnail.webp"
+              alt="Hamburguesa artesanal"
               width={67}
               height={105}
               className="absolute top-[-5px] left-[15px] w-[67px] h-[105px] object-cover"
@@ -62,8 +62,8 @@ export const showFoodToast = (productName: string) => {
           )}
           {productName === "SALSA DE AJO" && (
             <Image
-              src="/salsaSmall.png"
-              alt="Burger"
+              src="/images/products/sauce-thumbnail.webp"
+              alt="Salsa de ajo"
               width={118}
               height={85}
               className="absolute top-[5px] left-[3px] w-[118px] h-[85px] object-cover overflow-visible"
@@ -71,7 +71,7 @@ export const showFoodToast = (productName: string) => {
           )}
           {productName === "PAPAS VAQUERA" && (
             <Image
-              src="/papaCayendo2.png"
+              src="/images/products/vaquera-card.webp"
               alt="Papas Vaquera"
               width={67}
               height={105}
@@ -80,7 +80,7 @@ export const showFoodToast = (productName: string) => {
           )}
           {productName === "PAPAS TROYANA" && (
             <Image
-              src="/papaTroyana3.png"
+              src="/images/products/troyana-card.webp"
               alt="Papas Troyana"
               width={67}
               height={105}

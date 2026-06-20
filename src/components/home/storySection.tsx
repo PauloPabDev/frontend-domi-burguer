@@ -36,27 +36,30 @@ export default function StorySection() {
       {/* Imágenes */}
       <div className="w-full overflow-x-auto flex gap-6 scrollbar-hide">
         <Image
-          src="/IGFoto1.png"
-          alt="Instagram image"
+          src="/images/gallery/instagram-1.webp"
+          alt="Producto de Domiburguer en Instagram"
           width={265}
           height={400}
           className="w-[265px] h-[400px] flex-shrink-0"
+          sizes="265px"
         />
 
         <Image
-          src="/IGFoto2.png"
-          alt="Instagram image"
+          src="/images/gallery/instagram-2.webp"
+          alt="Experiencia Domiburguer en Instagram"
           width={271}
           height={400}
           className="w-[271px] h-[400px] flex-shrink-0 mt-20"
+          sizes="271px"
         />
 
         <Image
-          src="/IGFoto3.png"
-          alt="Instagram image"
+          src="/images/gallery/instagram-3.webp"
+          alt="Hamburguesa Domiburguer en Instagram"
           width={258}
           height={400}
           className="w-[258px] h-[400px] flex-shrink-0"
+          sizes="258px"
         />
       </div>
     </section>
