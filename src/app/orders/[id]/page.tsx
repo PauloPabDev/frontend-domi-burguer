@@ -11,12 +11,13 @@ import { OrderService } from "@/services/orderService";
 import { useRouter } from "next/navigation";
 
 interface OrderDetailPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default function OrderDetailPage({ params }: OrderDetailPageProps) {
+    const { id } = React.use(params);
     const { user } = useAuth();
     const router = useRouter();
     const [order, setOrder] = React.useState<Order | null>(null);
@@ -35,7 +36,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                 setError(null);
 
                 const token = await user.getIdToken();
-                const response = await OrderService.getOrderById(params.id, token);
+                const response = await OrderService.getOrderById(id, token);
                 setOrder(response.body);
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'Error al cargar el pedido';
@@ -47,7 +48,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
         };
 
         fetchOrder();
-    }, [user, params.id, router]);
+    }, [user, id, router]);
 
     const handleCancelOrder = async () => {
         if (!order || !user) return;

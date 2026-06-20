@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
@@ -29,12 +32,12 @@
     "firebase": "^12.6.0",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.544.0",
-    "next": "^15.5.10",
+    "next": "^16.2.9",
     "opening_hours": "^3.12.0",
     "qrcode.react": "^4.2.0",
-    "react": "19.1.0",
+    "react": "19.2.3",
     "react-confetti": "^6.4.0",
-    "react-dom": "19.1.0",
+    "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
     "react-phone-number-input": "^3.4.12",
     "react-use": "^17.6.0",
@@ -44,14 +47,13 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.5.3",
+    "eslint-config-next": "^16.2.9",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
