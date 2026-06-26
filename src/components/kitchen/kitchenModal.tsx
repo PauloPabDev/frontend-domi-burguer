@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { InstagramIcon, WhatsAppIcon, TiktokIcon } from "../ui/icons";
 import {
@@ -40,9 +39,7 @@ export const KitchenModal = ({ isOpen, onClose, handleBackButton = true }: Kitch
     selectLocation,
     formattedDeliveryPrice,
     parsedHours,
-    countdownText,
   } = useKitchenModal({ isOpen });
-  console.log("KitchenModal renderizado parsed:", parsedHours);
   const mapMarkers: MapMarker[] = kitchens
     .filter(k => k.location?.coordinates?.lat && k.location?.coordinates?.lng)
     .map(k => ({

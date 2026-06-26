@@ -14,6 +14,7 @@ import { addToast } from "@heroui/toast";
 import { useAppliedCodeStore } from "@/store/appliedCodeStore";
 import Link from "next/link";
 import { Modal } from "@/components/ui/modal";
+import { copyToClipboard } from "@/utils/clipboard";
 
 const CODE_PREVIEW_LIMIT = 3;
 
@@ -71,26 +72,6 @@ export function CodesSection() {
 
     const previewCodes = codes.slice(0, CODE_PREVIEW_LIMIT);
     const hasMore = codes.length > CODE_PREVIEW_LIMIT;
-
-    const copyToClipboard = async (text: string) => {
-        try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(text);
-                return true;
-            }
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-999999px";
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand("copy");
-            document.body.removeChild(textArea);
-            return true;
-        } catch {
-            return false;
-        }
-    };
 
     const handleShare = async (code: Code) => {
         const referralUrl = `${window.location.origin}/referral/${code.code}`;

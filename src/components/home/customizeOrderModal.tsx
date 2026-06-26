@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { QuantitySelector } from "../ui/quantitySelector";
 import { Complement, CustomizationType } from "@/types/products";
 import { favoritosData, otrosData, gaseosasData, iconMap, salsasData, salsasPapasData } from "@/utils/complementSections";
@@ -60,16 +60,9 @@ export const CustomizationModalSection = ({
           }
 
           if (ing.type === "addable") {
-            //esto esta harcodeado para el combo especial, pero no deberia estarlo , solo lo voy a comentar para acordarme. esto da mas problemas
-            // const isComboEspecial = productId === 1;
             const adicion = complements.find((c) => c.id === ing.additionId);
             const aditionQty = adicion ? adicion.quantity : 0;
-
-            // if (isComboEspecial) {
-            // return { ...ing, quantity: 1 + aditionQty };
-            // } else {
             return { ...ing, quantity: aditionQty };
-            // }
           }
 
           if (ing.type === "removable") {

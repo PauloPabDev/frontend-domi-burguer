@@ -5,7 +5,7 @@ interface KitchenResponse {
   body: Kitchen[];
 }
 
-export class AddressService {
+export class KitchenService {
   private static get API_URL(): string {
     return getApiUrl();
   }

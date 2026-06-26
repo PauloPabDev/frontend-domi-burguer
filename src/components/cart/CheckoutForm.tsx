@@ -1,4 +1,3 @@
-import React from "react";
 import { FormHeader } from "./FormHeader";
 import { UserInfoSection } from "./UserInfoSection";
 import { AddressSection } from "./AddressSection";

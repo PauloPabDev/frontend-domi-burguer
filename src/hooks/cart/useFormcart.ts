@@ -21,8 +21,6 @@ function useFormCart() {
   const router = useRouter();
   const { submitOrder } = useOrderSubmit(
     (result) => {
-      console.log("Order submitted successfully:", result);
-
       // Guardar última orden en localStorage ANTES de limpiar
       const lastOrder = {
         name: formData.name,
@@ -93,10 +91,6 @@ function useFormCart() {
   // Actualizar el formulario con los datos del usuario cuando se autentica
   useEffect(() => {
     if (user) {
-      console.log("Filling form with user data:", {
-        name: user.displayName,
-        phone: user.phoneNumber
-      });
       setFormData({
         name: user.displayName || "",
         phone: user.phoneNumber || ""
@@ -183,7 +177,6 @@ function useFormCart() {
     if (user) {
       orderPayload.userId = user.uid;
     }
-    console.log("Built order payload:", orderPayload);
     return orderPayload;
   };
 
@@ -209,7 +202,6 @@ function useFormCart() {
     const orderPayload = buildOrderPayload({ formData, address, items });
 
     const token = await user?.getIdToken();
-    console.log(orderPayload, "Submitting order with token:");
 
     setIsSubmitting(true);
     try {

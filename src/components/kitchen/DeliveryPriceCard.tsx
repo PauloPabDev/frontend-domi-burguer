@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPinIcon } from "@/components/ui/icons";
 import { Loader2 } from "lucide-react";

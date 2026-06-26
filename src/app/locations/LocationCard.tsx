@@ -17,8 +17,7 @@ interface LocationCardProps {
 
 export const LocationCard: React.FC<LocationCardProps> = ({
     location,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onEdit,
+    onEdit: _onEdit,
     onRefresh,
 }) => {
     const { user } = useAuth();

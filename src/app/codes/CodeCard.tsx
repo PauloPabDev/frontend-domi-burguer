@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { ConfirmModal } from "@/components/ui/modal/presets/ConfirmModal";
 import { addToast } from "@heroui/toast";
 import Link from "next/link";
+import { copyToClipboard } from "@/utils/clipboard";
 
 interface CodeCardProps {
     code: Code;
@@ -34,27 +35,6 @@ export function CodeCard({ code, onDelete, onToggleStatus }: CodeCardProps) {
     const [copied, setCopied] = useState(false);
 
     const isExpired = code.expirationDate && new Date(code.expirationDate) < new Date();
-
-    const copyToClipboard = async (text: string) => {
-        try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(text);
-                return true;
-            }
-            // Fallback para navegadores que no soportan clipboard API
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-999999px";
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand("copy");
-            document.body.removeChild(textArea);
-            return true;
-        } catch {
-            return false;
-        }
-    };
 
     const handleShareCode = async () => {
         const referralUrl = `${window.location.origin}/referral/${code.code}`;

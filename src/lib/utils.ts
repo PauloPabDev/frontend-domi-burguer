@@ -29,25 +29,11 @@ export const calculateTotalPrice = (
 ): number => {
   let total = basePrice;
 
-  console.log("=== Calculando precio ===");
-  console.log("Precio base:", basePrice);
-
   complements.forEach((complement) => {
-    // Solo sumar precios de complementos que tienen costo
     if (complement.price && complement.price > 0) {
-      const complementPrice = complement.price * complement.quantity;
-      total += complementPrice;
-
-      console.log(
-        `${complement.name}: $${complement.price} x ${complement.quantity} = $${complementPrice}`
-      );
-    } else {
-      console.log(`${complement.name}: Sin costo adicional`);
+      total += complement.price * complement.quantity;
     }
   });
-
-  console.log("Precio total calculado:", total);
-  console.log("=====================");
 
   return total;
 };

@@ -17,7 +17,7 @@ const handleAddableComplement = (
   ingredient: Complement,
   action: 'plus' | 'minus',
   currentComplements: Complement[],
-  productId: number,
+  _productId: number,
   newQuantity: number
 ): {
   complementsToAdd: Complement[];
@@ -25,14 +25,6 @@ const handleAddableComplement = (
 } => {
   const complementsToAdd: Complement[] = [];
   const complementsToRemove: (number | string)[] = [];
-
-  //esta harcodeada para el combo especial que permite  que ya tiene papas incluidas, pero da mas problemas
-  // const isComboEspecial = productId === 1;
-
-  // if (isComboEspecial) {
-  //   if (action === 'minus' && newQuantity < 1) {
-  //     return { complementsToAdd, complementsToRemove };
-  //   }
 
   if (action === 'plus' && newQuantity > 1 && ingredient.additionId) {
     const existing = currentComplements.find(c => c.id === ingredient.additionId);
@@ -47,13 +39,6 @@ const handleAddableComplement = (
       });
     }
   }
-
-  //   if (action === 'minus' && newQuantity === 1 && ingredient.additionId) {
-  //     complementsToRemove.push(ingredient.additionId);
-  //   }
-
-  //   return { complementsToAdd, complementsToRemove };
-  // }
 
   if (action === 'minus' && newQuantity < 0) {
     return { complementsToAdd, complementsToRemove };

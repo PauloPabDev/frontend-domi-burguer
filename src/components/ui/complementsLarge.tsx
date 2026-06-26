@@ -1,5 +1,6 @@
 import React, { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { Complement } from "@/types/products";
+import { COMPLEMENTS_LAYOUT } from "@/utils/constants/layoutConstants";
 import {
   CarneIcon,
   FrenchFriesIcon,
@@ -53,8 +54,6 @@ export const ComplementsLarge: React.FC<ComplementsLargeProps> = ({
       return;
     }
 
-    const maxLines = 2;
-    const tolerance = 10; // Mayor tolerancia para móviles
     let lineCount = 1;
     let lastTop = Math.round(chips[0].offsetTop);
     let countInTwoLines = chips.length;
@@ -62,46 +61,32 @@ export const ComplementsLarge: React.FC<ComplementsLargeProps> = ({
     for (let i = 1; i < chips.length; i++) {
       const currentTop = Math.round(chips[i].offsetTop);
 
-      // Nueva línea detectada
-      if (Math.abs(currentTop - lastTop) > tolerance) {
+      if (Math.abs(currentTop - lastTop) > COMPLEMENTS_LAYOUT.POSITION_TOLERANCE_PX) {
         lineCount++;
         lastTop = currentTop;
 
-        // Si superamos las 2 líneas
-        if (lineCount > maxLines) {
+        if (lineCount > COMPLEMENTS_LAYOUT.MAX_LINES) {
           countInTwoLines = i;
           break;
         }
       }
     }
 
-    console.log('Cálculo:', { 
-      total: chips.length, 
-      countInTwoLines, 
-      lineCount,
-      isStable,
-      attempts: recalculationAttemptsRef.current 
-    });
-
-    // Solo actualizar si cambió Y no estamos estables
     if (countInTwoLines !== previousCountRef.current && !isStable) {
       previousCountRef.current = countInTwoLines;
       setVisibleCount(countInTwoLines);
       recalculationAttemptsRef.current++;
-      
-      // Después de 3 intentos, marcamos como estable
-      if (recalculationAttemptsRef.current >= 3) {
-        setTimeout(() => setIsStable(true), 150);
+
+      if (recalculationAttemptsRef.current >= COMPLEMENTS_LAYOUT.MAX_RECALCULATION_ATTEMPTS) {
+        setTimeout(() => setIsStable(true), COMPLEMENTS_LAYOUT.STABILITY_DELAY_MS);
       }
     } else if (!isStable && recalculationAttemptsRef.current > 0) {
-      // Si ya no cambia, estabilizar
-      setTimeout(() => setIsStable(true), 150);
+      setTimeout(() => setIsStable(true), COMPLEMENTS_LAYOUT.STABILITY_DELAY_MS);
     }
   };
 
   // Reset cuando cambian los complementos
   useEffect(() => {
-    console.log('Reset - nuevos complementos:', complements.length);
     setVisibleCount(complements.length);
     previousCountRef.current = complements.length;
     setIsStable(false);
@@ -113,7 +98,7 @@ export const ComplementsLarge: React.FC<ComplementsLargeProps> = ({
     if (!isStable) {
       const timeoutId = setTimeout(() => {
         calculateVisible();
-      }, 50); // Más tiempo para móviles
+      }, COMPLEMENTS_LAYOUT.CALCULATION_DELAY_MS);
 
       return () => clearTimeout(timeoutId);
     }

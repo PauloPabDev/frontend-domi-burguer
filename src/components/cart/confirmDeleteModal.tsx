@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { ConfirmModal } from "@/components/ui/modal";
 
 interface ConfirmDeleteModalProps {

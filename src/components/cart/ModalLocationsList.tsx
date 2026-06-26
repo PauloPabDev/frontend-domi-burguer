@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Location } from "@/types/locations";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { Heart } from "lucide-react";

@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CodesService } from "@/services/codesService";
 import { Code } from "@/types/codes";
 import { Loader2, Gift, ArrowRight, QrCode, Users } from "lucide-react";
 import { track } from "@/utils/analytics";
-import Image from "next/image";
 import { QRShare } from "@/components/QRShare";
 import { SpikesIcon } from "@/components/ui/icons";
 

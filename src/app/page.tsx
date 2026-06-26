@@ -2,8 +2,6 @@
 
 import MenuSection from "@/components/home/menuSection";
 import HeroSection from "@/components/home/heroSection";
-import ValuesSection from "@/components/home/valuesSection";
-import StorySection from "@/components/home/storySection";
 import ConfettiExplosion from "@/components/confetti/ConfettiExplosion";
 import { useEffect, useState } from "react";
 

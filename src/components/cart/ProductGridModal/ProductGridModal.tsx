@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Modal } from "@/components/ui/modal/Modal";
 import { ProductCard } from "./ProductCard";
 import { useProductGridModal } from "./useProductGridModal";

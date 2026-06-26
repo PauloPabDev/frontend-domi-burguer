@@ -36,22 +36,4 @@ export interface Location {
     // Metadatos
     createdAt: Date; // Fecha de creación
     updatedAt: Date; // Fecha de última actualización
-    
-    // (Opcional, si se incluyen propiedades con el mismo nombre y tipo)
-    // static STATUS: any; 
-    // static TYPES: any; 
 }
-
-// Ejemplo de cómo podrías definir las interfaces para las coordenadas si lo prefieres más explícito:
-/*
-interface ICoordinates {
-    lat: number | null;
-    lng: number | null;
-}
-
-interface ILocation {
-    // ... otras propiedades
-    coordinates: ICoordinates;
-    // ... otras propiedades
-}
-*/

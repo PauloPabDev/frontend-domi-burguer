@@ -147,7 +147,6 @@ export const useCoupon = (): UseCouponReturn => {
   }, []);
 
   const removeCoupon = useCallback(() => {
-    console.log("Removiendo cupón aplicado");
     track('coupon_removed', { code: couponCode });
     removeAppliedCode();
     setCouponCode("");

@@ -38,16 +38,6 @@ export const useAddToCart = () => {
       complements_count: product.complements.length,
     });
 
-    console.log('✅ Producto añadido al carrito:', {
-      id: uniqueId,
-      productName: product.name,
-      quantity: product.quantity,
-      complementsCount: product.complements.length,
-      basePrice: product.basePrice,
-      totalPrice,
-      pricePerUnit: totalPrice,
-      totalCost: totalPrice * product.quantity,
-    });
   };
 
   return { handleAddToCart };

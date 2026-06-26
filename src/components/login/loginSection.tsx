@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { auth } from "@/lib/firebase";
 import { GoogleLogin } from "./googleLogin";
 import { Card, CardContent } from "@/components/ui/card";

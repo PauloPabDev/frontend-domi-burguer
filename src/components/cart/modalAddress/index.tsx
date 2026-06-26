@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAddressSubmit } from "@/hooks/address/useAddressSubmit";
 import { useGooglePlaces } from "@/hooks/useGooglePlaces";
@@ -69,15 +69,11 @@ export const ModalAddress = ({ isOpen, onClose }: ModalAddressProps) => {
       let token: string | null = null;
       if (user) {
         token = await getIdToken(user);
-        console.log("Usuario autenticado, manejando dirección con autenticación");
-      } else {
-        console.log("Usuario invitado, manejando dirección sin autenticación");
       }
-      const location = await submitAddress(
+      await submitAddress(
         createLocationData(),
         token
       );
-      console.log("Dirección creada:", location);
     } catch (error) {
       console.error("Error al confirmar dirección:", error);
     }

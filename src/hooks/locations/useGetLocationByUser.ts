@@ -2,7 +2,7 @@ import { LocationService } from "@/services/locationService";
 import { Location } from "@/types/locations";
 import { useEffect, useState } from "react";
 
-const useGetLocationByUser = ( token : string )  =>  {
+export const useGetLocationByUser = (token: string) => {
     const [ locations, setLocations ] = useState<Location[]>([]);
     const [ isLoading, setIsLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);
@@ -34,5 +34,4 @@ const useGetLocationByUser = ( token : string )  =>  {
     return { locations, isLoading, error , fetchLocations};
 }
 
-export default useGetLocationByUser;
 

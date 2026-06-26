@@ -71,7 +71,6 @@ function OrderStatusBadge({ status }: { status: OrderStatus }) {
 }
 
 function OrderCard({ order }: { order: Order }) {
-    const statusInfo = OrderService.getOrderStatusInfo(order.status);
     const isDelivered = order.status === "delivered";
 
     return (

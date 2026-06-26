@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Plus, List } from "lucide-react";
 import { Button } from "@/components/ui/button";

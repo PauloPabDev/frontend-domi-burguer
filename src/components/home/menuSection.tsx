@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { ArrowIcon, EditarIcon, HamburgerIcon } from "@/components/ui/icons";
-import { Plus } from "lucide-react";
 import { useMenu } from "@/hooks/home/useMenu";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { QuantitySelector } from "@/components/ui/quantitySelector";
@@ -15,6 +14,7 @@ import { useAddToCart } from "@/hooks/cart/useAddToCart";
 import { ComplementsLarge } from "../ui/complementsLarge";
 import { track } from "@/utils/analytics";
 import { useTrackSectionView } from "@/hooks/useTrackSectionView";
+import { ProductThumbnail, PRODUCT_CARD_IMAGES } from "./ProductThumbnail";
 
 // Lazy load modal pesado
 const CustomizationModalSection = dynamic(
@@ -235,240 +235,22 @@ export default function MenuSection() {
 
       {/* Sección de miniaturas de productos */}
       <section className="grid lg:gap-y-14 grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 items-center justify-center lg:gap-6 gap-2 gap-x-4 py-14 relative">
-        {/* Cada tarjeta representa un producto (ejemplo producto 0) */}
-        <div
-          className={`w-[160px] h-[160px] lg:w-[280px] lg:h-40 ${actualProduct === 0 ? "bg-accent-yellow-40" : "bg-accent-yellow-20"} rounded-2xl border-0 overflow-visible`}
-        >
-          <div
-            className={` flex relative flex-col items-center justify-center gap-[4.47px] overflow-visible p-0 h-full`}
-            onClick={() => {
-              handleChangeProduct(0);
-              if (emblaApi) emblaApi.scrollTo(0);
+        {products.map((product, index) => (
+          <ProductThumbnail
+            key={product.id}
+            product={product}
+            isActive={actualProduct === index}
+            onSelect={() => {
+              handleChangeProduct(index);
+              if (emblaApi) emblaApi.scrollTo(index);
             }}
-          >
-            {/* Imagen flotante del producto */}
-            <Image
-              src="/images/products/burger-card.webp"
-              alt="Burger"
-              width={140}
-              height={220}
-              className="absolute top-[8px] left-[36px] lg:top-[-30px] lg:left-[70px] h-[149px] w-[94px] lg:w-[140.16px] lg:h-[220px] object-cover"
-            />
-
-            <Button
-              variant="primary"
-              size="icon-sm"
-              className={`absolute top-[5px] z-10 right-[5px] lg:top-[7px] lg:left-[232px] lg:w-10 lg:h-10 ${actualProduct === 0 ? "hidden" : ""}`}
-              onClick={() => {
-                handleAddToCart(products[0]);
-                showFoodToast(products[0].name);
-                resetCurrentProduct();
-              }}
-            >
-              <Plus className="text-white" />
-            </Button>
-          </div>
-        </div>
-        <div
-          className={`w-[160px] h-[160px] lg:w-[280px] lg:h-40 ${actualProduct === 1 ? "bg-accent-yellow-40" : "bg-accent-yellow-20"} rounded-2xl border-0 overflow-visible`}
-        >
-          <div
-            className={`${"relative gap-[4.47px]"} p-0 h-full`}
-            onClick={() => {
-              handleChangeProduct(1);
-              if (emblaApi) emblaApi.scrollTo(1);
+            onAddToCart={(p) => {
+              handleAddToCart(p);
+              resetCurrentProduct();
             }}
-          >
-            <Image
-              src="/images/products/burger-card.webp"
-              alt="Burger"
-              width={140}
-              height={220}
-              className="absolute top-[8px] left-[25px] lg:top-[-30px] lg:left-[45px] h-[149px] w-[94px] lg:w-[140.16px] lg:h-[220px] object-cover"
-            />
-
-            <Image
-              src="/images/products/fries-card.webp"
-              alt="Papas del combo"
-              width={119}
-              height={178}
-              className="absolute top-[35px] left-[68px] lg:top-[23px] lg:left-[121px] w-[84px] h-[126px] lg:w-[119px] lg:h-[178px] object-cover"
-            />
-
-            <Button
-              variant="primary"
-              size="icon-sm"
-              className={`absolute z-10 top-[5px] right-[5px] lg:top-[7px] lg:left-[232px] lg:w-10 lg:h-10 ${actualProduct === 1 ? "hidden" : ""}`}
-              onClick={() => {
-                handleAddToCart(products[1]);
-                showFoodToast(products[1].name);
-                resetCurrentProduct();
-              }}
-            >
-              <Plus className="text-white" />
-            </Button>
-          </div>
-        </div>
-        <div
-          className={`w-[160px] h-[160px] lg:w-[280px] lg:h-40 ${actualProduct === 2 ? "bg-accent-yellow-40" : "bg-accent-yellow-20"} rounded-2xl border-0 overflow-visible`}
-          onClick={() => {
-            handleChangeProduct(2);
-            if (emblaApi) emblaApi.scrollTo(2);
-          }}
-        >
-          <div className={`${"relative gap-[4.47px]"} p-0 h-full`}>
-            <Image
-              className="absolute top-[28px] lg:top-[-30px] w-[178px] h-[128px] lg:w-[308px] lg:h-[221px]"
-              alt="Burger"
-              src="/images/products/sauce-card.webp"
-              width={308}
-              height={221}
-            />
-
-            <Button
-              variant="primary"
-              size="icon-sm"
-              className={`absolute z-10 top-[5px] right-[5px] lg:top-[7px] lg:left-[232px] lg:w-10 lg:h-10 ${actualProduct === 2 ? "hidden" : ""}`}
-              onClick={() => {
-                handleAddToCart(products[2]);
-                showFoodToast(products[2].name);
-                resetCurrentProduct();
-              }}
-            >
-              <Plus className="text-white" />
-            </Button>
-          </div>
-        </div>
-        {/* Papas Vaquera */}
-        <div
-          className={`w-[160px] h-[160px] lg:w-[280px] lg:h-40 ${actualProduct === 3 ? "bg-accent-yellow-40" : "bg-accent-yellow-20"} rounded-2xl border-0 overflow-visible`}
-          onClick={() => {
-            handleChangeProduct(3);
-            if (emblaApi) emblaApi.scrollTo(3);
-          }}
-        >
-          <div className={`${"relative gap-[4.47px]"} p-0 h-full`}>
-            <Image
-              src="/images/products/vaquera-card.webp"
-              alt="Papas Vaquera"
-              width={153}
-              height={230}
-              className="absolute top-[-0px] left-[26px] lg:top-[-38px] lg:left-[69px] w-[110px] h-[166px] lg:w-[153px] lg:h-[230px] object-cover"
-            />
-
-            <Button
-              variant="primary"
-              size="icon-sm"
-              className={`absolute z-10 top-[5px] right-[5px] lg:top-[7px] lg:left-[232px] lg:w-10 lg:h-10 ${actualProduct === 3 ? "hidden" : ""}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddToCart(products[3]);
-                showFoodToast(products[3].name);
-                resetCurrentProduct();
-              }}
-            >
-              <Plus className="text-white" />
-            </Button>
-          </div>
-        </div>
-        {/* Papas Troyana */}
-        <div
-          className={`w-[160px] h-[160px] lg:w-[280px] lg:h-40 ${actualProduct === 4 ? "bg-accent-yellow-40" : "bg-accent-yellow-20"} rounded-2xl border-0 overflow-visible`}
-          onClick={() => {
-            handleChangeProduct(4);
-            if (emblaApi) emblaApi.scrollTo(4);
-          }}
-        >
-          <div className={`${"relative gap-[4.47px]"} p-0 h-full`}>
-            <Image
-              src="/images/products/troyana-card.webp"
-              alt="Papas Troyana"
-              width={153}
-              height={230}
-              className="absolute top-[-0px] left-[26px] lg:top-[-38px] lg:left-[69px] w-[110px] h-[166px] lg:w-[153px] lg:h-[230px] object-cover"
-            />
-
-            <Button
-              variant="primary"
-              size="icon-sm"
-              className={`absolute z-10 top-[5px] right-[5px] lg:top-[7px] lg:left-[232px] lg:w-10 lg:h-10 ${actualProduct === 4 ? "hidden" : ""}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddToCart(products[4]);
-                showFoodToast(products[4].name);
-                resetCurrentProduct();
-              }}
-            >
-              <Plus className="text-white" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Postre Cheesecake de fresa */}
-        <div
-          className={`w-[160px] h-[160px] lg:w-[280px] lg:h-40 ${actualProduct === 5 ? "bg-accent-yellow-40" : "bg-accent-yellow-20"} rounded-2xl border-0 overflow-visible`}
-          onClick={() => {
-            handleChangeProduct(5);
-            if (emblaApi) emblaApi.scrollTo(5);
-          }}
-        >
-          <div className={`${"relative gap-[4.47px]"} p-0 h-full`}>
-            <Image
-              src="/images/products/cheesecake-card.webp"
-              alt="Cheesecake de Fresa"
-              width={153}
-              height={230}
-              className="absolute top-[-0px] left-[26px] lg:top-[-38px] lg:left-[69px] w-[110px] h-[166px] lg:w-[153px] lg:h-[230px] object-cover"
-            />
-
-            <Button
-              variant="primary"
-              size="icon-sm"
-              className={`absolute z-10 top-[5px] right-[5px] lg:top-[7px] lg:left-[232px] lg:w-10 lg:h-10 ${actualProduct === 5 ? "hidden" : ""}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddToCart(products[5]);
-                showFoodToast(products[5].name);
-                resetCurrentProduct();
-              }}
-            >
-              <Plus className="text-white" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Jugo Natural de Mora */}
-        <div
-          className={`w-[160px] h-[160px] lg:w-[280px] lg:h-40 ${actualProduct === 6 ? "bg-accent-yellow-40" : "bg-accent-yellow-20"} rounded-2xl border-0 overflow-visible`}
-          onClick={() => {
-            handleChangeProduct(6);
-            if (emblaApi) emblaApi.scrollTo(6);
-          }}
-        >
-          <div className={`${"relative gap-[4.47px]"} p-0 h-full`}>
-            <Image
-              src="/images/products/blackberry-juice-card.webp"
-              alt="Jugo Natural de Mora"
-              width={153}
-              height={230}
-              className="absolute top-[-0px] left-[26px] lg:top-[-38px] lg:left-[69px] w-[110px] h-[166px] lg:w-[153px] lg:h-[230px] object-cover"
-            />
-
-            <Button
-              variant="primary"
-              size="icon-sm"
-              className={`absolute z-10 top-[5px] right-[5px] lg:top-[7px] lg:left-[232px] lg:w-10 lg:h-10 ${actualProduct === 6 ? "hidden" : ""}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddToCart(products[6]);
-                showFoodToast(products[6].name);
-                resetCurrentProduct();
-              }}
-            >
-              <Plus className="text-white" />
-            </Button>
-          </div>
-        </div>
+            images={PRODUCT_CARD_IMAGES[index] ?? []}
+          />
+        ))}
       </section>
 
       <CustomizationModalSection

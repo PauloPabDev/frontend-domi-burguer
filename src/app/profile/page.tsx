@@ -9,7 +9,6 @@ import { ProfileHeader } from "./ProfileHeader";
 import { PointsSection } from "./PointsSection";
 import { AddressesSection } from "./AddressesSection";
 import { PhoneSection } from "./PhoneSection";
-import { OrdersSection } from "./OrdersSection";
 import { CodesSection } from "./CodesSection";
 import { ComingSoonSection } from "./ComingSoonSection";
 

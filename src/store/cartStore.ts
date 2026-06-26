@@ -49,9 +49,6 @@ export const useCartStore = create<CartStore>()(
           const existingItem = state.items.find((i) => i.id === item.id);
 
           if (existingItem) {
-            console.log(
-              `Incrementando cantidad del item existente: ${item.name}`
-            );
             return {
               items: state.items.map((i) =>
                 i.id === item.id
@@ -61,7 +58,6 @@ export const useCartStore = create<CartStore>()(
             };
           }
 
-          console.log(`Agregando nuevo item: ${item.name}`);
           return { items: [...state.items, item] };
         }),
 

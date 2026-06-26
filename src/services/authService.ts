@@ -100,9 +100,9 @@ export class AuthService {
    * Vincular una cuenta telefónica con un usuario existente
    */
   static async linkPhoneToAccount(
-    user: User, 
-    phoneNumber: string, 
-    verificationId: string, 
+    user: User,
+    _phoneNumber: string,
+    verificationId: string,
     verificationCode: string
   ): Promise<UserCredential> {
     try {

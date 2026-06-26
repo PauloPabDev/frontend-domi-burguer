@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { CheckoutFormProvider } from "@/contexts/CheckoutFormContext";
 
@@ -21,10 +21,7 @@ const PhoneVerificationModal = dynamic(
 );
 
 export default function Cart() {
-  const { handleSubmitWithValidation, isSubmitting, error } = useCartSubmit();
-  useEffect(() => {
-    console.log(error)
-  }, [error])
+  const { handleSubmitWithValidation, isSubmitting } = useCartSubmit();
 
   // Verificación de teléfono integrada
   const { user, reloadUser } = useAuth();

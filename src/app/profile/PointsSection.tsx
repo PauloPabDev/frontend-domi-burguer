@@ -5,42 +5,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Star, ChevronDown, ChevronRight, Plus, Minus, Trophy, Check, Copy } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserPoints } from "@/hooks/useUserPoints";
-import { POINT_FLOW_TYPES, Point, FirebaseTimestamp } from "@/types/points";
+import { POINT_FLOW_TYPES, Point } from "@/types/points";
 import { useAuth } from "@/contexts/AuthContext";
 import { getIdToken } from "firebase/auth";
 import { CodesService } from "@/services/codesService";
 import { Code } from "@/types/codes";
 import { Modal } from "@/components/ui/modal";
 import { addToast } from "@heroui/toast";
-
-function formatDate(timestamp: FirebaseTimestamp): string {
-    const date = new Date(timestamp._seconds * 1000);
-    return date.toLocaleDateString("es-ES", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    });
-}
-
-async function copyToClipboard(text: string): Promise<boolean> {
-    try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(text);
-            return true;
-        }
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-999999px";
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        return true;
-    } catch {
-        return false;
-    }
-}
+import { copyToClipboard } from "@/utils/clipboard";
+import { formatFirebaseTimestamp } from "@/utils/dateFormatters";
 
 export function PointsSection() {
     const { userProfile, loading: loadingProfile } = useUserProfile();
@@ -222,7 +195,7 @@ export function PointsSection() {
                                                     {record.description}
                                                 </p>
                                                 <p className="text-xs text-neutral-500">
-                                                    {formatDate(record.createdAt)}
+                                                    {formatFirebaseTimestamp(record.createdAt)}
                                                 </p>
                                             </div>
                                             <motion.div

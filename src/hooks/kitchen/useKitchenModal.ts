@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getIdToken } from "firebase/auth";
 import { useAuth } from "@/contexts/AuthContext";
-import { AddressService as KitchenService } from "@/services/kitchenService";
+import { KitchenService } from "@/services/kitchenService";
 import { LocationService } from "@/services/locationService";
 import { AddressService } from "@/services/addressService";
 import { Kitchen } from "@/types/kitchens";

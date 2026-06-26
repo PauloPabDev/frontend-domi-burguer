@@ -1,4 +1,4 @@
-import useGetLocationByUser from "@/hooks/locations/useGetLocationByUser";
+import { useGetLocationByUser } from "@/hooks/locations/useGetLocationByUser";
 import { Address } from "@/types/address";
 import { Location } from "@/types/locations";
 import { getIdToken } from "firebase/auth";
@@ -9,7 +9,7 @@ import { useCartStore } from "@/store/cartStore";
 
 // Define aquí los campos que necesitas compartir
 export interface FormValues {
-    [key: string]: string | number | boolean | undefined | null | object;
+    [key: string]: string | number | boolean | undefined | null;
 }
 
 interface CheckoutFormData {
@@ -75,15 +75,13 @@ export const CheckoutFormProvider = ({ children }: { children: React.ReactNode }
 
         try {
             // Consultamos el precio del delivery
-            const { delivery, kitchen } = await AddressService.createDelivery(loc.id);
-            console.log('Datos de delivery obtenidos para la ubicación seleccionada:', { kitchen });
+            const { delivery } = await AddressService.createDelivery(loc.id);
             const rta: Address = {
                 ...loc,
                 distance: delivery.distance,
                 fullAddress: loc.address,
                 deliveryPrice: delivery.price,
             };
-            console.log('Datos de delivery obtenidos para la ubicación seleccionada:', rta);
             setAddressClient(rta);
         } catch (error) {
             console.error("Error al obtener datos de delivery:", error);
