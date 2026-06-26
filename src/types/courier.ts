@@ -1,31 +1,6 @@
-import { DeliveryAddress, OrderItem, PaymentMethod, OrderStatus } from './orders';
+import { WorkerOrder } from './worker';
 
-export interface CourierOrder {
-  id: string;
-  status: OrderStatus;
-  createdAt: string;
-  updatedAt: string;
-  dailyOrderNumber: number;
-  totalPrice: number;
-  deliveryPrice: number;
-  subtotal: number;
-  locationId: string;
-  courierId?: string;
-  client?: {
-    name: string;
-    phone: string;
-    email?: string;
-  };
-  kitchen?: {
-    id: string;
-    name: string;
-  };
-  distance?: number;
-  orderItems: OrderItem[];
-  deliveryAddress: DeliveryAddress;
-  paymentMethod: PaymentMethod;
-  comment?: string;
-}
+export type CourierOrder = WorkerOrder;
 
 export interface CourierStats {
   earnings: number;

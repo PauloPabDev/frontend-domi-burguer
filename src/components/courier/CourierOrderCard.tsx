@@ -21,8 +21,8 @@ const PAYMENT_LABELS: Record<string, string> = {
 };
 
 const STATUS_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: string }>> = {
-  ready: { next: 'delivering', label: 'Iniciar entrega' },
-  delivering: { next: 'delivered', label: 'Marcar entregado' },
+  ready_for_pickup: { next: 'dispatched', label: 'Iniciar entrega' },
+  dispatched: { next: 'delivered', label: 'Marcar entregado' },
 };
 
 export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
@@ -153,7 +153,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
             loadingText="Actualizando..."
             fullWidth
             size="md"
-            variant={transition.next === 'delivered' ? 'dark' : 'primary'}
+            variant={transition.next === 'delivered' || transition.next === 'dispatched' ? 'dark' : 'primary'}
           >
             {transition.label}
           </Button>

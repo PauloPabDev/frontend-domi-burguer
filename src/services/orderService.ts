@@ -70,15 +70,8 @@ export class OrderService {
   }
 
   static getOrderStatusInfo(status: OrderStatus) {
-    const statusMap = {
-      pending: {
-        label: 'CREADO',
-        color: 'text-neutral-800',
-        bgColor: 'bg-[#c4d600]',
-        borderColor: 'border-[#c4d600]',
-        isButton: false
-      },
-      confirmed: {
+    const statusMap: Record<OrderStatus, { label: string; color: string; bgColor: string; borderColor: string; isButton: boolean }> = {
+      fresh: {
         label: 'CREADO',
         color: 'text-neutral-800',
         bgColor: 'bg-[#c4d600]',
@@ -92,14 +85,14 @@ export class OrderService {
         borderColor: 'border-[#c4a600]',
         isButton: false
       },
-      ready: {
+      ready_for_pickup: {
         label: 'EN CAMINO',
         color: 'text-[#c4a600]',
         bgColor: 'bg-white',
         borderColor: 'border-[#c4a600]',
         isButton: false
       },
-      delivering: {
+      dispatched: {
         label: 'EN CAMINO',
         color: 'text-[#c4a600]',
         bgColor: 'bg-white',
@@ -113,6 +106,13 @@ export class OrderService {
         borderColor: 'border-[#e73533]',
         isButton: true
       },
+      pending_payment: {
+        label: 'PAGO PENDIENTE',
+        color: 'text-white',
+        bgColor: 'bg-red-800',
+        borderColor: 'border-red-800',
+        isButton: false
+      },
       cancelled: {
         label: 'CANCELADO',
         color: 'text-neutral-600',
@@ -122,6 +122,6 @@ export class OrderService {
       }
     };
 
-    return statusMap[status] || statusMap.pending;
+    return statusMap[status] ?? statusMap.fresh;
   }
 }

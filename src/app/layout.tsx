@@ -33,7 +33,10 @@ export default async function RootLayout({
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? headersList.get("next-url") ?? "";
   const isDesignRoute = pathname.startsWith("/design");
-  const isCourierRoute = pathname.startsWith("/domiciliario");
+  const isCourierRoute = pathname.startsWith("/domiciliario")
+    || pathname.startsWith("/cocina")
+    || pathname.startsWith("/recepcion")
+    || pathname.startsWith("/admin");
 
   return (
     <html lang="es">

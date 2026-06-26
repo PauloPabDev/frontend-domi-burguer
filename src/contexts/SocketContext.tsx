@@ -2,13 +2,15 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { CourierOrder, ConnectionStatus } from '@/types/courier';
+import { ConnectionStatus } from '@/types/courier';
+import { WorkerOrder } from '@/types/worker';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface SocketContextType {
-  orders: CourierOrder[];
+  orders: WorkerOrder[];
   connectionStatus: ConnectionStatus;
   reconnect: () => void;
+  changeKitchen: (kitchenId: string | null) => void;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -52,29 +54,46 @@ const SOCKET_OPTIONS = {
   reconnectionDelayMax: 10000,
 };
 
-export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface SocketProviderProps {
+  children: React.ReactNode;
+  role: string;
+  kitchenId?: string | null;
+}
+
+export const SocketProvider: React.FC<SocketProviderProps> = ({
+  children,
+  role,
+  kitchenId: initialKitchenId = null,
+}) => {
   const { user } = useAuth();
   const socketRef = useRef<Socket | null>(null);
   const initialized = useRef(false);
+  const kitchenIdRef = useRef<string | null>(initialKitchenId ?? null);
 
-  const [orders, setOrders] = useState<CourierOrder[]>([]);
+  const [orders, setOrders] = useState<WorkerOrder[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('IDLE');
 
-  const sortOrders = useCallback((list: CourierOrder[]) => {
+  const sortOrders = useCallback((list: WorkerOrder[]) => {
     return [...list].sort((a, b) => a.dailyOrderNumber - b.dailyOrderNumber);
   }, []);
 
-  const emitLogin = useCallback(async () => {
+  const emitLogin = useCallback(async (overrideKitchenId?: string | null) => {
     if (!socketRef.current?.connected || !user) return;
     const token = await user.getIdToken();
-    socketRef.current.emit('login', { token, role: 'courier', kitchenId: null });
-  }, [user]);
+    const kId = overrideKitchenId !== undefined ? overrideKitchenId : kitchenIdRef.current;
+    socketRef.current.emit('login', { token, role, kitchenId: kId });
+  }, [user, role]);
 
   const reconnect = useCallback(() => {
     if (socketRef.current && !socketRef.current.connected) {
       socketRef.current.connect();
     }
   }, []);
+
+  const changeKitchen = useCallback((id: string | null) => {
+    kitchenIdRef.current = id;
+    emitLogin(id);
+  }, [emitLogin]);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -110,11 +129,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       emitLogin();
     });
 
-    socketRef.current.on('order/init', (incoming: CourierOrder[]) => {
+    socketRef.current.on('order/init', (incoming: WorkerOrder[]) => {
       setOrders(sortOrders(incoming));
     });
 
-    socketRef.current.on('order/create', (order: CourierOrder) => {
+    socketRef.current.on('order/create', (order: WorkerOrder) => {
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.set(order.id, order);
@@ -122,7 +141,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
     });
 
-    socketRef.current.on('order/update', (order: CourierOrder) => {
+    socketRef.current.on('order/update', (order: WorkerOrder) => {
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.set(order.id, order);
@@ -130,7 +149,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
     });
 
-    socketRef.current.on('order/remove', (order: CourierOrder) => {
+    socketRef.current.on('order/remove', (order: WorkerOrder) => {
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.delete(order.id);
@@ -138,7 +157,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
     });
 
-    socketRef.current.on('order/delete', (order: CourierOrder) => {
+    socketRef.current.on('order/delete', (order: WorkerOrder) => {
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.delete(order.id);
@@ -184,7 +203,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   return (
-    <SocketContext.Provider value={{ orders, connectionStatus, reconnect }}>
+    <SocketContext.Provider value={{ orders, connectionStatus, reconnect, changeKitchen }}>
       {children}
     </SocketContext.Provider>
   );

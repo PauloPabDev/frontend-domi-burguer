@@ -4,10 +4,9 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { SocketProvider } from '@/contexts/SocketContext';
-import { CourierNavbar } from '@/components/courier/CourierNavbar';
+import { AdminNavbar } from '@/components/admin/AdminNavbar';
 
-export default function DomiciliarioLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const { userProfile, loading: profileLoading } = useUserProfile();
   const router = useRouter();
@@ -16,14 +15,8 @@ export default function DomiciliarioLayout({ children }: { children: React.React
 
   useEffect(() => {
     if (loading) return;
-    if (!user) {
-      router.replace('/login');
-      return;
-    }
-    const isCourier = userProfile?.roles?.includes('courier');
-    if (userProfile && !isCourier) {
-      router.replace('/');
-    }
+    if (!user) { router.replace('/login'); return; }
+    if (userProfile && !userProfile.roles?.includes('admin')) router.replace('/');
   }, [user, userProfile, loading, router]);
 
   if (loading) {
@@ -34,14 +27,12 @@ export default function DomiciliarioLayout({ children }: { children: React.React
     );
   }
 
-  if (!user || (userProfile && !userProfile.roles?.includes('courier'))) {
-    return null;
-  }
+  if (!user || (userProfile && !userProfile.roles?.includes('admin'))) return null;
 
   return (
-    <SocketProvider role="courier">
-      <CourierNavbar />
-      <main className="max-w-screen-md mx-auto px-4 py-4">{children}</main>
-    </SocketProvider>
+    <>
+      <AdminNavbar />
+      <main className="max-w-screen-xl mx-auto px-4 py-6">{children}</main>
+    </>
   );
 }

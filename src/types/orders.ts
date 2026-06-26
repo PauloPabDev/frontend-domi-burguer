@@ -66,13 +66,13 @@ export interface Delivery  {
 
 export type PaymentMethod = 'cash' | 'bancolombia' | 'nequi';
 
-export type OrderStatus = 
-  | 'pending'
-  | 'confirmed'
+export type OrderStatus =
+  | 'fresh'
   | 'preparing'
-  | 'ready'
-  | 'delivering'
+  | 'ready_for_pickup'
+  | 'dispatched'
   | 'delivered'
+  | 'pending_payment'
   | 'cancelled';
 
 export interface OrderStatusInfo {

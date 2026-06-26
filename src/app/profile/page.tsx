@@ -11,6 +11,7 @@ import { AddressesSection } from "./AddressesSection";
 import { PhoneSection } from "./PhoneSection";
 import { CodesSection } from "./CodesSection";
 import { ComingSoonSection } from "./ComingSoonSection";
+import { WorkSection } from "./WorkSection";
 
 export default function ProfilePage() {
     const { user, loading } = useAuth();
@@ -35,6 +36,7 @@ export default function ProfilePage() {
             <div className="mt-[130px] min-h-screen bg-white py-8 px-4">
                 <div className="max-w-2xl mx-auto">
                     <ProfileHeader />
+                    <WorkSection />
                     <AddressesSection />
                     <PhoneSection />
                     {/* <OrdersSection /> */}
