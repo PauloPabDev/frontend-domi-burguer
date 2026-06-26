@@ -12,6 +12,8 @@ export interface Order {
   paymentMethod: PaymentMethod;
   comment?: string;
   estimatedDeliveryTime?: string;
+  locationId?: string;
+  dailyOrderNumber?: number;
 }
 
 export interface OrderItem {

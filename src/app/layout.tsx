@@ -33,6 +33,7 @@ export default async function RootLayout({
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? headersList.get("next-url") ?? "";
   const isDesignRoute = pathname.startsWith("/design");
+  const isCourierRoute = pathname.startsWith("/domiciliario");
 
   return (
     <html lang="es">
@@ -49,7 +50,7 @@ export default async function RootLayout({
         className={montserrat.variable}
       >
         <AuthProvider>
-          {!isDesignRoute && <Navbar />}
+          {!isDesignRoute && !isCourierRoute && <Navbar />}
           <HeroUIProvider>
             <ToastProvider
               placement="top-right"
@@ -59,7 +60,7 @@ export default async function RootLayout({
             <Suspense fallback={null}>
               <PromoCodeDetector />
             </Suspense>
-            {isDesignRoute ? (
+            {isDesignRoute || isCourierRoute ? (
               children
             ) : (
               <div className="container mx-auto overflow-x-hidden px-5 sm:px-10 md:px-10 lg:px-10 xl:px-16  max-w-[1440px] h-auto">
@@ -67,8 +68,8 @@ export default async function RootLayout({
               </div>
             )}
           </HeroUIProvider>
-          {!isDesignRoute && <Footer />}
-          {!isDesignRoute && <GoogleSignInBanner />}
+          {!isDesignRoute && !isCourierRoute && <Footer />}
+          {!isDesignRoute && !isCourierRoute && <GoogleSignInBanner />}
         </AuthProvider>
         <Script
           defer
@@ -76,7 +77,7 @@ export default async function RootLayout({
           data-website-id="6449fca5-1454-49e0-8bdc-33fba01bcda4"
           strategy="afterInteractive"
         />
-        {!isDesignRoute && <InstallBanner />}
+        {!isDesignRoute && !isCourierRoute && <InstallBanner />}
         <ServiceWorkerRegistration />
       </body>
     </html>
