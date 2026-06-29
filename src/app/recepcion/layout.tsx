@@ -6,6 +6,22 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { SocketProvider } from '@/contexts/SocketContext';
 import { RecepcionNavbar } from '@/components/recepcion/RecepcionNavbar';
+import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
+
+function RecepcionLayoutInner({ children }: { children: React.ReactNode }) {
+  const { kitchens, selectedKitchenId, selectedKitchen, selectKitchen } = useKitchenSelector();
+
+  return (
+    <SocketProvider role="reception" kitchenId={selectedKitchenId}>
+      <RecepcionNavbar
+        kitchens={kitchens}
+        selectedKitchen={selectedKitchen}
+        onKitchenChange={selectKitchen}
+      />
+      <main className="max-w-screen-xl mx-auto px-4 py-4">{children}</main>
+    </SocketProvider>
+  );
+}
 
 export default function RecepcionLayout({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
@@ -32,10 +48,5 @@ export default function RecepcionLayout({ children }: { children: React.ReactNod
   const hasAccess = userProfile?.roles?.includes('reception') || userProfile?.roles?.includes('admin');
   if (!user || (userProfile && !hasAccess)) return null;
 
-  return (
-    <SocketProvider role="reception">
-      <RecepcionNavbar />
-      <main className="max-w-screen-xl mx-auto px-4 py-4">{children}</main>
-    </SocketProvider>
-  );
+  return <RecepcionLayoutInner>{children}</RecepcionLayoutInner>;
 }
