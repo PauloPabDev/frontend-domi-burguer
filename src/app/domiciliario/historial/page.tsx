@@ -26,7 +26,7 @@ export default function HistorialPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3 text-neutral-black-50">
+      <div className="flex flex-col items-center justify-center py-20 gap-3 text-neutral-black-50">
         <div className="w-8 h-8 border-4 border-primary-red border-t-transparent rounded-full animate-spin" />
         <p className="text-sm">Cargando historial...</p>
       </div>
@@ -45,7 +45,7 @@ export default function HistorialPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="py-4 space-y-5">
       {/* Earnings summary */}
       <EarningsCard stats={stats} />
 

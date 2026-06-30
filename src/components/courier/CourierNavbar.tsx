@@ -22,10 +22,24 @@ export const CourierNavbar: React.FC = () => {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-neutral-black-20 shadow-sm">
       <div className="max-w-screen-md mx-auto px-4 h-14 flex items-center justify-between gap-4">
-        {/* Logo */}
-        <span className="font-bold text-lg text-primary-red tracking-tight shrink-0">
-          DomiBurguer
-        </span>
+        {/* Connection dot + order count */}
+        <div className="flex items-center gap-2 shrink-0 w-12">
+          <span
+            className={cn(
+              'w-2.5 h-2.5 rounded-full shrink-0',
+              isConnected
+                ? 'bg-green-500'
+                : connectionStatus === 'RECONNECTING'
+                ? 'bg-yellow-400 animate-pulse'
+                : 'bg-red-500'
+            )}
+          />
+          {orders.length > 0 && (
+            <span className="text-xs font-bold bg-primary-red text-white rounded-full w-5 h-5 flex items-center justify-center">
+              {orders.length}
+            </span>
+          )}
+        </div>
 
         {/* Nav links */}
         <div className="flex items-center gap-1 flex-1 justify-center">
@@ -46,24 +60,8 @@ export const CourierNavbar: React.FC = () => {
           ))}
         </div>
 
-        {/* Right side: connection + orders count + logout */}
-        <div className="flex items-center gap-3 shrink-0">
-          {/* Connection status */}
-          <div className="flex items-center gap-1.5">
-            <span
-              className={cn(
-                'w-2.5 h-2.5 rounded-full',
-                isConnected ? 'bg-green-500' : connectionStatus === 'RECONNECTING' ? 'bg-yellow-400 animate-pulse' : 'bg-red-500'
-              )}
-            />
-            {orders.length > 0 && (
-              <span className="text-xs font-bold bg-primary-red text-white rounded-full w-5 h-5 flex items-center justify-center">
-                {orders.length}
-              </span>
-            )}
-          </div>
-
-          {/* Logout */}
+        {/* Logout */}
+        <div className="shrink-0 w-12 flex justify-end">
           <button
             onClick={() => logout()}
             className="p-1.5 rounded-full text-neutral-black-50 hover:text-primary-red hover:bg-neutral-black-10 transition-colors"

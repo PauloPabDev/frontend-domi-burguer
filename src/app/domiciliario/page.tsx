@@ -34,43 +34,45 @@ export default function DomiciliarioPage() {
   const isEmpty = orders.length === 0;
 
   return (
-    <div className="space-y-4">
-      {/* Map */}
-      <div className="rounded-2xl overflow-hidden shadow-sm border border-neutral-black-20 h-[42vh]">
+    <div className="h-[calc(100dvh-3.5rem)] flex flex-col py-3 gap-3">
+      {/* Map — always visible, fixed portion of screen */}
+      <div className="rounded-2xl overflow-hidden shadow-sm border border-neutral-black-20 h-[45%] shrink-0">
         <MultiMarkerMap
           markers={markers}
           selectedMarkerId={selectedId ?? undefined}
           center={selectedCenter}
           onMarkerClick={(id) => setSelectedId((prev) => (prev === id ? null : id))}
-          minHeight="42vh"
+          minHeight="100%"
           defaultZoom={13}
           selectedZoom={16}
         />
       </div>
 
-      {/* Orders list */}
-      {connectionStatus === 'CONNECTING' && (
-        <p className="text-sm text-center text-neutral-black-50 animate-pulse">Conectando...</p>
-      )}
+      {/* Orders list — scrollable in remaining space */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {connectionStatus === 'CONNECTING' && (
+          <p className="text-sm text-center text-neutral-black-50 animate-pulse py-4">Conectando...</p>
+        )}
 
-      {isEmpty && connectionStatus === 'CONNECTED' ? (
-        <div className="flex flex-col items-center justify-center py-12 gap-3 text-neutral-black-50">
-          <Bike size={48} className="opacity-30" />
-          <p className="text-sm">No tienes pedidos asignados ahora</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {orders.map((order) => (
-            <CourierOrderCard
-              key={order.id}
-              order={order}
-              isSelected={selectedId === order.id}
-              onSelect={() => setSelectedId((prev) => (prev === order.id ? null : order.id))}
-              onStatusChange={handleStatusChange}
-            />
-          ))}
-        </div>
-      )}
+        {isEmpty && connectionStatus === 'CONNECTED' ? (
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-neutral-black-50">
+            <Bike size={40} className="opacity-30" />
+            <p className="text-sm">No tienes pedidos asignados</p>
+          </div>
+        ) : (
+          <div className="space-y-3 pb-3">
+            {orders.map((order) => (
+              <CourierOrderCard
+                key={order.id}
+                order={order}
+                isSelected={selectedId === order.id}
+                onSelect={() => setSelectedId((prev) => (prev === order.id ? null : order.id))}
+                onStatusChange={handleStatusChange}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
