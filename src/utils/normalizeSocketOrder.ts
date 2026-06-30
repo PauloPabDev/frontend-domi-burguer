@@ -22,13 +22,13 @@ function normalizeComplement(raw: RawSocketComplement): OrderComplement {
   };
 }
 
-function normalizeOrderItem(raw: RawSocketOrderItem): OrderItem {
+function normalizeOrderItem(raw: RawSocketOrderItem, index: number): OrderItem {
   const complements: OrderComplement[] | undefined = raw.complements?.length
     ? raw.complements.map(normalizeComplement)
     : undefined;
 
   return {
-    id: raw.id,
+    id: `${raw.id}-${index}`,
     name: raw.id,
     price: raw.price,
     quantity: raw.quantity,
@@ -50,6 +50,8 @@ export function normalizeSocketOrder(raw: RawSocketOrder): WorkerOrder {
     comment: raw.comment,
     locationId: raw.locationId,
     orderItems: raw.orderItems.map(normalizeOrderItem),
+    ...(raw.client && { client: raw.client }),
+    ...(raw.deliveryAddress && { deliveryAddress: raw.deliveryAddress }),
     ...(raw.assignedCourierUserId && { courierId: raw.assignedCourierUserId }),
     ...(raw.assignedKitchenId && { kitchenId: raw.assignedKitchenId }),
     ...(distance !== undefined && { distance }),

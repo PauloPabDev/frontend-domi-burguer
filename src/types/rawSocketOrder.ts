@@ -30,6 +30,22 @@ export interface RawSocketTimeLapse {
   userId: string;
 }
 
+export interface RawSocketClient {
+  name: string;
+  phone: string;
+  email?: string;
+}
+
+export interface RawSocketDeliveryAddress {
+  name: string;
+  address: string;
+  city: string;
+  country: string;
+  floor?: string;
+  coordinates: { lat: number; lng: number };
+  deliveryPrice: number;
+}
+
 export interface RawSocketOrder {
   id: string;
   status: OrderStatus;
@@ -41,6 +57,8 @@ export interface RawSocketOrder {
 
   delivery: RawSocketDelivery | null;
   orderItems: RawSocketOrderItem[];
+  deliveryAddress?: RawSocketDeliveryAddress;
+  client?: RawSocketClient;
 
   clientId: string;
   userCreateId?: string;

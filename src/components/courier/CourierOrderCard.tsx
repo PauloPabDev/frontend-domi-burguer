@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Phone, MapPin, ShoppingBag, CreditCard, ChevronDown, ChevronUp } from 'lucide-react';
+import { Phone, MapPin, ShoppingBag, CreditCard } from 'lucide-react';
 import { CourierOrder } from '@/types/courier';
 import { OrderStatus } from '@/types/orders';
 import { Button } from '@/components/ui/button';
@@ -25,13 +25,15 @@ const STATUS_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label
   dispatched: { next: 'delivered', label: 'Marcar entregado' },
 };
 
+const formatCOP = (value: number) =>
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+
 export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   order,
   isSelected,
   onSelect,
   onStatusChange,
 }) => {
-  const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const transition = STATUS_TRANSITIONS[order.status];
@@ -45,29 +47,26 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
       setLoading(false);
     }
   };
-
-  const formatCOP = (value: number) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+  console.log('Rendering CourierOrderCard for order:', order.id, 'Selected:', isSelected, order);
 
   return (
     <div
       className={cn(
-        'rounded-2xl border bg-white shadow-sm transition-all duration-200',
+        'rounded-2xl border bg-white shadow-sm transition-all duration-200 overflow-hidden',
         isSelected ? 'border-primary-red ring-2 ring-primary-red/20' : 'border-neutral-black-20',
       )}
+      onClick={onSelect}
     >
-      {/* Header */}
-      <div
-        className="p-4 cursor-pointer"
-        onClick={onSelect}
-      >
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold bg-primary-red text-white rounded-full w-7 h-7 flex items-center justify-center shrink-0">
+      {/* Header: número, cliente, total */}
+      <div className="p-4 pb-3">
+        <div className="flex items-start justify-between gap-3">
+          {/* Número de orden + cliente */}
+          <div className="flex items-start gap-2.5 min-w-0">
+            <span className="text-sm font-bold bg-primary-red text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">
               {order.dailyOrderNumber}
             </span>
-            <div>
-              <p className="font-semibold text-sm text-neutral-black-80 leading-tight">
+            <div className="min-w-0">
+              <p className="font-bold text-base text-neutral-black-80 leading-tight truncate">
                 {order.client?.name ?? 'Cliente'}
               </p>
               {order.client?.phone && (
@@ -83,82 +82,70 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-neutral-black-80">{formatCOP(order.deliveryPrice)}</span>
-            <button
-              onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
-              className="p-1 text-neutral-black-50 hover:text-neutral-black-80"
-            >
-              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
+          {/* Total */}
+          <div className="text-right shrink-0">
+            <p className="text-xs text-neutral-black-50 leading-none mb-0.5">Total</p>
+            <p className="text-lg font-bold text-neutral-black-80">{formatCOP(order.totalPrice)}</p>
           </div>
         </div>
 
-        {/* Address */}
-        <div className="flex items-start gap-1.5 mt-2">
-          <MapPin size={13} className="text-neutral-black-50 mt-0.5 shrink-0" />
-          <p className="text-xs text-neutral-black-50 line-clamp-2">
-            {order.deliveryAddress?.address}
-            {order.deliveryAddress?.floor && ` — ${order.deliveryAddress.floor}`}
+        {/* Dirección */}
+        <div className="flex items-start gap-1.5 mt-3 bg-neutral-black-5 rounded-xl px-3 py-2">
+          <MapPin size={14} className="text-primary-red mt-0.5 shrink-0" />
+          <p className="text-sm text-neutral-black-80 leading-snug">
+            {order.deliveryAddress?.address ?? 'Sin dirección'}
+            {order.deliveryAddress?.floor && (
+              <span className="text-neutral-black-50"> — {order.deliveryAddress.floor}</span>
+            )}
           </p>
         </div>
       </div>
 
-      {/* Expandable content */}
-      {expanded && (
-        <div className="px-4 pb-4 space-y-3 border-t border-neutral-black-10 pt-3">
-          {/* Items */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <ShoppingBag size={13} className="text-neutral-black-50" />
-              <span className="text-xs font-semibold text-neutral-black-80">Productos</span>
-            </div>
-            <ul className="space-y-1">
-              {order.orderItems.map((item) => (
-                <li key={item.id} className="flex justify-between text-xs text-neutral-black-80">
-                  <span>{item.quantity}× {item.name}</span>
-                  <span className="text-neutral-black-50">{formatCOP(item.price * item.quantity)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Payment */}
-          <div className="flex items-center gap-1.5">
-            <CreditCard size={13} className="text-neutral-black-50" />
-            <span className="text-xs text-neutral-black-80">
-              {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}
-            </span>
-          </div>
-
-          {/* Comment */}
-          {order.comment && (
-            <p className="text-xs text-neutral-black-50 italic">"{order.comment}"</p>
-          )}
-
-          {/* Total */}
-          <div className="flex justify-between text-xs font-semibold border-t border-neutral-black-10 pt-2">
-            <span>Total pedido</span>
-            <span>{formatCOP(order.totalPrice)}</span>
-          </div>
+      {/* Productos */}
+      <div className="px-4 pb-3">
+        <div className="flex items-center gap-1.5 mb-2">
+          <ShoppingBag size={13} className="text-neutral-black-50" />
+          <span className="text-xs font-semibold text-neutral-black-50 uppercase tracking-wide">Productos</span>
         </div>
-      )}
+        <ul className="space-y-1.5">
+          {order.orderItems.map((item) => (
+            <li key={item.id} className="flex items-baseline justify-between gap-2">
+              <span className="text-sm text-neutral-black-80">
+                <span className="font-bold text-primary-red">{item.quantity}×</span>{' '}
+                {item.name}
+              </span>
+              <span className="text-xs text-neutral-black-50 shrink-0">{formatCOP(item.price * item.quantity)}</span>
+            </li>
+          ))}
+        </ul>
+        {order.comment && (
+          <p className="mt-2 text-xs text-neutral-black-50 italic border-l-2 border-neutral-black-20 pl-2">
+            {order.comment}
+          </p>
+        )}
+      </div>
 
-      {/* Status action */}
-      {transition && (
-        <div className="px-4 pb-4">
+      {/* Footer: método de pago + acción */}
+      <div className="px-4 pb-4 pt-2 border-t border-neutral-black-10 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5">
+          <CreditCard size={13} className="text-neutral-black-50" />
+          <span className="text-xs text-neutral-black-80 font-medium">
+            {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}
+          </span>
+        </div>
+
+        {transition && (
           <Button
-            onClick={handleStatusChange}
+            onClick={(e) => { e.stopPropagation(); handleStatusChange(); }}
             loading={loading}
             loadingText="Actualizando..."
-            fullWidth
-            size="md"
-            variant={transition.next === 'delivered' || transition.next === 'dispatched' ? 'dark' : 'primary'}
+            size="sm"
+            variant={transition.next === 'delivered' ? 'dark' : 'primary'}
           >
             {transition.label}
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
