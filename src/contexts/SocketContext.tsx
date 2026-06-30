@@ -3,8 +3,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { ConnectionStatus } from '@/types/courier';
+import { RawSocketOrder } from '@/types/rawSocketOrder';
 import { WorkerOrder } from '@/types/worker';
 import { useAuth } from '@/contexts/AuthContext';
+import { normalizeSocketOrder, normalizeSocketOrders } from '@/utils/normalizeSocketOrder';
 
 interface SocketContextType {
   orders: WorkerOrder[];
@@ -129,11 +131,12 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       emitLogin();
     });
 
-    socketRef.current.on('order/init', (incoming: WorkerOrder[]) => {
-      setOrders(sortOrders(incoming));
+    socketRef.current.on('order/init', (incoming: RawSocketOrder[]) => {
+      setOrders(sortOrders(normalizeSocketOrders(incoming)));
     });
 
-    socketRef.current.on('order/create', (order: WorkerOrder) => {
+    socketRef.current.on('order/create', (raw: RawSocketOrder) => {
+      const order = normalizeSocketOrder(raw);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.set(order.id, order);
@@ -141,7 +144,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       });
     });
 
-    socketRef.current.on('order/update', (order: WorkerOrder) => {
+    socketRef.current.on('order/update', (raw: RawSocketOrder) => {
+      const order = normalizeSocketOrder(raw);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.set(order.id, order);
@@ -149,7 +153,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       });
     });
 
-    socketRef.current.on('order/remove', (order: WorkerOrder) => {
+    socketRef.current.on('order/remove', (raw: RawSocketOrder) => {
+      const order = normalizeSocketOrder(raw);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.delete(order.id);
@@ -157,7 +162,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       });
     });
 
-    socketRef.current.on('order/delete', (order: WorkerOrder) => {
+    socketRef.current.on('order/delete', (raw: RawSocketOrder) => {
+      const order = normalizeSocketOrder(raw);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.delete(order.id);
@@ -172,14 +178,14 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       socketRef.current = null;
       initialized.current = false;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (connectionStatus === 'CONNECTED') {
       emitLogin();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useEffect(() => {

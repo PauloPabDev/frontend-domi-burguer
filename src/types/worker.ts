@@ -28,7 +28,7 @@ export interface WorkerOrder {
   };
   distance?: number;
   orderItems: OrderItem[];
-  deliveryAddress: DeliveryAddress;
+  deliveryAddress?: DeliveryAddress;
   paymentMethod: PaymentMethod;
   comment?: string;
 }

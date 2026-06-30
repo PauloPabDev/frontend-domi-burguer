@@ -18,7 +18,7 @@ export default function DomiciliarioPage() {
     .filter((o) => o.deliveryAddress?.coordinates)
     .map((o) => ({
       id: o.id,
-      position: o.deliveryAddress.coordinates,
+      position: o.deliveryAddress!.coordinates,
       label: String(o.dailyOrderNumber),
     }));
 
