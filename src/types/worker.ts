@@ -10,6 +10,7 @@ export interface WorkerOrder {
   deliveryPrice: number;
   subtotal: number;
   locationId?: string;
+  clientId?: string;
   courierId?: string;
   kitchenId?: string;
   client?: {

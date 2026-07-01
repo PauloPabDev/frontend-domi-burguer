@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
+import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { KitchenOrderCard } from '@/components/cocina/KitchenOrderCard';
 import { KitchenSelector } from '@/components/cocina/KitchenSelector';
 import { WorkerOrderService } from '@/services/workerOrderService';
@@ -13,8 +14,9 @@ export default function CocinaPage() {
   const { user } = useAuth();
   const { orders, connectionStatus } = useSocket();
   const { kitchens, selectedKitchenId, selectKitchen, changeKitchen, loading } = useKitchenSelectorWithSocket();
+  const enrichedOrders = useEnrichedOrders(orders, kitchens);
 
-  const activeOrders = orders.filter(
+  const activeOrders = enrichedOrders.filter(
     (o) => o.status === 'fresh' || o.status === 'preparing'
   );
 

@@ -3,6 +3,7 @@ import "./globals.css";
 import { HeroUIProvider } from "@heroui/system";
 import { ToastProvider } from "@heroui/toast";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProductsProvider } from "@/contexts/ProductsContext";
 import { Metadata, Viewport } from "next";
 import { metadataConfig, viewportConfig } from "./metadata";
 import Script from "next/script";
@@ -39,6 +40,7 @@ export default function RootLayout({
       </head>
       <body className={montserrat.variable}>
         <AuthProvider>
+          <ProductsProvider>
           <HeroUIProvider>
             <ToastProvider
               placement="top-right"
@@ -50,6 +52,7 @@ export default function RootLayout({
             </Suspense>
             <LayoutShell>{children}</LayoutShell>
           </HeroUIProvider>
+          </ProductsProvider>
         </AuthProvider>
         <Script
           defer

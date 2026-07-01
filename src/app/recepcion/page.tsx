@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useCouriers } from '@/hooks/reception/useCouriers';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
+import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { OrderKanbanColumn } from '@/components/recepcion/OrderKanbanColumn';
 import { WorkerOrderService } from '@/services/workerOrderService';
 import { OrderStatus } from '@/types/orders';
@@ -22,10 +23,11 @@ export default function RecepcionPage() {
   const { orders } = useSocket();
   const { couriers } = useCouriers();
   const { kitchens } = useKitchenSelector();
+  const enrichedOrders = useEnrichedOrders(orders, kitchens);
 
-  const ordersByStatus = KANBAN_STATUSES.reduce<Record<string, typeof orders>>(
+  const ordersByStatus = KANBAN_STATUSES.reduce<Record<string, typeof enrichedOrders>>(
     (acc, status) => {
-      acc[status] = orders.filter((o) => o.status === status);
+      acc[status] = enrichedOrders.filter((o) => o.status === status);
       return acc;
     },
     {}

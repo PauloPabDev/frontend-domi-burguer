@@ -50,6 +50,7 @@ export function normalizeSocketOrder(raw: RawSocketOrder): WorkerOrder {
     comment: raw.comment,
     locationId: raw.locationId,
     orderItems: raw.orderItems.map(normalizeOrderItem),
+    ...(raw.clientId && { clientId: raw.clientId }),
     ...(raw.client && { client: raw.client }),
     ...(raw.deliveryAddress && { deliveryAddress: raw.deliveryAddress }),
     ...(raw.assignedCourierUserId && { courierId: raw.assignedCourierUserId }),

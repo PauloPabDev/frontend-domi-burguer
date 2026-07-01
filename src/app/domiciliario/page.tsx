@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
+import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { CourierOrderCard } from '@/components/courier/CourierOrderCard';
 import { MultiMarkerMap, MapMarker } from '@/components/map/MultiMarkerMap';
 import { CourierService } from '@/services/courierService';
@@ -12,9 +13,10 @@ import { Bike } from 'lucide-react';
 export default function DomiciliarioPage() {
   const { user } = useAuth();
   const { orders, connectionStatus } = useSocket();
+  const enrichedOrders = useEnrichedOrders(orders);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const markers: MapMarker[] = orders
+  const markers: MapMarker[] = enrichedOrders
     .filter((o) => o.deliveryAddress?.coordinates)
     .map((o) => ({
       id: o.id,
@@ -22,7 +24,7 @@ export default function DomiciliarioPage() {
       label: String(o.dailyOrderNumber),
     }));
 
-  const selectedOrder = orders.find((o) => o.id === selectedId);
+  const selectedOrder = enrichedOrders.find((o) => o.id === selectedId);
   const selectedCenter = selectedOrder?.deliveryAddress?.coordinates;
 
   const handleStatusChange = async (orderId: string, prev: OrderStatus, next: OrderStatus) => {
@@ -31,7 +33,7 @@ export default function DomiciliarioPage() {
     await CourierService.changeStatus(token, orderId, prev, next);
   };
 
-  const isEmpty = orders.length === 0;
+  const isEmpty = enrichedOrders.length === 0;
 
   return (
     <div className="h-[calc(100dvh-3.5rem)] flex flex-col py-3 gap-3">
@@ -61,7 +63,7 @@ export default function DomiciliarioPage() {
           </div>
         ) : (
           <div className="space-y-3 pb-3">
-            {orders.map((order) => (
+            {enrichedOrders.map((order) => (
               <CourierOrderCard
                 key={order.id}
                 order={order}

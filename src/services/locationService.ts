@@ -19,6 +19,14 @@ export class LocationService {
     }
   }
 
+  static async getByIdAuthenticated(id: string, token: string): Promise<{ body: Location }> {
+    const response = await fetch(`${this.API_URL}api/v2/locations/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Error fetching location');
+    return response.json();
+  }
+
   static async getLocationByIdPublic(id: string): Promise<{ body: Location }> {
     try {
       const response = await fetch(`${this.API_URL}api/v2/locations/public/${id}`);
