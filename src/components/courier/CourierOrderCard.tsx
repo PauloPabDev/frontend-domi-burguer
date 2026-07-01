@@ -5,7 +5,15 @@ import { Phone, MapPin, ShoppingBag, CreditCard } from 'lucide-react';
 import { CourierOrder } from '@/types/courier';
 import { OrderStatus } from '@/types/orders';
 import { Button } from '@/components/ui/button';
+import { StatusStepBar, StatusStep } from '@/components/ui/StatusStepBar';
+import { OrderItemsList } from '@/components/ui/OrderItemsList';
 import { cn } from '@/lib/utils';
+
+const COURIER_STEPS: StatusStep[] = [
+  { key: 'ready_for_pickup', label: 'Listo' },
+  { key: 'dispatched', label: 'En camino' },
+  { key: 'delivered', label: 'Entregado' },
+];
 
 interface CourierOrderCardProps {
   order: CourierOrder;
@@ -91,6 +99,11 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
           </div>
         </div>
 
+        {/* Progress de estado */}
+        <div className="mt-3 px-1">
+          <StatusStepBar steps={COURIER_STEPS} currentStatus={order.status} />
+        </div>
+
         {/* Dirección */}
         <div className="flex items-start gap-1.5 mt-3 bg-neutral-black-5 rounded-xl px-3 py-2">
           <MapPin size={14} className="text-primary-red mt-0.5 shrink-0" />
@@ -109,17 +122,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
           <ShoppingBag size={13} className="text-neutral-black-50" />
           <span className="text-xs font-semibold text-neutral-black-50 uppercase tracking-wide">Productos</span>
         </div>
-        <ul className="space-y-1.5">
-          {order.orderItems.map((item) => (
-            <li key={item.id} className="flex items-baseline justify-between gap-2">
-              <span className="text-sm text-neutral-black-80">
-                <span className="font-bold text-primary-red">{item.quantity}×</span>{' '}
-                {item.name}
-              </span>
-              <span className="text-xs text-neutral-black-50 shrink-0">{formatCOP(item.price * item.quantity)}</span>
-            </li>
-          ))}
-        </ul>
+        <OrderItemsList items={order.orderItems} />
         {order.comment && (
           <p className="mt-2 text-xs text-neutral-black-50 italic border-l-2 border-neutral-black-20 pl-2">
             {order.comment}

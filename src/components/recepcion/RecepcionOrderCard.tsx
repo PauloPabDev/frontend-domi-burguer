@@ -5,9 +5,19 @@ import { Phone, MapPin, ShoppingBag, CreditCard, ChevronDown, ChevronUp, Bike, C
 import { WorkerOrder, WorkerUser, WorkerKitchen, PAYMENT_LABELS, STATUS_CONFIG } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { Button } from '@/components/ui/button';
+import { StatusStepBar, StatusStep } from '@/components/ui/StatusStepBar';
+import { OrderItemsList } from '@/components/ui/OrderItemsList';
 import { AssignCourierModal } from './AssignCourierModal';
 import { AssignKitchenModal } from './AssignKitchenModal';
 import { cn } from '@/lib/utils';
+
+const RECEPTION_STEPS: StatusStep[] = [
+  { key: 'fresh', label: 'Nuevo' },
+  { key: 'preparing', label: 'Cocina' },
+  { key: 'ready_for_pickup', label: 'Listo' },
+  { key: 'dispatched', label: 'Camino' },
+  { key: 'delivered', label: 'Entregado' },
+];
 
 interface RecepcionOrderCardProps {
   order: WorkerOrder;
@@ -63,7 +73,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
     <>
       <div className="rounded-2xl border border-neutral-black-20 bg-white shadow-sm overflow-hidden">
         {/* Status strip */}
-        <div className={cn('h-1', statusCfg.dotColor)} />
+        <div className={cn('h-1.5', statusCfg.dotColor)} />
 
         {/* Header */}
         <div className="p-3">
@@ -76,9 +86,6 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
                 <p className="font-bold text-sm text-neutral-black-80 truncate">
                   {order.client?.name ?? 'Cliente'}
                 </p>
-                <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0', statusCfg.bg, statusCfg.color)}>
-                  {statusCfg.label}
-                </span>
               </div>
               <div className="flex items-center gap-3 mt-0.5">
                 {order.client?.phone && (
@@ -95,6 +102,11 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
             >
               {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
             </button>
+          </div>
+
+          {/* Progress de estado */}
+          <div className="mt-2">
+            <StatusStepBar steps={RECEPTION_STEPS} currentStatus={order.status} compact />
           </div>
 
           {/* Address */}
@@ -117,18 +129,11 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           <div className="px-3 pb-3 space-y-2 border-t border-neutral-black-10 pt-3">
             {/* Items */}
             <div>
-              <div className="flex items-center gap-1 mb-1.5">
+              <div className="flex items-center gap-1 mb-2">
                 <ShoppingBag size={11} className="text-neutral-black-50" />
                 <span className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide">Productos</span>
               </div>
-              <ul className="space-y-1">
-                {order.orderItems.map((item) => (
-                  <li key={item.id} className="flex justify-between text-xs text-neutral-black-80">
-                    <span>{item.quantity}× {item.name}</span>
-                    <span className="text-neutral-black-50">{formatCOP(item.price * item.quantity)}</span>
-                  </li>
-                ))}
-              </ul>
+              <OrderItemsList items={order.orderItems} />
             </div>
 
             {/* Payment + total */}
