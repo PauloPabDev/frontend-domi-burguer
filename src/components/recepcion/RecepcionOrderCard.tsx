@@ -35,6 +35,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [showCourierModal, setShowCourierModal] = useState(false);
   const [showKitchenModal, setShowKitchenModal] = useState(false);
 
@@ -50,8 +51,12 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   const handleStatusChange = async () => {
     if (!transition) return;
     setLoadingStatus(true);
-    try { await onStatusChange(order.id, order.status, transition.next); }
-    finally { setLoadingStatus(false); }
+    try {
+      await onStatusChange(order.id, order.status, transition.next);
+      setConfirming(false);
+    } finally {
+      setLoadingStatus(false);
+    }
   };
 
   return (
@@ -158,7 +163,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
         {/* Actions */}
         {(transition || !expanded) && (
           <div className="px-3 pb-3 flex gap-2">
-            {!expanded && (
+            {!expanded && !confirming && (
               <>
                 <button
                   onClick={() => setShowCourierModal(true)}
@@ -177,16 +182,35 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               </>
             )}
             {transition && (
-              <Button
-                onClick={handleStatusChange}
-                loading={loadingStatus}
-                loadingText="..."
-                size="sm"
-                variant="primary"
-                className="ml-auto"
-              >
-                {transition.label}
-              </Button>
+              confirming ? (
+                <div className="ml-auto flex items-center gap-2">
+                  <button
+                    onClick={() => setConfirming(false)}
+                    disabled={loadingStatus}
+                    className="text-[10px] font-medium text-neutral-black-50 hover:text-neutral-black-80 border border-neutral-black-20 rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-40"
+                  >
+                    Cancelar
+                  </button>
+                  <Button
+                    onClick={handleStatusChange}
+                    loading={loadingStatus}
+                    loadingText="..."
+                    size="sm"
+                    variant="primary"
+                  >
+                    Confirmar
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => setConfirming(true)}
+                  size="sm"
+                  variant="primary"
+                  className="ml-auto"
+                >
+                  {transition.label}
+                </Button>
+              )
             )}
           </div>
         )}

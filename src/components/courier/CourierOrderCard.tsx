@@ -35,6 +35,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   onStatusChange,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   const transition = STATUS_TRANSITIONS[order.status];
 
@@ -43,6 +44,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
     setLoading(true);
     try {
       await onStatusChange(order.id, order.status, transition.next);
+      setConfirming(false);
     } finally {
       setLoading(false);
     }
@@ -135,15 +137,34 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
         </div>
 
         {transition && (
-          <Button
-            onClick={(e) => { e.stopPropagation(); handleStatusChange(); }}
-            loading={loading}
-            loadingText="Actualizando..."
-            size="sm"
-            variant={transition.next === 'delivered' ? 'dark' : 'primary'}
-          >
-            {transition.label}
-          </Button>
+          confirming ? (
+            <div className="flex items-center gap-2 ml-auto" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => setConfirming(false)}
+                disabled={loading}
+                className="text-xs font-medium text-neutral-black-50 hover:text-neutral-black-80 border border-neutral-black-20 rounded-xl px-3 py-1.5 transition-colors disabled:opacity-40"
+              >
+                Cancelar
+              </button>
+              <Button
+                onClick={(e) => { e.stopPropagation(); handleStatusChange(); }}
+                loading={loading}
+                loadingText="..."
+                size="sm"
+                variant={transition.next === 'delivered' ? 'dark' : 'primary'}
+              >
+                Confirmar
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={(e) => { e.stopPropagation(); setConfirming(true); }}
+              size="sm"
+              variant={transition.next === 'delivered' ? 'dark' : 'primary'}
+            >
+              {transition.label}
+            </Button>
+          )
         )}
       </div>
     </div>

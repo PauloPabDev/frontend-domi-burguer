@@ -20,6 +20,7 @@ const COOK_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: 
 export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onStatusChange }) => {
   const [expanded, setExpanded] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   const transition = COOK_TRANSITIONS[order.status];
 
@@ -28,6 +29,7 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onSta
     setLoading(true);
     try {
       await onStatusChange(order.id, order.status, transition.next);
+      setConfirming(false);
     } finally {
       setLoading(false);
     }
@@ -136,16 +138,38 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onSta
       {/* Action button */}
       {transition && (
         <div className="px-4 pb-4 pt-2">
-          <Button
-            onClick={handleStatusChange}
-            loading={loading}
-            loadingText="Actualizando..."
-            fullWidth
-            size="md"
-            variant={transition.variant}
-          >
-            {transition.label}
-          </Button>
+          {confirming ? (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirming(false)}
+                disabled={loading}
+                className="flex-1 text-sm font-medium text-neutral-black-50 hover:text-neutral-black-80 border border-neutral-black-20 rounded-xl py-2.5 transition-colors disabled:opacity-40"
+              >
+                Cancelar
+              </button>
+              <div className="flex-1">
+                <Button
+                  onClick={handleStatusChange}
+                  loading={loading}
+                  loadingText="Actualizando..."
+                  fullWidth
+                  size="md"
+                  variant={transition.variant}
+                >
+                  Confirmar
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button
+              onClick={() => setConfirming(true)}
+              fullWidth
+              size="md"
+              variant={transition.variant}
+            >
+              {transition.label}
+            </Button>
+          )}
         </div>
       )}
     </div>
