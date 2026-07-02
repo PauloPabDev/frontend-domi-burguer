@@ -19,7 +19,11 @@ const ComplementItem = ({ complement }: { complement: Complement }) => (
     <span>
       + {complement.name} {complement.quantity && complement.quantity > 1 ? `x${complement.quantity}` : ""}
     </span>
-    <span suppressHydrationWarning>{formatCurrency((complement.price ?? 0) * (complement.quantity || 1))}</span>
+    <span suppressHydrationWarning>
+      {complement.price === 0 || complement.price == null
+        ? 'GRATIS'
+        : formatCurrency(complement.price * (complement.quantity || 1))}
+    </span>
   </div>
 );
 
