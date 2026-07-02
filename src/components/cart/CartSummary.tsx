@@ -12,7 +12,6 @@ import { useCartActions } from "@/hooks/cart/useCartActions";
 import { useCartSubmit } from "@/hooks/cart/useCartSubmit";
 import { useComplementsModal } from "@/hooks/cart/useComplementsModal";
 import { useCoupon } from "@/hooks/cart/useCoupon";
-import { useAnniversaryPromo } from "@/hooks/cart/useAnniversaryPromo";
 import { CartItemCard } from "@/components/cart/CartItemCard";
 import { CouponInput } from "@/components/cart/CouponInput";
 import { OrderTotals } from "@/components/cart/OrderTotals";
@@ -52,8 +51,6 @@ export const CartSummary = ({ }) => {
     addCodeInItems,
     removeCodeFromItems,
   } = useCartActions();
-
-  useAnniversaryPromo();
 
   const { handleEditComplements } = useComplementsModal();
   const { isSubmitting, error } = useCartSubmit();
@@ -110,21 +107,6 @@ export const CartSummary = ({ }) => {
             </div>
 
             <div className="flex flex-col items-start gap-8 w-full">
-              {items.length > 0 && (
-                <div className="w-full rounded-xl border-2 border-accent-yellow-100 bg-accent-yellow-10 p-3 flex items-center gap-3">
-                  <span className="text-2xl flex-shrink-0">🎉</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-neutral-black-80 leading-tight">
-                      ¡Aniversario 10 años!
-                    </p>
-                    <p className="text-xs text-neutral-black-60 leading-tight mt-0.5">
-                      Te regalamos unas papas gratis con tu pedido
-                    </p>
-                  </div>
-                  <span className="text-2xl flex-shrink-0">🍟</span>
-                </div>
-              )}
-
               <div className="flex flex-col items-start gap-4 w-full">
                 {items.map((item) => (
                   <CartItemCard
