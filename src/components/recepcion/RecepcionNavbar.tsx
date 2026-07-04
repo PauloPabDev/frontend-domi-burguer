@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, ClipboardList, History, ChevronDown, Store } from 'lucide-react';
+import { LogOut, ClipboardList, History, ChevronDown, Store, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -26,8 +26,9 @@ const STATUS_DOT: Record<ConnectionStatus, string> = {
 };
 
 const NAV_LINKS = [
-  { href: '/recepcion',           label: 'Pedidos',   Icon: ClipboardList },
-  { href: '/recepcion/historial', label: 'Historial', Icon: History },
+  { href: '/recepcion',               label: 'Pedidos',      Icon: ClipboardList },
+  { href: '/recepcion/historial',     label: 'Historial',    Icon: History       },
+  { href: '/recepcion/nueva-orden',   label: 'Nueva Orden',  Icon: PlusCircle    },
 ];
 
 export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({

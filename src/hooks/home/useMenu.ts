@@ -13,7 +13,7 @@ import { track } from "@/utils/analytics";
  * Maneja la lógica de complementos ADDABLE (ej: Papas)
  * Solo se pueden agregar, no vienen por defecto
  */
-const handleAddableComplement = (
+export const handleAddableComplement = (
   ingredient: Complement,
   action: 'plus' | 'minus',
   currentComplements: Complement[],
@@ -65,7 +65,7 @@ const handleAddableComplement = (
 /**
  * Maneja la lógica de complementos SPECIAL (ej: Carne)
  */
-const handleSpecialComplement = (
+export const handleSpecialComplement = (
   ingredient: Complement,
   action: 'plus' | 'minus',
   currentComplements: Complement[],
@@ -121,7 +121,7 @@ const handleSpecialComplement = (
 /**
  * Maneja la lógica de complementos REMOVABLE (ej: Lechuga)
  */
-const handleRemovableComplement = (
+export const handleRemovableComplement = (
   ingredient: Complement,
   action: 'plus' | 'minus',
   currentComplements: Complement[],

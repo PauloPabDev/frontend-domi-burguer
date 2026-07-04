@@ -35,7 +35,7 @@ const CreateAddressInputSection = ({ isLoaded, onLoad, onPlaceChanged, formState
         <div className="flex flex-1 flex-col px-[20px] lg:pl-[32px] lg:pr-0">
 
             <div className="flex flex-col gap-2">
-                {isLoaded && (
+                {isLoaded ? (
                     <Autocomplete
                         onLoad={onLoad}
                         onPlaceChanged={onPlaceChanged}
@@ -76,6 +76,25 @@ const CreateAddressInputSection = ({ isLoaded, onLoad, onPlaceChanged, formState
                             )}
                         </div>
                     </Autocomplete>
+                ) : (
+                    <div className="flex flex-col">
+                        <div className="relative">
+                            <Input
+                                ref={addressRef}
+                                className={`shadow-none pr-12 ${errors.address || errors.coordinates ? 'border-red-500' : ''}`}
+                                placeholder="Nueva dirección"
+                                value={formState.address}
+                                onChange={(e) => {
+                                    updateField("address", e.target.value);
+                                    if (errors.address) clearError("address");
+                                    if (errors.coordinates) clearError("coordinates");
+                                }} />
+                            <MapPinIcon className="w-[22px] h-[22px] absolute right-5 top-1/2 -translate-y-1/2" />
+                        </div>
+                        {(errors.address || errors.coordinates) && (
+                            <span className="text-red-500 text-sm mt-1">{errors.address || errors.coordinates}</span>
+                        )}
+                    </div>
                 )}
 
 

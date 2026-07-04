@@ -20,4 +20,22 @@ export class ClientService {
     if (!response.ok) throw new Error('Error fetching client');
     return response.json();
   }
+
+  static async findByPhone(phone: string, token: string): Promise<{ body: ApiClient }> {
+    const response = await fetch(`${this.API_URL}api/v2/clients/phone/${encodeURIComponent(phone)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Cliente no encontrado');
+    return response.json();
+  }
+
+  static async create(data: { name: string; phone: string }, token: string): Promise<{ body: ApiClient }> {
+    const response = await fetch(`${this.API_URL}api/v2/clients/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Error al crear cliente');
+    return response.json();
+  }
 }

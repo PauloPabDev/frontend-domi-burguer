@@ -29,10 +29,10 @@ interface RecepcionOrderCardProps {
 }
 
 const RECEPTION_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: string }>> = {
-  fresh:            { next: 'preparing',        label: 'Enviar a cocina' },
-  preparing:        { next: 'ready_for_pickup', label: 'Marcar listo' },
-  ready_for_pickup: { next: 'dispatched',       label: 'Despachar' },
-  dispatched:       { next: 'delivered',        label: 'Marcar entregado' },
+  fresh: { next: 'preparing', label: 'Enviar a cocina' },
+  preparing: { next: 'ready_for_pickup', label: 'Marcar listo' },
+  ready_for_pickup: { next: 'dispatched', label: 'Despachar' },
+  dispatched: { next: 'delivered', label: 'Marcar entregado' },
 };
 
 export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
@@ -177,13 +177,13 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
                   <Bike size={10} />
                   <span>{order.courier?.name ?? 'Moto'}</span>
                 </button>
-                <button
+                {/* <button
                   onClick={() => setShowKitchenModal(true)}
                   className="flex items-center gap-1 text-[10px] text-neutral-black-50 hover:text-primary-red border border-neutral-black-20 rounded-lg px-2 py-1.5 transition-colors"
                 >
                   <ChefHat size={10} />
                   <span>{order.kitchen?.name ?? 'Cocina'}</span>
-                </button>
+                </button> */}
               </>
             )}
             {transition && (

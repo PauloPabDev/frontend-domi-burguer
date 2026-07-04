@@ -108,6 +108,14 @@ export class LocationService {
     }
   }
 
+  static async getByClientId(clientId: string, token: string): Promise<{ body: Location[] }> {
+    const response = await fetch(`${this.API_URL}api/v2/locations/client/${clientId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Error fetching client locations');
+    return response.json();
+  }
+
   static async setFavoriteLocation(token: string, id: string): Promise<void> {
     try {
       const response = await fetch(`${this.API_URL}api/v2/locations/${id}/favorite`, {

@@ -2,6 +2,31 @@ import { WorkerOrder, WorkerKitchen, WorkerUser } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { getApiUrl } from '@/utils/apiUrl';
 
+export interface AdminOrderPayload {
+  clientId: string;
+  locationId: string;
+  comment: string;
+  paymentMethod: string;
+  orderItems: Array<{ id: string; complements?: Array<{ id: string }> }>;
+  delivery: { price: number; distance: number };
+  assignedKitchenId?: string;
+}
+
+export interface DeliveryInfo {
+  price: number;
+  distance: number;
+  duration?: number;
+  modified?: boolean;
+}
+
+export interface KitchenInfo {
+  id: string;
+  name: string;
+  address?: string;
+  phone?: string;
+  dailyOrders?: number;
+}
+
 export class WorkerOrderService {
   private static get API_URL(): string {
     return getApiUrl();
@@ -94,6 +119,37 @@ export class WorkerOrderService {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) throw new Error('Error al obtener cocinas');
+    return response.json();
+  }
+
+  static async createAdminOrder(
+    payload: AdminOrderPayload,
+    token: string
+  ): Promise<{ body: WorkerOrder }> {
+    const response = await fetch(`${this.API_URL}api/v2/orders/public/admin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error((err as { message?: string }).message || 'Error al crear la orden');
+    }
+    return response.json();
+  }
+
+  static async getSelectKitchen(
+    locationId: string,
+    token: string,
+    kitchenId?: string
+  ): Promise<{ body: { delivery: DeliveryInfo; kitchen: KitchenInfo } }> {
+    const params = new URLSearchParams({ locationId });
+    if (kitchenId) params.set('kitchenId', kitchenId);
+    const response = await fetch(
+      `${this.API_URL}api/v2/kitchens/selectKitchen/location?${params}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!response.ok) throw new Error('Error al calcular precio de delivery');
     return response.json();
   }
 }
