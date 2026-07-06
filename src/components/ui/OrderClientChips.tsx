@@ -29,7 +29,7 @@ interface ClientActionMenuProps {
 
 function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientActionMenuProps) {
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-500 flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
 
       <div

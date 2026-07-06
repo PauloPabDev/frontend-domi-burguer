@@ -35,7 +35,7 @@ export interface WorkerOrder {
   paymentMethod: PaymentMethod;
   payment: Payment;
   comment?: string;
-  location: Location;
+  location?: Location;
 }
 
 export interface StatusConfig {

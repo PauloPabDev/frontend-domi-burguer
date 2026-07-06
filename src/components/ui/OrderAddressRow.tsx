@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   MapPin,
@@ -53,6 +53,17 @@ interface AddressSheetProps {
 
 function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) {
   const [copied, setCopied] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  const handleClose = () => {
+    setVisible(false);
+    setTimeout(onClose, 250);
+  };
 
   const displayAddress = location?.address ?? address ?? 'Sin dirección';
   const displayFloor = location?.floor ?? floor;
@@ -86,22 +97,24 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
       '_blank',
     );
   };
-
+  console.log(location, "location")
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      onClick={onClose}
+      className={cn(
+        'fixed inset-0 z-500 flex items-center justify-center transition-opacity duration-250',
+        visible ? 'opacity-100' : 'opacity-0',
+      )}
+      onClick={handleClose}
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
       <div
-        className="relative z-10 w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden"
+        className={cn(
+          'relative z-10 w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden transition-transform duration-250 ease-out relative z-10 w-[300px] bg-white rounded-2xl shadow-xl overflow-hidden',
+          visible ? 'translate-y-0' : 'translate-y-full',
+        )}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 bg-neutral-200 rounded-full" />
-        </div>
 
         {/* Header */}
         <div className="flex items-start justify-between px-5 pt-3 pb-4 border-b border-neutral-black-10">
@@ -122,7 +135,7 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1.5 rounded-full hover:bg-neutral-black-10 transition-colors shrink-0 ml-3"
           >
             <X size={16} className="text-neutral-black-50" />

@@ -56,6 +56,7 @@ export interface DeliveryAddress {
     lng: number;
   };
   deliveryPrice: number;
+  comment?: string;
 }
 
 export interface Delivery {

@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProducts } from '@/contexts/ProductsContext';
 import { WorkerOrder, WorkerKitchen } from '@/types/worker';
 import { DeliveryAddress, OrderItem, OrderComplement } from '@/types/orders';
+import { Location } from '@/types/locations';
 import { Product } from '@/types/product';
 import { ClientService } from '@/services/clientService';
 import { LocationService } from '@/services/locationService';
@@ -41,6 +42,7 @@ function resolveItemNames(
   });
 }
 
+//agrupa la información de las órdenes con la información de cocinas, productos, repartidores, clientes y direcciones
 function applyEnrichment(
   orders: WorkerOrder[],
   kitchens: WorkerKitchen[],
@@ -48,6 +50,7 @@ function applyEnrichment(
   courierCache: Map<string, CourierInfo>,
   clientCache: Map<string, ClientInfo>,
   locCache: Map<string, DeliveryAddress>,
+  locationObjCache: Map<string, Location>,
 ): WorkerOrder[] {
   return orders.map((order) => {
     const kitchen =
@@ -59,6 +62,8 @@ function applyEnrichment(
       order.client ?? (order.clientId ? clientCache.get(order.clientId) : undefined);
     const deliveryAddress =
       order.deliveryAddress ?? (order.locationId ? locCache.get(order.locationId) : undefined);
+    const location =
+      order.location ?? (order.locationId ? locationObjCache.get(order.locationId) : undefined);
     const orderItems = productMap.size > 0 ? resolveItemNames(order.orderItems, productMap) : order.orderItems;
 
     if (
@@ -66,6 +71,7 @@ function applyEnrichment(
       courier === order.courier &&
       client === order.client &&
       deliveryAddress === order.deliveryAddress &&
+      location === order.location &&
       orderItems === order.orderItems
     ) {
       return order;
@@ -78,6 +84,7 @@ function applyEnrichment(
       ...(courier && { courier }),
       ...(client && { client }),
       ...(deliveryAddress && { deliveryAddress }),
+      ...(location && { location }),
     };
   });
 }
@@ -102,6 +109,7 @@ export function useEnrichedOrders(
   const courierCache = useRef<Map<string, CourierInfo>>(new Map());
   const clientCache = useRef<Map<string, ClientInfo>>(new Map());
   const locCache = useRef<Map<string, DeliveryAddress>>(new Map());
+  const locationObjCache = useRef<Map<string, Location>>(new Map());
   const inFlight = useRef<Set<string>>(new Set());
 
   // Guardamos kitchens en un ref para no meterlo en el dep array:
@@ -118,6 +126,7 @@ export function useEnrichedOrders(
       courierCache.current,
       clientCache.current,
       locCache.current,
+      locationObjCache.current,
     );
 
     // Comparación por referencia: si ningún elemento cambió, no actualizamos estado
@@ -136,7 +145,7 @@ export function useEnrichedOrders(
       if (order.clientId && !order.client && !clientCache.current.has(order.clientId) && !inFlight.current.has(`client:${order.clientId}`)) {
         missingClients.add(order.clientId);
       }
-      if (order.locationId && !order.deliveryAddress && !locCache.current.has(order.locationId) && !inFlight.current.has(`location:${order.locationId}`)) {
+      if (order.locationId && (!order.deliveryAddress || !order.location) && !locCache.current.has(order.locationId) && !inFlight.current.has(`location:${order.locationId}`)) {
         missingLocations.add(order.locationId);
       }
     }
@@ -156,7 +165,7 @@ export function useEnrichedOrders(
             .then(({ body }) => {
               courierCache.current.set(id, { id: body.id, name: body.name, photoURL: body.photoUrl });
             })
-            .catch(() => {})
+            .catch(() => { })
             .finally(() => inFlight.current.delete(`courier:${id}`)),
         );
       }
@@ -168,7 +177,7 @@ export function useEnrichedOrders(
             .then(({ body }) => {
               clientCache.current.set(id, { name: body.name, phone: body.phone, email: body.email });
             })
-            .catch(() => {})
+            .catch(() => { })
             .finally(() => inFlight.current.delete(`client:${id}`)),
         );
       }
@@ -186,9 +195,11 @@ export function useEnrichedOrders(
                 floor: body.floor || undefined,
                 coordinates: body.coordinates,
                 deliveryPrice: 0,
+                comment: body.comment || undefined,
               });
+              locationObjCache.current.set(id, body);
             })
-            .catch(() => {})
+            .catch(() => { })
             .finally(() => inFlight.current.delete(`location:${id}`)),
         );
       }
@@ -199,7 +210,7 @@ export function useEnrichedOrders(
         setEnriched((prev) =>
           setIfChanged(
             prev,
-            applyEnrichment(orders, kitchensRef.current, products, courierCache.current, clientCache.current, locCache.current),
+            applyEnrichment(orders, kitchensRef.current, products, courierCache.current, clientCache.current, locCache.current, locationObjCache.current),
           ),
         );
       }
