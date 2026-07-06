@@ -1,39 +1,336 @@
-import { MapPin } from 'lucide-react';
+'use client';
+
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
+import {
+  MapPin,
+  MoreHorizontal,
+  Navigation,
+  Navigation2,
+  Copy,
+  Check,
+  X,
+  Home,
+  Building2,
+  Trees,
+  Briefcase,
+  MessageSquare,
+  Clock,
+  Camera,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Location } from '@/types/locations';
+import { Location, PropertyType } from '@/types/locations';
 
 interface OrderAddressRowProps {
-  location?: Location
+  location?: Location;
   address?: string;
   floor?: string;
-  /** Compacto: sin fondo, ícono y texto más pequeños (para recepción) */
+  /** Compacto: sin fondo ni acciones, solo ícono y texto pequeños (para recepción) */
   compact?: boolean;
   className?: string;
 }
 
-export function OrderAddressRow({ location, address, floor, compact = false, className }: OrderAddressRowProps) {
-  return (
+const PROPERTY_ICONS: Record<PropertyType, React.ReactNode> = {
+  house: <Home size={13} />,
+  building: <Building2 size={13} />,
+  urbanization: <Trees size={13} />,
+  office: <Briefcase size={13} />,
+};
+
+const PROPERTY_LABELS: Record<PropertyType, string> = {
+  house: 'Casa',
+  building: 'Edificio',
+  urbanization: 'Urbanización',
+  office: 'Oficina',
+};
+
+interface AddressSheetProps {
+  location?: Location;
+  address?: string;
+  floor?: string;
+  onClose: () => void;
+}
+
+function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) {
+  const [copied, setCopied] = useState(false);
+
+  const displayAddress = location?.address ?? address ?? 'Sin dirección';
+  const displayFloor = location?.floor ?? floor;
+  const hasCoords =
+    location?.coordinates?.lat != null && location?.coordinates?.lng != null;
+
+  const coordsQuery = hasCoords
+    ? `${location!.coordinates.lat},${location!.coordinates.lng}`
+    : encodeURIComponent(displayAddress);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(displayAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenMaps = () => {
+    window.open(
+      hasCoords
+        ? `https://www.google.com/maps?q=${coordsQuery}`
+        : `https://www.google.com/maps/search/?api=1&query=${coordsQuery}`,
+      '_blank',
+    );
+  };
+
+  const handleOpenWaze = () => {
+    window.open(
+      hasCoords
+        ? `https://waze.com/ul?ll=${coordsQuery}&navigate=yes`
+        : `https://waze.com/ul?q=${coordsQuery}`,
+      '_blank',
+    );
+  };
+
+  return createPortal(
     <div
-      className={cn(
-        'flex items-start gap-1.5',
-        !compact && 'bg-neutral-black-5 rounded-xl px-3 py-2',
-        className,
-      )}
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={onClose}
     >
-      <MapPin
-        size={compact ? 11 : 14}
-        className={cn('mt-0.5 shrink-0', compact ? 'text-neutral-black-50' : 'text-primary-red')}
-      />
-      <p
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+
+      <div
+        className="relative z-10 w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 bg-neutral-200 rounded-full" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-start justify-between px-5 pt-3 pb-4 border-b border-neutral-black-10">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-neutral-black-80 truncate">
+              {location?.name ?? 'Dirección de entrega'}
+            </p>
+            {location?.propertyType && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-neutral-black-50">
+                  {PROPERTY_ICONS[location.propertyType]}
+                </span>
+                <span className="text-xs text-neutral-black-50">
+                  {PROPERTY_LABELS[location.propertyType]}
+                </span>
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-full hover:bg-neutral-black-10 transition-colors shrink-0 ml-3"
+          >
+            <X size={16} className="text-neutral-black-50" />
+          </button>
+        </div>
+
+        {/* Detalle de dirección */}
+        <div className="px-5 py-4 space-y-3.5">
+          {/* Dirección + piso */}
+          <div className="flex items-start gap-3">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50 shrink-0 mt-0.5">
+              <MapPin size={15} className="text-primary-red" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-neutral-black-50 uppercase tracking-wide mb-1">
+                Dirección
+              </p>
+              <p className="text-sm text-neutral-black-80 leading-snug">{displayAddress}</p>
+              {displayFloor && (
+                <p className="text-xs text-neutral-black-50 mt-1">
+                  Piso / Apto: <span className="font-medium">{displayFloor}</span>
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Comentarios */}
+          {location?.comment && (
+            <div className="flex items-start gap-3">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-50 shrink-0 mt-0.5">
+                <MessageSquare size={15} className="text-amber-500" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-neutral-black-50 uppercase tracking-wide mb-1">
+                  Comentarios
+                </p>
+                <p className="text-sm text-neutral-black-80 leading-snug">{location.comment}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Acciones */}
+        <div className="flex flex-col divide-y divide-neutral-black-10 border-t border-neutral-black-10">
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium text-neutral-black-80 hover:bg-neutral-black-3 transition-colors text-left"
+          >
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-black-10 shrink-0">
+              {copied
+                ? <Check size={15} className="text-green-600" />
+                : <Copy size={15} className="text-neutral-black-50" />}
+            </span>
+            {copied ? 'Dirección copiada' : 'Copiar dirección'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenMaps}
+            className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium text-neutral-black-80 hover:bg-neutral-black-3 transition-colors text-left"
+          >
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 shrink-0">
+              <Navigation size={15} className="text-blue-600" />
+            </span>
+            Abrir en Google Maps
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenWaze}
+            className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium text-neutral-black-80 hover:bg-neutral-black-3 transition-colors text-left"
+          >
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-cyan-50 shrink-0">
+              <Navigation2 size={15} className="text-cyan-600" />
+            </span>
+            Ir a Waze
+          </button>
+
+          <button
+            type="button"
+            disabled
+            className="flex items-center gap-3 px-5 py-3.5 text-left opacity-50 cursor-not-allowed"
+          >
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-black-10 shrink-0">
+              <Clock size={15} className="text-neutral-black-50" />
+            </span>
+            <div>
+              <p className="text-sm font-medium text-neutral-black-80">Historial de dirección</p>
+              <p className="text-xs text-neutral-black-50">Próximamente</p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            disabled
+            className="flex items-center gap-3 px-5 py-3.5 text-left opacity-50 cursor-not-allowed"
+          >
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-black-10 shrink-0">
+              <Camera size={15} className="text-neutral-black-50" />
+            </span>
+            <div>
+              <p className="text-sm font-medium text-neutral-black-80">Fotos del lugar</p>
+              <p className="text-xs text-neutral-black-50">Próximamente</p>
+            </div>
+          </button>
+        </div>
+
+        <div className="pb-8" />
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+export function OrderAddressRow({
+  location,
+  address,
+  floor,
+  compact = false,
+  className,
+}: OrderAddressRowProps) {
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const displayAddress = location?.address ?? address ?? 'Sin dirección';
+  const displayFloor = location?.floor ?? floor;
+  const hasCoords =
+    location?.coordinates?.lat != null && location?.coordinates?.lng != null;
+
+  const handleOpenMaps = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!hasCoords) return;
+    window.open(
+      `https://www.google.com/maps?q=${location!.coordinates.lat},${location!.coordinates.lng}`,
+      '_blank',
+    );
+  };
+
+  const handleOpenSheet = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSheetOpen(true);
+  };
+
+  if (compact) {
+    return (
+      <div className={cn('flex items-center gap-1.5', className)}>
+        <MapPin size={11} className="text-neutral-black-50 shrink-0" />
+        <p className="text-xs text-neutral-black-50 line-clamp-1">{displayAddress}</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div
         className={cn(
-          compact
-            ? 'text-xs text-neutral-black-50 line-clamp-1'
-            : 'text-sm text-neutral-black-80 leading-snug',
+          'flex items-start gap-2 bg-neutral-black-5 rounded-xl px-3 py-2.5',
+          className,
         )}
       >
-        {address ?? 'Sin dirección'}
-        {!compact && floor && <span className="text-neutral-black-50"> — {floor}</span>}
-      </p>
-    </div>
+        <MapPin size={15} className="text-primary-red mt-0.5 shrink-0" />
+
+        {/* Texto */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-neutral-black-80 leading-snug">{displayAddress}</p>
+          {displayFloor && (
+            <p className="text-xs text-neutral-black-50 mt-0.5">
+              Piso / Apto: <span className="font-medium">{displayFloor}</span>
+            </p>
+          )}
+          {location?.comment && (
+            <p className="text-xs text-neutral-black-50 mt-0.5 line-clamp-1 italic">
+              {location.comment}
+            </p>
+          )}
+        </div>
+
+        {/* Botones de acción */}
+        <div className="flex items-center gap-0.5 shrink-0 -mr-0.5 mt-0.5">
+          {hasCoords && (
+            <button
+              type="button"
+              onClick={handleOpenMaps}
+              title="Abrir en Google Maps"
+              className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              <Navigation size={14} className="text-blue-500" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleOpenSheet}
+            title="Más opciones"
+            className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-neutral-black-10 transition-colors"
+          >
+            <MoreHorizontal size={14} className="text-neutral-black-50" />
+          </button>
+        </div>
+      </div>
+
+      {sheetOpen && (
+        <AddressSheet
+          location={location}
+          address={address}
+          floor={floor}
+          onClose={() => setSheetOpen(false)}
+        />
+      )}
+    </>
   );
 }
