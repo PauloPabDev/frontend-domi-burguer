@@ -3,7 +3,7 @@
 import { OrderItem } from '@/types/orders';
 import { cn } from '@/lib/utils';
 
-const formatCOP = (v: number) =>
+export const formatCOP = (v: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v);
 
 interface OrderItemsListProps {

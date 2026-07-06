@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from 'react';
-import { Phone, MapPin, ShoppingBag, CreditCard } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { CourierOrder } from '@/types/courier';
 import { OrderStatus } from '@/types/orders';
 import { Button } from '@/components/ui/button';
 import { StatusStepBar, StatusStep } from '@/components/ui/StatusStepBar';
-import { OrderItemsList } from '@/components/ui/OrderItemsList';
+import { OrderItemsList, formatCOP } from '@/components/ui/OrderItemsList';
+import { OrderCardNumber } from '@/components/ui/OrderCardNumber';
+import { OrderClientInfo } from '@/components/ui/OrderClientInfo';
+import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
+import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
 import { cn } from '@/lib/utils';
 
 const COURIER_STEPS: StatusStep[] = [
@@ -22,19 +26,10 @@ interface CourierOrderCardProps {
   onStatusChange?: (orderId: string, prev: OrderStatus, next: OrderStatus) => Promise<void>;
 }
 
-const PAYMENT_LABELS: Record<string, string> = {
-  cash: 'Efectivo',
-  bancolombia: 'Bancolombia',
-  nequi: 'Nequi',
-};
-
 const STATUS_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: string }>> = {
   ready_for_pickup: { next: 'dispatched', label: 'Iniciar entrega' },
   dispatched: { next: 'delivered', label: 'Marcar entregado' },
 };
-
-const formatCOP = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
 
 export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   order,
@@ -57,7 +52,6 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
       setLoading(false);
     }
   };
-  console.log('Rendering CourierOrderCard for order:', order.id, 'Selected:', isSelected, order);
 
   return (
     <div
@@ -70,50 +64,31 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
       {/* Header: número, cliente, total */}
       <div className="p-4 pb-3">
         <div className="flex items-start justify-between gap-3">
-          {/* Número de orden + cliente */}
           <div className="flex items-start gap-2.5 min-w-0">
-            <span className="text-sm font-bold bg-primary-red text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">
-              {order.dailyOrderNumber}
-            </span>
-            <div className="min-w-0">
-              <p className="font-bold text-base text-neutral-black-80 leading-tight truncate">
-                {order.client?.name ?? 'Cliente'}
-              </p>
-              {order.client?.phone && (
-                <a
-                  href={`tel:${order.client.phone}`}
-                  className="flex items-center gap-1 text-xs text-neutral-black-50 hover:text-primary-red mt-0.5"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Phone size={11} />
-                  {order.client.phone}
-                </a>
-              )}
-            </div>
+            <OrderCardNumber number={order.dailyOrderNumber} className="mt-0.5" />
+            <OrderClientInfo
+              name={order.client?.name}
+              phone={order.client?.phone}
+              nameSize="base"
+              onPhoneClick={(e) => e.stopPropagation()}
+            />
           </div>
 
-          {/* Total */}
           <div className="text-right shrink-0">
             <p className="text-xs text-neutral-black-50 leading-none mb-0.5">Total</p>
             <p className="text-lg font-bold text-neutral-black-80">{formatCOP(order.totalPrice)}</p>
           </div>
         </div>
 
-        {/* Progress de estado */}
         <div className="mt-3 px-1">
           <StatusStepBar steps={COURIER_STEPS} currentStatus={order.status} />
         </div>
 
-        {/* Dirección */}
-        <div className="flex items-start gap-1.5 mt-3 bg-neutral-black-5 rounded-xl px-3 py-2">
-          <MapPin size={14} className="text-primary-red mt-0.5 shrink-0" />
-          <p className="text-sm text-neutral-black-80 leading-snug">
-            {order.deliveryAddress?.address ?? 'Sin dirección'}
-            {order.deliveryAddress?.floor && (
-              <span className="text-neutral-black-50"> — {order.deliveryAddress.floor}</span>
-            )}
-          </p>
-        </div>
+        <OrderAddressRow
+          address={order.deliveryAddress?.address}
+          floor={order.deliveryAddress?.floor}
+          className="mt-3"
+        />
       </div>
 
       {/* Productos */}
@@ -132,12 +107,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
 
       {/* Footer: método de pago + acción */}
       <div className="px-4 pb-4 pt-2 border-t border-neutral-black-10 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5">
-          <CreditCard size={13} className="text-neutral-black-50" />
-          <span className="text-xs text-neutral-black-80 font-medium">
-            {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}
-          </span>
-        </div>
+        <OrderPaymentRow paymentMethod={order.paymentMethod} />
 
         {transition && (
           confirming ? (

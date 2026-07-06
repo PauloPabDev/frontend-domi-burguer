@@ -41,7 +41,7 @@ export default function DomiciliarioLayout({ children }: { children: React.React
   return (
     <SocketProvider role="courier">
       <CourierNavbar />
-      <main className="max-w-screen-md mx-auto px-4">{children}</main>
+      <main className="max-w-screen-md mx-auto px-4  mt-[90px]">{children}</main>
     </SocketProvider>
   );
 }

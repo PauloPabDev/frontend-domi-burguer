@@ -1,15 +1,20 @@
 "use client";
 
 import { useState } from 'react';
-import { Phone, MapPin, ShoppingBag, CreditCard, ChevronDown, ChevronUp, Bike, ChefHat, MessageSquare } from 'lucide-react';
-import { WorkerOrder, WorkerUser, WorkerKitchen, PAYMENT_LABELS, STATUS_CONFIG } from '@/types/worker';
+import { ShoppingBag, ChevronDown, ChevronUp, Bike, ChefHat } from 'lucide-react';
+import { WorkerOrder, WorkerUser, WorkerKitchen } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { Button } from '@/components/ui/button';
 import { StatusStepBar, StatusStep } from '@/components/ui/StatusStepBar';
 import { OrderItemsList } from '@/components/ui/OrderItemsList';
+import { OrderCardNumber } from '@/components/ui/OrderCardNumber';
+import { OrderClientInfo } from '@/components/ui/OrderClientInfo';
+import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
+import { OrderComment } from '@/components/ui/OrderComment';
+import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
+import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
 import { AssignCourierModal } from './AssignCourierModal';
 import { AssignKitchenModal } from './AssignKitchenModal';
-import { cn } from '@/lib/utils';
 
 const RECEPTION_STEPS: StatusStep[] = [
   { key: 'fresh', label: 'Nuevo' },
@@ -29,11 +34,14 @@ interface RecepcionOrderCardProps {
 }
 
 const RECEPTION_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: string }>> = {
-  fresh: { next: 'preparing', label: 'Enviar a cocina' },
-  preparing: { next: 'ready_for_pickup', label: 'Marcar listo' },
-  ready_for_pickup: { next: 'dispatched', label: 'Despachar' },
-  dispatched: { next: 'delivered', label: 'Marcar entregado' },
+  fresh:            { next: 'preparing',        label: 'Enviar a cocina' },
+  preparing:        { next: 'ready_for_pickup', label: 'Marcar listo' },
+  ready_for_pickup: { next: 'dispatched',       label: 'Despachar' },
+  dispatched:       { next: 'delivered',        label: 'Marcar entregado' },
 };
+
+const formatTime = (d: string) =>
+  new Date(d).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 
 export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   order,
@@ -50,13 +58,6 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   const [showKitchenModal, setShowKitchenModal] = useState(false);
 
   const transition = RECEPTION_TRANSITIONS[order.status];
-  const statusCfg = STATUS_CONFIG[order.status];
-
-  const formatCOP = (v: number) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v);
-
-  const formatTime = (d: string) =>
-    new Date(d).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 
   const handleStatusChange = async () => {
     if (!transition) return;
@@ -72,30 +73,20 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   return (
     <>
       <div className="rounded-2xl border border-neutral-black-20 bg-white shadow-sm overflow-hidden">
-        {/* Status strip */}
-        <div className={cn('h-1.5', statusCfg.dotColor)} />
+        <OrderStatusStrip status={order.status} />
 
         {/* Header */}
         <div className="p-3">
           <div className="flex items-start gap-2">
-            <span className="text-xs font-bold bg-primary-red text-white rounded-full w-7 h-7 flex items-center justify-center shrink-0 mt-0.5">
-              {order.dailyOrderNumber}
-            </span>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-1">
-                <p className="font-bold text-sm text-neutral-black-80 truncate">
-                  {order.client?.name ?? 'Cliente'}
-                </p>
-              </div>
-              <div className="flex items-center gap-3 mt-0.5">
-                {order.client?.phone && (
-                  <a href={`tel:${order.client.phone}`} className="flex items-center gap-1 text-xs text-neutral-black-50 hover:text-primary-red" onClick={(e) => e.stopPropagation()}>
-                    <Phone size={10} />{order.client.phone}
-                  </a>
-                )}
-                <span className="text-[10px] text-neutral-black-50">{formatTime(order.createdAt)}</span>
-              </div>
-            </div>
+            <OrderCardNumber number={order.dailyOrderNumber} size="sm" className="mt-0.5" />
+            <OrderClientInfo
+              name={order.client?.name}
+              phone={order.client?.phone}
+              time={formatTime(order.createdAt)}
+              nameSize="sm"
+              onPhoneClick={(e) => e.stopPropagation()}
+              className="flex-1"
+            />
             <button
               onClick={() => setExpanded((v) => !v)}
               className="p-1 text-neutral-black-50 hover:text-neutral-black-80 shrink-0"
@@ -104,30 +95,22 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
             </button>
           </div>
 
-          {/* Progress de estado */}
           <div className="mt-2">
             <StatusStepBar steps={RECEPTION_STEPS} currentStatus={order.status} compact />
           </div>
 
-          {/* Address */}
-          <div className="flex items-start gap-1.5 mt-2">
-            <MapPin size={11} className="text-neutral-black-50 mt-0.5 shrink-0" />
-            <p className="text-xs text-neutral-black-50 line-clamp-1">{order.deliveryAddress?.address}</p>
-          </div>
+          <OrderAddressRow
+            address={order.deliveryAddress?.address}
+            compact
+            className="mt-2"
+          />
 
-          {/* Comment */}
-          {order.comment && (
-            <div className="flex items-start gap-1.5 mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-2">
-              <MessageSquare size={10} className="text-yellow-600 mt-0.5 shrink-0" />
-              <p className="text-xs text-yellow-800 line-clamp-2">{order.comment}</p>
-            </div>
-          )}
+          {order.comment && <OrderComment comment={order.comment} compact className="mt-2" />}
         </div>
 
-        {/* Expanded content */}
+        {/* Contenido expandible */}
         {expanded && (
           <div className="px-3 pb-3 space-y-2 border-t border-neutral-black-10 pt-3">
-            {/* Items */}
             <div>
               <div className="flex items-center gap-1 mb-2">
                 <ShoppingBag size={11} className="text-neutral-black-50" />
@@ -136,16 +119,13 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               <OrderItemsList items={order.orderItems} />
             </div>
 
-            {/* Payment + total */}
-            <div className="flex items-center justify-between border-t border-neutral-black-10 pt-2">
-              <div className="flex items-center gap-1.5">
-                <CreditCard size={11} className="text-neutral-black-50" />
-                <span className="text-xs text-neutral-black-50">{PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}</span>
-              </div>
-              <span className="text-xs font-bold text-neutral-black-80">{formatCOP(order.totalPrice)}</span>
-            </div>
+            <OrderPaymentRow
+              paymentMethod={order.paymentMethod}
+              total={order.totalPrice}
+              withBorderTop
+              muted
+            />
 
-            {/* Courier and kitchen info */}
             <div className="flex gap-2 border-t border-neutral-black-10 pt-2">
               <button
                 onClick={() => setShowCourierModal(true)}
@@ -165,26 +145,17 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           </div>
         )}
 
-        {/* Actions */}
+        {/* Acciones */}
         {(transition || !expanded) && (
           <div className="px-3 pb-3 flex gap-2">
             {!expanded && !confirming && (
-              <>
-                <button
-                  onClick={() => setShowCourierModal(true)}
-                  className="flex items-center gap-1 text-[10px] text-neutral-black-50 hover:text-primary-red border border-neutral-black-20 rounded-lg px-2 py-1.5 transition-colors"
-                >
-                  <Bike size={10} />
-                  <span>{order.courier?.name ?? 'Moto'}</span>
-                </button>
-                {/* <button
-                  onClick={() => setShowKitchenModal(true)}
-                  className="flex items-center gap-1 text-[10px] text-neutral-black-50 hover:text-primary-red border border-neutral-black-20 rounded-lg px-2 py-1.5 transition-colors"
-                >
-                  <ChefHat size={10} />
-                  <span>{order.kitchen?.name ?? 'Cocina'}</span>
-                </button> */}
-              </>
+              <button
+                onClick={() => setShowCourierModal(true)}
+                className="flex items-center gap-1 text-[10px] text-neutral-black-50 hover:text-primary-red border border-neutral-black-20 rounded-lg px-2 py-1.5 transition-colors"
+              >
+                <Bike size={10} />
+                <span>{order.courier?.name ?? 'Moto'}</span>
+              </button>
             )}
             {transition && (
               confirming ? (

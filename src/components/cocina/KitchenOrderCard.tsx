@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from 'react';
-import { Phone, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { WorkerOrder } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { Button } from '@/components/ui/button';
 import { StatusStepBar, StatusStep } from '@/components/ui/StatusStepBar';
 import { OrderItemsList } from '@/components/ui/OrderItemsList';
-import { cn } from '@/lib/utils';
+import { OrderCardNumber } from '@/components/ui/OrderCardNumber';
+import { OrderClientInfo } from '@/components/ui/OrderClientInfo';
+import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
+import { OrderComment } from '@/components/ui/OrderComment';
 
 const KITCHEN_STEPS: StatusStep[] = [
   { key: 'fresh', label: 'Nuevo' },
@@ -21,8 +24,8 @@ interface KitchenOrderCardProps {
 }
 
 const COOK_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: string; variant: 'primary' | 'dark' }>> = {
-  fresh:     { next: 'preparing',        label: 'Preparar',             variant: 'primary' },
-  preparing: { next: 'ready_for_pickup', label: 'Listo para despacho',  variant: 'dark' },
+  fresh:     { next: 'preparing',        label: 'Preparar',            variant: 'primary' },
+  preparing: { next: 'ready_for_pickup', label: 'Listo para despacho', variant: 'dark' },
 };
 
 export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onStatusChange }) => {
@@ -43,32 +46,16 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onSta
     }
   };
 
-return (
+  return (
     <div className="rounded-2xl border border-neutral-black-20 bg-white shadow-sm overflow-hidden">
-      {/* Status bar */}
-      <div className={cn('h-1.5', order.status === 'fresh' ? 'bg-sky-400' : 'bg-violet-500')} />
+      <OrderStatusStrip status={order.status} />
 
       {/* Header */}
       <div className="p-4 pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold bg-primary-red text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">
-              {order.dailyOrderNumber}
-            </span>
-            <div>
-              <p className="font-bold text-neutral-black-80 leading-tight">
-                {order.client?.name ?? 'Cliente'}
-              </p>
-              {order.client?.phone && (
-                <a
-                  href={`tel:${order.client.phone}`}
-                  className="flex items-center gap-1 text-xs text-neutral-black-50 hover:text-primary-red mt-0.5"
-                >
-                  <Phone size={11} />
-                  {order.client.phone}
-                </a>
-              )}
-            </div>
+            <OrderCardNumber number={order.dailyOrderNumber} />
+            <OrderClientInfo name={order.client?.name} phone={order.client?.phone} />
           </div>
 
           <button
@@ -79,21 +66,14 @@ return (
           </button>
         </div>
 
-        {/* Progress de estado */}
         <div className="mt-3 px-1">
           <StatusStepBar steps={KITCHEN_STEPS} currentStatus={order.status} />
         </div>
 
-        {/* Comment */}
-        {order.comment && (
-          <div className="flex items-start gap-1.5 mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-2.5">
-            <MessageSquare size={13} className="text-yellow-600 mt-0.5 shrink-0" />
-            <p className="text-xs text-yellow-800 leading-relaxed">{order.comment}</p>
-          </div>
-        )}
+        {order.comment && <OrderComment comment={order.comment} className="mt-3" />}
       </div>
 
-      {/* Expandable items */}
+      {/* Productos (expandible) */}
       {expanded && (
         <div className="px-4 pb-3 border-t border-neutral-black-10 pt-3">
           <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide mb-3">Productos</p>
@@ -101,7 +81,7 @@ return (
         </div>
       )}
 
-      {/* Action button */}
+      {/* Acción */}
       {transition && (
         <div className="px-4 pb-4 pt-2">
           {confirming ? (
