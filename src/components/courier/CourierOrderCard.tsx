@@ -63,6 +63,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
         </div>
 
         <OrderAddressRow
+          location={order.location}
           address={order.deliveryAddress?.address}
           floor={order.deliveryAddress?.floor}
           className="mt-3"

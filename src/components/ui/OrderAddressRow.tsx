@@ -1,7 +1,9 @@
 import { MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Location } from '@/types/locations';
 
 interface OrderAddressRowProps {
+  location?: Location
   address?: string;
   floor?: string;
   /** Compacto: sin fondo, ícono y texto más pequeños (para recepción) */
@@ -9,7 +11,7 @@ interface OrderAddressRowProps {
   className?: string;
 }
 
-export function OrderAddressRow({ address, floor, compact = false, className }: OrderAddressRowProps) {
+export function OrderAddressRow({ location, address, floor, compact = false, className }: OrderAddressRowProps) {
   return (
     <div
       className={cn(

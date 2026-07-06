@@ -1,5 +1,7 @@
 import { DeliveryAddress, OrderItem, OrderStatus, PaymentMethod, Payment } from './orders';
 
+import { Location } from './locations';
+
 export interface WorkerOrder {
   id: string;
   status: OrderStatus;
@@ -33,6 +35,7 @@ export interface WorkerOrder {
   paymentMethod: PaymentMethod;
   payment: Payment;
   comment?: string;
+  location: Location;
 }
 
 export interface StatusConfig {
