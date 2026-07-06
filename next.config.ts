@@ -8,8 +8,13 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  // Habilitar compresión
   compress: true,
+
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'i.pravatar.cc' },
+    ],
+  },
 
   // Optimizar paquetes externos (tree-shaking agresivo)
   experimental: {

@@ -4,11 +4,10 @@ import { ShoppingBag } from 'lucide-react';
 import { CourierOrder } from '@/types/courier';
 import { OrderStatus } from '@/types/orders';
 import { OrderItemsList, formatCOP } from '@/components/ui/OrderItemsList';
-import { OrderCardNumber } from '@/components/ui/OrderCardNumber';
-import { OrderClientInfo } from '@/components/ui/OrderClientInfo';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { OrderStatusBadge } from '@/components/ui/OrderStatusBadge';
+import { OrderClientChips } from '@/components/ui/OrderClientChips';
 import { cn } from '@/lib/utils';
 import { OrderPaymentRow } from '../ui/OrderPaymentRow';
 
@@ -43,15 +42,13 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
       {/* Header: número, cliente, total */}
       <div className="p-4 pb-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-2.5 min-w-0">
-            <OrderCardNumber number={order.dailyOrderNumber} className="mt-0.5" />
-            <OrderClientInfo
-              name={order.client?.name}
-              phone={order.client?.phone}
-              nameSize="base"
-              onPhoneClick={(e) => e.stopPropagation()}
-            />
-          </div>
+          <OrderClientChips
+            name={order.client?.name}
+            phone={order.client?.phone}
+            clientId={order.clientId}
+            orderNumber={order.dailyOrderNumber}
+            onPhoneClick={(e) => e.stopPropagation()}
+          />
 
           <div className="text-right shrink-0">
             <p className="text-xs text-neutral-black-50 leading-none mb-0.5">
