@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { addToast } from '@heroui/toast';
 import { useNuevaOrden, PAYMENT_METHODS } from '@/hooks/recepcion/useNuevaOrden';
 import { useChatwootBus } from '@/hooks/recepcion/useChatwootBus';
 import { ClienteSearch } from './ClienteSearch';
 import { UbicacionesCliente } from './UbicacionesCliente';
 import { ProductoSelector } from './ProductoSelector';
+import { SedeSelector } from './SedeSelector';
 import { PaymentMethodsSection } from '@/components/cart/PaymentMethodsSection';
 import { Button } from '@/components/ui/button';
-import { Complement } from '@/types/products';
+import { Complement, Product } from '@/types/products';
 import { handleAddableComplement, handleSpecialComplement, handleRemovableComplement } from '@/hooks/home/useMenu';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { Loader2, Tag, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CustomizationModalSection = dynamic(
@@ -27,19 +29,47 @@ const ModalAddressAdmin = dynamic(
 export function NuevaOrdenForm() {
   const form = useNuevaOrden();
 
-  // Chatwoot integration — pre-fills phone when embedded as Dashboard App
   useChatwootBus(form.handlePhoneSet);
 
-  // Local pending complements state for the complement editor
   const pendingComplementsRef = useRef<Complement[]>([]);
+  const originalComplementsRef = useRef<Complement[]>([]);
   const [pendingComplements, setPendingComplements] = useState<Complement[]>([]);
+  const [isCotizacion, setIsCotizacion] = useState(false);
+  const [summaryExpanded, setSummaryExpanded] = useState(true);
+
+  useEffect(() => {
+    if (form.submitSuccess) {
+      addToast({
+        title: '¡Orden creada exitosamente!',
+        description: 'La orden fue registrada y enviada a cocina.',
+        color: 'success',
+      });
+    }
+  }, [form.submitSuccess]);
 
   const handleOpenComplementEditor = useCallback(
     (item: Parameters<typeof form.openComplementEditor>[0]) => {
       const initial = [...item.complements];
       pendingComplementsRef.current = initial;
+      originalComplementsRef.current = initial;
       setPendingComplements(initial);
       form.openComplementEditor(item);
+    },
+    [form]
+  );
+
+  const handleAddProduct = useCallback(
+    (product: Product) => {
+      if (form.showComplementModal) return;
+      if (product.allowCustomization) {
+        const initial = [...product.complements];
+        pendingComplementsRef.current = initial;
+        originalComplementsRef.current = initial;
+        setPendingComplements(initial);
+        form.addProductAndEdit(product);
+      } else {
+        form.addProduct(product);
+      }
     },
     [form]
   );
@@ -73,152 +103,326 @@ export function NuevaOrdenForm() {
       updated = updated.filter((c) => c.id !== id);
     });
 
+    // Fallback: handleAddableComplement and handleSpecialComplement return empty arrays
+    // when the complement already exists at qty > 1 (addable) or qty > 2 (special).
+    // In those cases, increment/decrement the existing entry directly so that
+    // pendingComplements stays in sync and the modal's useEffect doesn't clobber the display.
+    if (
+      (ingredient.type === 'addable' || ingredient.type === 'special') &&
+      result.complementsToAdd.length === 0 &&
+      result.complementsToRemove.length === 0
+    ) {
+      const targetId = ingredient.additionId ?? ingredient.id;
+      const existingEntry = updated.find((c) => c.id === targetId);
+      if (existingEntry) {
+        if (action === 'plus') {
+          updated = updated.map((c) =>
+            c.id === targetId ? { ...c, quantity: c.quantity + 1 } : c
+          );
+        } else if (action === 'minus') {
+          updated = updated
+            .map((c) => c.id === targetId ? { ...c, quantity: Math.max(0, c.quantity - 1) } : c)
+            .filter((c) => c.id !== targetId || c.quantity > 0);
+        }
+      }
+    }
+
     pendingComplementsRef.current = updated;
     setPendingComplements(updated);
   }, []);
 
-  const handleCloseComplementModal = useCallback(() => {
+  const handleConfirmComplements = useCallback(() => {
     form.confirmComplements(pendingComplementsRef.current);
-    form.setShowComplementModal(false);
+  }, [form]);
+
+  const handleCancelComplements = useCallback(() => {
+    form.confirmComplements(originalComplementsRef.current);
   }, [form]);
 
   const handleOpenAddressModal = useCallback(() => {
     form.setShowCreateLocationModal(true);
   }, [form]);
 
-  const formatCurrency = (n: number) => `$${n.toLocaleString('es-CO')}`;
+  const fmt = (n: number) => `$${n.toLocaleString('es-CO')}`;
+  const clientUnlocked = !!form.client || isCotizacion;
+  const isQuoteOnly = isCotizacion && !form.client;
+  const totalUnidades = form.orderItems.reduce((s, i) => s + i.quantity, 0);
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6 flex flex-col gap-6">
+    <div className="w-full px-4 lg:px-8 py-6 flex flex-col gap-5">
 
-      {/* Success banner */}
-      {form.submitSuccess && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">
-          <CheckCircle className="w-5 h-5 shrink-0 text-green-600" />
-          <div>
-            <p className="font-semibold text-sm">¡Orden creada exitosamente!</p>
-            <p className="text-xs text-green-600">Puedes crear otra orden en cualquier momento.</p>
+      {/* Top bar: cotización toggle + indicador de orden */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <label className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-neutral-black-20 bg-white cursor-pointer select-none w-fit">
+          <div className="relative shrink-0">
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={isCotizacion}
+              onChange={(e) => setIsCotizacion(e.target.checked)}
+            />
+            <div className={cn(
+              'w-9 h-5 rounded-full transition-colors',
+              isCotizacion ? 'bg-primary-red' : 'bg-neutral-black-20'
+            )} />
+            <div className={cn(
+              'absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform',
+              isCotizacion ? 'translate-x-4' : 'translate-x-0'
+            )} />
           </div>
-        </div>
-      )}
-
-      {/* Step 1: Client */}
-      <section className="flex flex-col gap-4 p-4 rounded-xl border border-neutral-black-20 bg-white">
-        <ClienteSearch
-          phone={form.phone}
-          onPhoneChange={form.setPhone}
-          clientState={form.clientState}
-          client={form.client}
-          onSearch={form.searchClient}
-          onCreateClient={form.createClient}
-        />
-      </section>
-
-      {/* Step 2: Location */}
-      <section className={cn(
-        'flex flex-col gap-4 p-4 rounded-xl border bg-white transition-opacity',
-        !form.client ? 'border-neutral-black-10 opacity-50 pointer-events-none' : 'border-neutral-black-20'
-      )}>
-        <UbicacionesCliente
-          locations={form.locations}
-          loading={form.locationsLoading}
-          selectedLocationId={form.selectedLocationId}
-          delivery={form.delivery}
-          deliveryLoading={form.deliveryLoading}
-          deliveryError={form.deliveryError}
-          clientId={form.client?.id ?? null}
-          onSelectLocation={form.handleSelectLocation}
-          onCreateLocation={handleOpenAddressModal}
-          onRetryDelivery={form.selectedLocationId
-            ? () => form.handleSelectLocation(form.selectedLocationId!)
-            : undefined}
-        />
-      </section>
-
-      {/* Step 3: Payment */}
-      <section className={cn(
-        'flex flex-col gap-4 p-4 rounded-xl border bg-white transition-opacity',
-        !form.client ? 'border-neutral-black-10 opacity-50 pointer-events-none' : 'border-neutral-black-20'
-      )}>
-        <PaymentMethodsSection
-          paymentMethods={PAYMENT_METHODS}
-          selectedMethod={form.paymentMethod}
-          onChange={(e) => form.setPaymentMethod(e.target.value)}
-        />
-      </section>
-
-      {/* Step 4: Products */}
-      <section className={cn(
-        'flex flex-col gap-4 p-4 rounded-xl border bg-white transition-opacity',
-        !form.client ? 'border-neutral-black-10 opacity-50 pointer-events-none' : 'border-neutral-black-20'
-      )}>
-        <ProductoSelector
-          allProducts={form.allProducts}
-          orderItems={form.orderItems}
-          onAdd={form.addProduct}
-          onChangeQuantity={form.changeQuantity}
-          onEditComplements={handleOpenComplementEditor}
-        />
-      </section>
-
-      {/* Step 5: Comment */}
-      <section className={cn(
-        'flex flex-col gap-3 p-4 rounded-xl border bg-white transition-opacity',
-        !form.client ? 'border-neutral-black-10 opacity-50 pointer-events-none' : 'border-neutral-black-20'
-      )}>
-        <h3 className="font-bold text-sm text-neutral-black-80">Comentario (opcional)</h3>
-        <textarea
-          value={form.comment}
-          onChange={(e) => form.setComment(e.target.value)}
-          placeholder="Instrucciones especiales para la orden..."
-          rows={3}
-          className="w-full rounded-lg border border-neutral-black-20 px-3 py-2 text-sm text-neutral-black-80 placeholder:text-neutral-black-40 resize-none focus:outline-none focus:ring-2 focus:ring-primary-red/30 focus:border-primary-red"
-        />
-      </section>
-
-      {/* Order summary + submit */}
-      {form.orderItems.length > 0 && (
-        <section className="flex flex-col gap-3 p-4 rounded-xl border border-neutral-black-20 bg-neutral-black-10">
-          <h3 className="font-bold text-sm text-neutral-black-80">Resumen</h3>
-          <div className="flex justify-between text-xs text-neutral-black-60">
-            <span>Subtotal ({form.orderItems.reduce((s, i) => s + i.quantity, 0)} productos)</span>
-            <span>{formatCurrency(form.subtotal)}</span>
+          <div className="flex items-center gap-1.5">
+            <Tag className="w-3.5 h-3.5 text-neutral-black-50" />
+            <span className="text-sm font-medium text-neutral-black-80">Modo cotización</span>
           </div>
-          {form.delivery && (
-            <div className="flex justify-between text-xs text-neutral-black-60">
-              <span>Domicilio</span>
-              <span>{formatCurrency(form.delivery.price)}</span>
-            </div>
-          )}
-          <div className="flex justify-between font-bold text-sm text-neutral-black-80 border-t border-neutral-black-20 pt-2">
-            <span>Total</span>
-            <span>{formatCurrency(form.total)}</span>
+        </label>
+
+        {totalUnidades > 0 && (
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-red/8 border border-primary-red/20 text-sm font-semibold text-primary-red">
+            <span>{totalUnidades} {totalUnidades === 1 ? 'producto' : 'productos'}</span>
+            <span className="text-neutral-black-40">·</span>
+            <span>{fmt(form.total)}</span>
           </div>
-        </section>
-      )}
-
-      {form.submitError && (
-        <p className="text-sm text-red-500 text-center px-4">{form.submitError}</p>
-      )}
-
-      <Button
-        type="button"
-        onClick={form.handleSubmit}
-        disabled={form.isSubmitting || !form.client || !form.selectedLocationId || form.orderItems.length === 0}
-        className="w-full h-12 text-sm font-bold"
-      >
-        {form.isSubmitting ? (
-          <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creando orden...</>
-        ) : (
-          'Crear Orden'
         )}
-      </Button>
+      </div>
 
-      {/* Complement editor modal */}
+      {/* ── Main layout: stacked on mobile, two-column on lg+ ── */}
+      <div className="flex flex-col lg:flex-row gap-5 items-start">
+
+        {/* ════ LEFT COLUMN: configuración de la orden ════ */}
+        <div className="w-full lg:w-[400px] xl:w-[440px] shrink-0 flex flex-col gap-4 lg:sticky lg:top-6">
+
+          {/* Cliente */}
+          <section className="flex flex-col gap-4 p-5 rounded-xl border border-neutral-black-20 bg-white shadow-sm">
+            <ClienteSearch
+              phone={form.phone}
+              onPhoneChange={form.setPhone}
+              clientState={form.clientState}
+              client={form.client}
+              onSearch={form.searchClient}
+              onCreateClient={form.createClient}
+            />
+          </section>
+
+          {/* Dirección */}
+          <section className={cn(
+            'flex flex-col gap-4 p-5 rounded-xl border bg-white shadow-sm transition-opacity duration-200',
+            !form.client
+              ? 'border-neutral-black-10 opacity-40 pointer-events-none'
+              : 'border-neutral-black-20'
+          )}>
+            <UbicacionesCliente
+              locations={form.locations}
+              loading={form.locationsLoading}
+              selectedLocationId={form.selectedLocationId}
+              delivery={form.delivery}
+              deliveryLoading={form.deliveryLoading}
+              deliveryError={form.deliveryError}
+              clientId={form.client?.id ?? null}
+              onSelectLocation={form.handleSelectLocation}
+              onCreateLocation={handleOpenAddressModal}
+              onRetryDelivery={form.selectedLocationId
+                ? () => form.handleSelectLocation(form.selectedLocationId!)
+                : undefined}
+            />
+          </section>
+
+          {/* Sede */}
+          <section className="flex flex-col gap-4 p-5 rounded-xl border border-neutral-black-20 bg-white shadow-sm">
+            <SedeSelector
+              kitchens={form.kitchens}
+              loading={form.kitchensLoading}
+              value={form.selectedKitchenId}
+              detectedKitchen={form.kitchen}
+              onChange={form.handleKitchenChange}
+            />
+          </section>
+
+          {/* Método de pago */}
+          <section className={cn(
+            'flex flex-col gap-4 p-5 rounded-xl border bg-white shadow-sm transition-opacity duration-200',
+            !clientUnlocked
+              ? 'border-neutral-black-10 opacity-40 pointer-events-none'
+              : 'border-neutral-black-20'
+          )}>
+            <PaymentMethodsSection
+              paymentMethods={PAYMENT_METHODS}
+              selectedMethod={form.paymentMethod}
+              onChange={(e) => form.setPaymentMethod(e.target.value)}
+            />
+          </section>
+
+        </div>
+
+        {/* ════ RIGHT COLUMN: productos, comentario, resumen ════ */}
+        <div className="flex-1 flex flex-col gap-4 min-w-0">
+
+          {/* Productos */}
+          <section className={cn(
+            'flex flex-col gap-4 p-5 rounded-xl border bg-white shadow-sm transition-opacity duration-200',
+            !clientUnlocked
+              ? 'border-neutral-black-10 opacity-40 pointer-events-none'
+              : 'border-neutral-black-20'
+          )}>
+            <ProductoSelector
+              allProducts={form.allProducts}
+              orderItems={form.orderItems}
+              onAdd={handleAddProduct}
+              onChangeQuantity={form.changeQuantity}
+              onEditComplements={handleOpenComplementEditor}
+            />
+          </section>
+
+          {/* Comentario */}
+          <section className={cn(
+            'flex flex-col gap-3 p-5 rounded-xl border bg-white shadow-sm transition-opacity duration-200',
+            !clientUnlocked
+              ? 'border-neutral-black-10 opacity-40 pointer-events-none'
+              : 'border-neutral-black-20'
+          )}>
+            <h3 className="font-bold text-sm text-neutral-black-80">Comentario (opcional)</h3>
+            <textarea
+              value={form.comment}
+              onChange={(e) => form.setComment(e.target.value)}
+              placeholder="Instrucciones especiales para la orden..."
+              rows={2}
+              className="w-full rounded-lg border border-neutral-black-20 px-3 py-2 text-sm text-neutral-black-80 placeholder:text-neutral-black-40 resize-none focus:outline-none focus:ring-2 focus:ring-primary-red/30 focus:border-primary-red"
+            />
+          </section>
+
+          {/* Resumen de la orden */}
+          {form.orderItems.length > 0 && (
+            <section className="rounded-xl border border-neutral-black-20 bg-white shadow-sm overflow-hidden">
+
+              {/* Header colapsable */}
+              <button
+                type="button"
+                onClick={() => setSummaryExpanded((v) => !v)}
+                className="w-full flex items-center justify-between px-5 py-4 hover:bg-neutral-black-5 transition-colors"
+              >
+                <h3 className="font-bold text-sm text-neutral-black-80">Resumen del pedido</h3>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-bold text-primary-red">{fmt(form.total)}</span>
+                  {summaryExpanded
+                    ? <ChevronUp className="w-4 h-4 text-neutral-black-40" />
+                    : <ChevronDown className="w-4 h-4 text-neutral-black-40" />
+                  }
+                </div>
+              </button>
+
+              {summaryExpanded && (
+                <div className="px-5 pb-5 flex flex-col gap-3 border-t border-neutral-black-10">
+
+                  {/* Desglose por ítem */}
+                  <div className="flex flex-col gap-2 pt-3">
+                    {form.orderItems.map((item) => {
+                      const additions = item.complements.filter((c) => !c.minusComplement && c.name);
+                      const removals = item.complements.filter((c) => c.minusComplement && c.name);
+                      return (
+                        <div key={item.itemId} className="flex gap-3 py-2 border-b border-neutral-black-10 last:border-0">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-sm font-medium text-neutral-black-80">{item.product.name}</span>
+                              {item.quantity > 1 && (
+                                <span className="text-xs text-neutral-black-40">×{item.quantity}</span>
+                              )}
+                            </div>
+                            {item.quantity > 1 && (
+                              <p className="text-xs text-neutral-black-40">{fmt(item.product.price)} c/u</p>
+                            )}
+                            {additions.length > 0 && (
+                              <p className="text-xs text-green-600 mt-0.5">
+                                + {additions.map((c) => c.name).join(', ')}
+                              </p>
+                            )}
+                            {removals.length > 0 && (
+                              <p className="text-xs text-neutral-black-40 line-through mt-0.5">
+                                {removals.map((c) => c.name).join(', ')}
+                              </p>
+                            )}
+                          </div>
+                          <span className="text-sm font-semibold text-neutral-black-80 shrink-0">
+                            {fmt(item.product.price * item.quantity)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Totales */}
+                  <div className="flex flex-col gap-1.5 pt-1">
+                    <div className="flex justify-between text-sm text-neutral-black-60">
+                      <span>Subtotal ({totalUnidades} {totalUnidades === 1 ? 'producto' : 'productos'})</span>
+                      <span>{fmt(form.subtotal)}</span>
+                    </div>
+                    {form.delivery && (
+                      <div className="flex justify-between text-sm text-neutral-black-60">
+                        <span className="flex items-center gap-1.5">
+                          Domicilio
+                          {form.delivery.distance > 0 && (
+                            <span className="text-neutral-black-40 text-xs">
+                              {(form.delivery.distance / 1000).toFixed(1)} km
+                              {form.delivery.duration ? ` · ~${Math.round(form.delivery.duration / 60)} min` : ''}
+                            </span>
+                          )}
+                        </span>
+                        <span>{fmt(form.delivery.price)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-bold text-base text-neutral-black-80 pt-2 border-t border-neutral-black-20">
+                      <span>Total</span>
+                      <span className="text-primary-red">{fmt(form.total)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Error */}
+          {form.submitError && (
+            <p className="text-sm text-red-500 text-center px-2">{form.submitError}</p>
+          )}
+
+          {/* Botón principal */}
+          {isQuoteOnly ? (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={form.orderItems.length === 0}
+              className="w-full h-12 text-sm font-bold"
+              onClick={() => addToast({
+                title: 'Cotización',
+                description: `Total estimado: ${fmt(form.total)}. Agrega un cliente para crear la orden.`,
+                color: 'default',
+              })}
+            >
+              <Tag className="w-4 h-4 mr-2" />
+              Calcular Cotización — {fmt(form.total)}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={form.handleSubmit}
+              disabled={form.isSubmitting || !form.client || !form.selectedLocationId || form.orderItems.length === 0}
+              className="w-full h-12 text-sm font-bold"
+            >
+              {form.isSubmitting ? (
+                <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creando orden...</>
+              ) : (
+                `Crear Orden${totalUnidades > 0 ? ` · ${fmt(form.total)}` : ''}`
+              )}
+            </Button>
+          )}
+
+        </div>
+      </div>
+
+      {/* ── Modals ── */}
       {form.showComplementModal && form.editingItem && (
         <CustomizationModalSection
           isOpen={form.showComplementModal}
-          onClose={handleCloseComplementModal}
+          onClose={handleConfirmComplements}
+          onCancel={handleCancelComplements}
           productName={form.editingItem.product.name}
           productId={form.editingItem.product.id}
           customizationType={form.editingItem.product.customizationType}
@@ -227,7 +431,6 @@ export function NuevaOrdenForm() {
         />
       )}
 
-      {/* New address modal */}
       {form.showCreateLocationModal && form.client && (
         <ModalAddressAdmin
           isOpen={form.showCreateLocationModal}

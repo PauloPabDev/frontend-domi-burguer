@@ -10,6 +10,7 @@ import { Modal } from "@/components/ui/modal";
 interface CustomizationModalSectionProps {
   isOpen: boolean;
   onClose: () => void;
+  onCancel?: () => void;
   productName?: string;
   productId?: number;
   customizationType?: CustomizationType;
@@ -20,6 +21,7 @@ interface CustomizationModalSectionProps {
 export const CustomizationModalSection = ({
   isOpen,
   onClose,
+  onCancel,
   productName = "BURGER",
   productId,
   customizationType = 'burger',
@@ -40,49 +42,41 @@ export const CustomizationModalSection = ({
   const [isGaseosasOpen, setIsGaseosasOpen] = useState(false);
   const [isSalsasOpen, setIsSalsasOpen] = useState(isPapas);
 
-  // Sincronizar ingredientes con complementos guardados
+  // Sincronizar ingredientes con complementos guardados SOLO al abrir el modal.
+  // No poner `complements` en el array de deps para evitar que el useEffect
+  // sobreescriba el estado local en cada clic del usuario.
   useEffect(() => {
-    if (isOpen) {
-      const syncIngredients = (ingredients: Complement[]) =>
-        ingredients.map((ing) => {
-          if (ing.type === "special") {
-            const hasVegetariano = complements.some((c) => c.id === ing.minusId);
-            if (hasVegetariano) {
-              return { ...ing, quantity: 0 };
-            }
+    if (!isOpen) return;
 
-            const adicion = complements.find((c) => c.id === ing.additionId);
-            if (adicion) {
-              return { ...ing, quantity: 1 + adicion.quantity };
-            }
+    const syncIngredients = (ingredients: Complement[]) =>
+      ingredients.map((ing) => {
+        if (ing.type === "special") {
+          const hasVegetariano = complements.some((c) => c.id === ing.minusId);
+          if (hasVegetariano) return { ...ing, quantity: 0 };
+          const adicion = complements.find((c) => c.id === ing.additionId);
+          if (adicion) return { ...ing, quantity: 1 + adicion.quantity };
+          return { ...ing, quantity: 1 };
+        }
 
-            return { ...ing, quantity: 1 };
-          }
+        if (ing.type === "addable") {
+          const adicion = complements.find((c) => c.id === ing.additionId);
+          return { ...ing, quantity: adicion ? adicion.quantity : 0 };
+        }
 
-          if (ing.type === "addable") {
-            const adicion = complements.find((c) => c.id === ing.additionId);
-            const aditionQty = adicion ? adicion.quantity : 0;
-            return { ...ing, quantity: aditionQty };
-          }
+        if (ing.type === "removable") {
+          const hasSinIngrediente = complements.some((c) => c.id === ing.id);
+          return { ...ing, quantity: hasSinIngrediente ? 0 : 1 };
+        }
 
-          if (ing.type === "removable") {
-            const hasSinIngrediente = complements.some((c) => c.id === ing.id);
-            if (hasSinIngrediente) {
-              return { ...ing, quantity: 0 };
-            }
-            return { ...ing, quantity: 1 };
-          }
+        return ing;
+      });
 
-          return ing;
-        });
-
-      setFavoritos(syncIngredients(favoritosData));
-      setOtros(syncIngredients(otrosData));
-      setGaseosas(syncIngredients(gaseosasData));
-      // Usar salsasPapasData para productos de papas
-      setSalsas(syncIngredients(isPapas ? salsasPapasData : salsasData));
-    }
-  }, [complements, isOpen, productId, isPapas]);
+    setFavoritos(syncIngredients(favoritosData));
+    setOtros(syncIngredients(otrosData));
+    setGaseosas(syncIngredients(gaseosasData));
+    setSalsas(syncIngredients(isPapas ? salsasPapasData : salsasData));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, productId, isPapas]);
 
   const handleIngredientChange = (
     ingredient: Complement,
@@ -184,10 +178,18 @@ export const CustomizationModalSection = ({
     </div>
   );
 
+  const handleCancel = () => {
+    handleReset();
+    if (onCancel) onCancel();
+    else onClose();
+  };
+
   return (
     <Modal
       open={isOpen}
-      onOpenChange={(open) => !open && onClose()}
+      onOpenChange={(open) => !open && handleCancel()}
+      closeOnOutsideClick={false}
+      closeOnEscape={false}
       title={`¿QUIERES PERSONALIZAR TU ${productName}?`}
       description={isPapas
         ? "Selecciona las salsas o bebidas que deseas agregar."
@@ -196,10 +198,7 @@ export const CustomizationModalSection = ({
       footer={{
         cancel: {
           label: "CANCELAR",
-          onClick: () => {
-            handleReset();
-            onClose();
-          },
+          onClick: handleCancel,
         },
         confirm: { label: "CONFIRMAR", onClick: onClose },
       }}

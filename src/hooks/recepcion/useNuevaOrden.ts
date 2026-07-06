@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ClientService, ApiClient } from '@/services/clientService';
 import { LocationService } from '@/services/locationService';
 import { WorkerOrderService, DeliveryInfo, KitchenInfo } from '@/services/workerOrderService';
 import { Location } from '@/types/locations';
 import { Product, Complement } from '@/types/products';
+import { WorkerKitchen } from '@/types/worker';
 import { PRODUCTS } from '@/data/products';
 import { BancolombiaIcon, MoneyIcon, NequiIcon } from '@/components/ui/icons';
 import { PaymentMethod } from '@/types/paymentMethod';
@@ -14,6 +15,7 @@ import { PaymentMethod } from '@/types/paymentMethod';
 export type ClientState = 'idle' | 'loading' | 'found' | 'not_found' | 'creating';
 
 export interface OrderItem {
+  itemId: number;
   product: Product;
   complements: Complement[];
   quantity: number;
@@ -39,6 +41,10 @@ export function useNuevaOrden() {
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [showCreateLocationModal, setShowCreateLocationModal] = useState(false);
 
+  // Kitchens/sedes
+  const [kitchens, setKitchens] = useState<WorkerKitchen[]>([]);
+  const [kitchensLoading, setKitchensLoading] = useState(false);
+
   // Delivery step
   const [delivery, setDelivery] = useState<DeliveryInfo | null>(null);
   const [kitchen, setKitchen] = useState<KitchenInfo | null>(null);
@@ -47,6 +53,7 @@ export function useNuevaOrden() {
   const [selectedKitchenId, setSelectedKitchenId] = useState<string | null>(null);
 
   // Products step
+  const itemIdCounterRef = useRef(0);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
   const [showComplementModal, setShowComplementModal] = useState(false);
@@ -57,6 +64,26 @@ export function useNuevaOrden() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // Fetch kitchens once when user is available
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const fetchKitchens = async () => {
+      setKitchensLoading(true);
+      try {
+        const token = await user.getIdToken();
+        const { body } = await WorkerOrderService.getKitchensList(token);
+        if (!cancelled) setKitchens(body);
+      } catch {
+        // silently ignore
+      } finally {
+        if (!cancelled) setKitchensLoading(false);
+      }
+    };
+    fetchKitchens();
+    return () => { cancelled = true; };
+  }, [user]);
 
   const getToken = useCallback(async () => {
     if (!user) throw new Error('No autenticado');
@@ -106,17 +133,18 @@ export function useNuevaOrden() {
     }
   }, [phone, getToken]);
 
-  const loadDelivery = useCallback(async (locationId: string) => {
+  const loadDelivery = useCallback(async (locationId: string, kitchenIdOverride?: string) => {
     setDeliveryLoading(true);
     setDeliveryError(null);
     setDelivery(null);
     setKitchen(null);
     try {
       const token = await getToken();
+      const effectiveKitchenId = kitchenIdOverride !== undefined ? kitchenIdOverride : (selectedKitchenId ?? undefined);
       const { body } = await WorkerOrderService.getSelectKitchen(
         locationId,
         token,
-        selectedKitchenId ?? undefined
+        effectiveKitchenId
       );
       setDelivery(body.delivery);
       setKitchen(body.kitchen);
@@ -133,6 +161,13 @@ export function useNuevaOrden() {
     loadDelivery(id);
   }, [loadDelivery]);
 
+  const handleKitchenChange = useCallback((kitchenId: string | null) => {
+    setSelectedKitchenId(kitchenId);
+    if (selectedLocationId) {
+      loadDelivery(selectedLocationId, kitchenId ?? '');
+    }
+  }, [selectedLocationId, loadDelivery]);
+
   const handleLocationCreated = useCallback(async (location: Location) => {
     setLocations((prev) => [...prev, location]);
     setShowCreateLocationModal(false);
@@ -143,30 +178,27 @@ export function useNuevaOrden() {
     setDelivery((prev) => prev ? { ...prev, price, modified: true } : prev);
   }, []);
 
-  // Product management
+  // Product management — each call to addProduct creates a new independent line item
   const addProduct = useCallback((product: Product) => {
-    setOrderItems((prev) => {
-      const existing = prev.find((i) => i.product.id === product.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
-      return [...prev, { product, complements: [...product.complements], quantity: 1 }];
-    });
+    itemIdCounterRef.current += 1;
+    const itemId = itemIdCounterRef.current;
+    setOrderItems((prev) => [
+      ...prev,
+      { itemId, product, complements: [...product.complements], quantity: 1 },
+    ]);
   }, []);
 
-  const removeProduct = useCallback((productId: number) => {
-    setOrderItems((prev) => prev.filter((i) => i.product.id !== productId));
+  const removeProduct = useCallback((itemId: number) => {
+    setOrderItems((prev) => prev.filter((i) => i.itemId !== itemId));
   }, []);
 
-  const changeQuantity = useCallback((productId: number, quantity: number) => {
+  const changeQuantity = useCallback((itemId: number, quantity: number) => {
     if (quantity <= 0) {
-      removeProduct(productId);
+      removeProduct(itemId);
       return;
     }
     setOrderItems((prev) =>
-      prev.map((i) => i.product.id === productId ? { ...i, quantity } : i)
+      prev.map((i) => i.itemId === itemId ? { ...i, quantity } : i)
     );
   }, [removeProduct]);
 
@@ -175,11 +207,23 @@ export function useNuevaOrden() {
     setShowComplementModal(true);
   }, []);
 
+  // Adds a product AND opens the complement editor in the same batch.
+  // Returns the new item so the caller can set up pendingComplements refs.
+  const addProductAndEdit = useCallback((product: Product): OrderItem => {
+    itemIdCounterRef.current += 1;
+    const itemId = itemIdCounterRef.current;
+    const newItem: OrderItem = { itemId, product, complements: [...product.complements], quantity: 1 };
+    setOrderItems((prev) => [...prev, newItem]);
+    setEditingItem(newItem);
+    setShowComplementModal(true);
+    return newItem;
+  }, []);
+
   const confirmComplements = useCallback((complements: Complement[]) => {
     if (!editingItem) return;
     setOrderItems((prev) =>
       prev.map((i) =>
-        i.product.id === editingItem.product.id ? { ...i, complements } : i
+        i.itemId === editingItem.itemId ? { ...i, complements } : i
       )
     );
     setShowComplementModal(false);
@@ -250,6 +294,9 @@ export function useNuevaOrden() {
     // Client
     phone, setPhone, clientState, client,
     searchClient, createClient, handlePhoneSet,
+    // Kitchens/sedes
+    kitchens, kitchensLoading, selectedKitchenId,
+    handleKitchenChange,
     // Locations
     locations, locationsLoading, selectedLocationId,
     showCreateLocationModal, setShowCreateLocationModal,
@@ -260,7 +307,7 @@ export function useNuevaOrden() {
     allProducts: PRODUCTS,
     orderItems, addProduct, removeProduct, changeQuantity,
     editingItem, showComplementModal, setShowComplementModal,
-    openComplementEditor, confirmComplements,
+    openComplementEditor, addProductAndEdit, confirmComplements,
     // Form
     paymentMethod, setPaymentMethod,
     comment, setComment,
