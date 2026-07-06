@@ -1,23 +1,15 @@
 "use client";
 
-import { useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { CourierOrder } from '@/types/courier';
 import { OrderStatus } from '@/types/orders';
-import { Button } from '@/components/ui/button';
-import { StatusStepBar, StatusStep } from '@/components/ui/StatusStepBar';
 import { OrderItemsList, formatCOP } from '@/components/ui/OrderItemsList';
 import { OrderCardNumber } from '@/components/ui/OrderCardNumber';
 import { OrderClientInfo } from '@/components/ui/OrderClientInfo';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
-import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
+import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
+import { OrderStatusBadge } from '@/components/ui/OrderStatusBadge';
 import { cn } from '@/lib/utils';
-
-const COURIER_STEPS: StatusStep[] = [
-  { key: 'ready_for_pickup', label: 'Listo' },
-  { key: 'dispatched', label: 'En camino' },
-  { key: 'delivered', label: 'Entregado' },
-];
 
 interface CourierOrderCardProps {
   order: CourierOrder;
@@ -37,21 +29,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   onSelect,
   onStatusChange,
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [confirming, setConfirming] = useState(false);
-
   const transition = STATUS_TRANSITIONS[order.status];
-
-  const handleStatusChange = async () => {
-    if (!transition || !onStatusChange) return;
-    setLoading(true);
-    try {
-      await onStatusChange(order.id, order.status, transition.next);
-      setConfirming(false);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div
@@ -80,10 +58,6 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
           </div>
         </div>
 
-        <div className="mt-3 px-1">
-          <StatusStepBar steps={COURIER_STEPS} currentStatus={order.status} />
-        </div>
-
         <OrderAddressRow
           address={order.deliveryAddress?.address}
           floor={order.deliveryAddress?.floor}
@@ -105,39 +79,18 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
         )}
       </div>
 
-      {/* Footer: método de pago + acción */}
-      <div className="px-4 pb-4 pt-2 border-t border-neutral-black-10 flex items-center justify-between gap-3">
-        <OrderPaymentRow paymentMethod={order.paymentMethod} />
+      {/* Footer: estado + acción */}
+      <div className="px-3 pb-3 pt-3 border-t border-neutral-black-10 flex items-center justify-between gap-3">
+        <OrderStatusBadge status={order.status} />
 
-        {transition && (
-          confirming ? (
-            <div className="flex items-center gap-2 ml-auto" onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={() => setConfirming(false)}
-                disabled={loading}
-                className="text-xs font-medium text-neutral-black-50 hover:text-neutral-black-80 border border-neutral-black-20 rounded-xl px-3 py-1.5 transition-colors disabled:opacity-40"
-              >
-                Cancelar
-              </button>
-              <Button
-                onClick={(e) => { e.stopPropagation(); handleStatusChange(); }}
-                loading={loading}
-                loadingText="..."
-                size="sm"
-                variant={transition.next === 'delivered' ? 'dark' : 'primary'}
-              >
-                Confirmar
-              </Button>
-            </div>
-          ) : (
-            <Button
-              onClick={(e) => { e.stopPropagation(); setConfirming(true); }}
-              size="sm"
-              variant={transition.next === 'delivered' ? 'dark' : 'primary'}
-            >
-              {transition.label}
-            </Button>
-          )
+        {transition && onStatusChange && (
+          <OrderActionButtons
+            label={transition.label}
+            variant={transition.next === 'delivered' ? 'dark' : 'primary'}
+            onConfirm={() => onStatusChange(order.id, order.status, transition.next)}
+            stopPropagation
+            className="ml-auto"
+          />
         )}
       </div>
     </div>

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { ShoppingBag, ChevronDown, ChevronUp, Bike, ChefHat } from 'lucide-react';
 import { WorkerOrder, WorkerUser, WorkerKitchen } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
-import { Button } from '@/components/ui/button';
 import { StatusStepBar, StatusStep } from '@/components/ui/StatusStepBar';
 import { OrderItemsList } from '@/components/ui/OrderItemsList';
 import { OrderCardNumber } from '@/components/ui/OrderCardNumber';
@@ -13,6 +12,7 @@ import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
 import { OrderComment } from '@/components/ui/OrderComment';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
+import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { AssignCourierModal } from './AssignCourierModal';
 import { AssignKitchenModal } from './AssignKitchenModal';
 
@@ -52,23 +52,11 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   onAssignKitchen,
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const [loadingStatus, setLoadingStatus] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [showCourierModal, setShowCourierModal] = useState(false);
   const [showKitchenModal, setShowKitchenModal] = useState(false);
 
   const transition = RECEPTION_TRANSITIONS[order.status];
-
-  const handleStatusChange = async () => {
-    if (!transition) return;
-    setLoadingStatus(true);
-    try {
-      await onStatusChange(order.id, order.status, transition.next);
-      setConfirming(false);
-    } finally {
-      setLoadingStatus(false);
-    }
-  };
 
   return (
     <>
@@ -158,35 +146,12 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               </button>
             )}
             {transition && (
-              confirming ? (
-                <div className="ml-auto flex items-center gap-2">
-                  <button
-                    onClick={() => setConfirming(false)}
-                    disabled={loadingStatus}
-                    className="text-[10px] font-medium text-neutral-black-50 hover:text-neutral-black-80 border border-neutral-black-20 rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-40"
-                  >
-                    Cancelar
-                  </button>
-                  <Button
-                    onClick={handleStatusChange}
-                    loading={loadingStatus}
-                    loadingText="..."
-                    size="sm"
-                    variant="primary"
-                  >
-                    Confirmar
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  onClick={() => setConfirming(true)}
-                  size="sm"
-                  variant="primary"
-                  className="ml-auto"
-                >
-                  {transition.label}
-                </Button>
-              )
+              <OrderActionButtons
+                label={transition.label}
+                onConfirm={() => onStatusChange(order.id, order.status, transition.next)}
+                onConfirmingChange={setConfirming}
+                className="ml-auto"
+              />
             )}
           </div>
         )}
