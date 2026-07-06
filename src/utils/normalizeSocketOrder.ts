@@ -40,6 +40,7 @@ export function normalizeSocketOrder(raw: RawSocketOrder): WorkerOrder {
   const deliveryPrice = raw.delivery?.price ?? 0;
   const distance = raw.delivery?.distance;
   return {
+    ...raw,
     id: raw.id,
     status: raw.status,
     dailyOrderNumber: raw.dailyOrderNumber,

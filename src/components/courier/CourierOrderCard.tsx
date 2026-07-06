@@ -10,6 +10,7 @@ import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { OrderStatusBadge } from '@/components/ui/OrderStatusBadge';
 import { cn } from '@/lib/utils';
+import { OrderPaymentRow } from '../ui/OrderPaymentRow';
 
 interface CourierOrderCardProps {
   order: CourierOrder;
@@ -30,7 +31,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   onStatusChange,
 }) => {
   const transition = STATUS_TRANSITIONS[order.status];
-
+  console.log(order)
   return (
     <div
       className={cn(
@@ -53,8 +54,14 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
           </div>
 
           <div className="text-right shrink-0">
-            <p className="text-xs text-neutral-black-50 leading-none mb-0.5">Total</p>
-            <p className="text-lg font-bold text-neutral-black-80">{formatCOP(order.totalPrice)}</p>
+            <p className="text-xs text-neutral-black-50 leading-none mb-0.5">
+
+              <OrderPaymentRow paymentMethod={order.paymentMethod} className="text-xs text-neutral-black-50 leading-none mb-0.5" />
+            </p>
+            {/* si ya pago se subraya*/}
+            <p className={"text-lg font-bold " + (order?.payment?.status === 'approved' ? ' line-through text-green-500' : 'text-neutral-black-80')}>
+              {formatCOP(order.totalPrice)}
+            </p>
           </div>
         </div>
 

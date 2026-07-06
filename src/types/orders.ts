@@ -58,13 +58,18 @@ export interface DeliveryAddress {
   deliveryPrice: number;
 }
 
-export interface Delivery  {
+export interface Delivery {
   distance: number;
   price: number;
   duration: number;
 }
 
 export type PaymentMethod = 'cash' | 'bancolombia' | 'nequi';
+
+export interface Payment {
+  status: 'pending' | 'approved' | 'rejected';
+  method: PaymentMethod;
+}
 
 export type OrderStatus =
   | 'fresh'
