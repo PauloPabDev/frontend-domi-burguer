@@ -42,7 +42,7 @@ function resolveItemNames(
   });
 }
 
-//agrupa la información de las órdenes con la información de cocinas, productos, repartidores, clientes y direcciones
+//agrupa la información de las órdenes con la información de cocinas, productos, repartidores, clientes y direcciones etc
 function applyEnrichment(
   orders: WorkerOrder[],
   kitchens: WorkerKitchen[],

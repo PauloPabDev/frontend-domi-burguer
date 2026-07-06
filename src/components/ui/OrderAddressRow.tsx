@@ -97,7 +97,6 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
       '_blank',
     );
   };
-  console.log(location, "location")
   return createPortal(
     <div
       className={cn(
@@ -292,29 +291,41 @@ export function OrderAddressRow({
     <>
       <div
         className={cn(
-          'flex items-start gap-2 bg-neutral-black-5 rounded-xl px-3 py-2.5',
+          'flex items-start gap-2 bg-neutral-black-5 rounded-xl px-0 py-0',
           className,
         )}
       >
-        <MapPin size={15} className="text-primary-red mt-0.5 shrink-0" />
+        {/* <MapPin size={15} className="text-primary-red mt-0.5 shrink-0" /> */}
 
         {/* Texto */}
         <div className="flex-1 min-w-0">
           <p className="text-sm text-neutral-black-80 leading-snug">{displayAddress}</p>
-          {displayFloor && (
-            <p className="text-xs text-neutral-black-50 mt-0.5">
-              Piso / Apto: <span className="font-medium">{displayFloor}</span>
-            </p>
-          )}
-          {location?.comment && (
-            <p className="text-xs text-neutral-black-50 mt-0.5 line-clamp-1 italic">
-              {location.comment}
-            </p>
+          {(displayFloor || location?.comment) && (
+            <div className="mt-0.5 space-y-0.5">
+              {displayFloor && (
+                <p className="text-xs text-neutral-black-70">
+                  Piso / Apto: <span className="font-medium">{displayFloor}</span>
+                </p>
+              )}
+              {location?.comment && (
+                <p className="text-xs text-neutral-black-70 ">
+                  {location.comment}
+                </p>
+              )}
+            </div>
           )}
         </div>
 
         {/* Botones de acción */}
-        <div className="flex items-center gap-0.5 shrink-0 -mr-0.5 mt-0.5">
+        <div className="flex flex-col items-center gap-0.5 shrink-0 -mr-0.5 mt-0.5">
+          <button
+            type="button"
+            onClick={handleOpenSheet}
+            title="Más opciones"
+            className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-neutral-black-10 transition-colors"
+          >
+            <MoreHorizontal size={14} className="text-neutral-black-50" />
+          </button>
           {hasCoords && (
             <button
               type="button"
@@ -325,14 +336,7 @@ export function OrderAddressRow({
               <Navigation size={14} className="text-blue-500" />
             </button>
           )}
-          <button
-            type="button"
-            onClick={handleOpenSheet}
-            title="Más opciones"
-            className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-neutral-black-10 transition-colors"
-          >
-            <MoreHorizontal size={14} className="text-neutral-black-50" />
-          </button>
+
         </div>
       </div>
 
