@@ -263,13 +263,14 @@ export function useNuevaOrden() {
       );
 
       setSubmitSuccess(true);
-      resetForm();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Error al crear la orden');
     } finally {
       setIsSubmitting(false);
     }
   }, [client, selectedLocationId, delivery, orderItems, comment, paymentMethod, selectedKitchenId, getToken]);
+
+  const clearSubmitError = useCallback(() => setSubmitError(null), []);
 
   const resetForm = useCallback(() => {
     setPhone('');
@@ -312,7 +313,7 @@ export function useNuevaOrden() {
     paymentMethod, setPaymentMethod,
     comment, setComment,
     isSubmitting, submitError, submitSuccess,
-    handleSubmit, resetForm,
+    handleSubmit, resetForm, clearSubmitError,
     // Totals
     subtotal, total,
   };

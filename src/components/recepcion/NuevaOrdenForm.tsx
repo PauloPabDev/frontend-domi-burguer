@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { addToast } from '@heroui/toast';
 import { useNuevaOrden, PAYMENT_METHODS, OrderItem } from '@/hooks/recepcion/useNuevaOrden';
@@ -15,7 +15,58 @@ import { FormCard } from './FormCard';
 import { PaymentMethodsSection } from '@/components/cart/PaymentMethodsSection';
 import { Button } from '@/components/ui/button';
 import { Product } from '@/types/products';
-import { Loader2 } from 'lucide-react';
+import { Loader2, XCircle } from 'lucide-react';
+
+function SubmitOverlay({
+  isSubmitting,
+  error,
+  onRetry,
+  onClose,
+}: {
+  isSubmitting: boolean;
+  error: string | null;
+  onRetry: () => void;
+  onClose: () => void;
+}) {
+  if (!isSubmitting && !error) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl p-10 max-w-sm w-full mx-4 flex flex-col items-center gap-5">
+        {isSubmitting && (
+          <>
+            <div className="w-20 h-20 rounded-full bg-primary-red/10 flex items-center justify-center">
+              <Loader2 className="w-10 h-10 text-primary-red animate-spin" />
+            </div>
+            <div className="text-center">
+              <p className="font-bold text-neutral-black-80 text-xl">Creando orden...</p>
+              <p className="text-sm text-neutral-black-40 mt-1">Por favor espera un momento</p>
+            </div>
+          </>
+        )}
+        {!isSubmitting && error && (
+          <>
+            <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center">
+              <XCircle className="w-10 h-10 text-red-500" />
+            </div>
+            <div className="text-center">
+              <p className="font-bold text-neutral-black-80 text-xl">Error al crear la orden</p>
+              <p className="text-sm text-red-500 mt-2">{error}</p>
+            </div>
+            <div className="flex gap-3 w-full">
+              <Button variant="outline" onClick={onClose} className="flex-1 h-11">
+                Cerrar
+              </Button>
+              <Button onClick={onRetry} className="flex-1 h-11 font-bold">
+                Reintentar
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const CustomizationModalSection = dynamic(
   () => import('@/components/home/customizeOrderModal').then((m) => m.CustomizationModalSection),
@@ -37,13 +88,10 @@ export function NuevaOrdenForm() {
 
   useEffect(() => {
     if (form.submitSuccess) {
-      addToast({
-        title: '¡Orden creada exitosamente!',
-        description: 'La orden fue registrada y enviada a cocina.',
-        color: 'success',
-      });
+      addToast({ title: '¡Orden creada!', description: 'La orden fue enviada a cocina.', color: 'success' });
+      form.resetForm();
     }
-  }, [form.submitSuccess]);
+  }, [form.submitSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOpenComplementEditor = useCallback((item: OrderItem) => {
     console.log('Opening complement editor for item:', item);
@@ -140,21 +188,13 @@ export function NuevaOrdenForm() {
             delivery={form.delivery}
           />
 
-          {form.submitError && (
-            <p className="text-sm text-red-500 text-center px-2">{form.submitError}</p>
-          )}
-
           <Button
             type="button"
             onClick={form.handleSubmit}
             disabled={form.isSubmitting || !form.client || !form.selectedLocationId || form.orderItems.length === 0}
             className="w-full h-12 text-sm font-bold"
           >
-            {form.isSubmitting ? (
-              <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creando orden...</>
-            ) : (
-              `Crear Orden${totalUnidades > 0 ? ` · ${fmt(form.total)}` : ''}`
-            )}
+            {`Crear Orden${totalUnidades > 0 ? ` · ${fmt(form.total)}` : ''}`}
           </Button>
         </div>
       </div>
@@ -180,6 +220,13 @@ export function NuevaOrdenForm() {
           onCreated={form.handleLocationCreated}
         />
       )}
+
+      <SubmitOverlay
+        isSubmitting={form.isSubmitting}
+        error={form.submitError}
+        onRetry={form.handleSubmit}
+        onClose={form.clearSubmitError}
+      />
     </div>
   );
 }

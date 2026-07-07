@@ -77,6 +77,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const [orders, setOrders] = useState<WorkerOrder[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('IDLE');
   const orderIdsRef = useRef<Set<string>>(new Set());
+  const courierAssignedIdsRef = useRef<Set<string>>(new Set());
 
   const sortOrders = useCallback((list: WorkerOrder[]) => {
     return [...list].sort((a, b) => a.dailyOrderNumber - b.dailyOrderNumber);
@@ -137,6 +138,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     socketRef.current.on('order/init', (incoming: RawSocketOrder[]) => {
       const normalized = normalizeSocketOrders(incoming);
       orderIdsRef.current = new Set(normalized.map((o) => o.id));
+      courierAssignedIdsRef.current = new Set(normalized.filter((o) => o.courierId).map((o) => o.id));
       setOrders(sortOrders(normalized));
     });
 
@@ -152,17 +154,40 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       });
     };
 
+    const notifyReception = (title: string, description: string, color: 'warning' | 'success') => {
+      playOrderNotification();
+      addToast({
+        title,
+        description,
+        color,
+        variant: 'flat',
+        size: 'sm',
+        timeout: 4000,
+        hideCloseButton: true,
+        shouldShowTimeoutProgress: true,
+      });
+    };
+
     socketRef.current.on('order/create', (raw: RawSocketOrder) => {
       const order = normalizeSocketOrder(raw);
       orderIdsRef.current.add(order.id);
+      if (order.courierId) courierAssignedIdsRef.current.add(order.id);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.set(order.id, order);
         return sortOrders(Array.from(map.values()));
       });
-      console.log(role, 'role')
       if (role === 'cook') {
         notifyNewKitchenOrder(order);
+      }
+      if (role === 'reception') {
+        const itemsSummary = order.orderItems.slice(0, 2).map((i) => i.name).join(', ');
+        const extra = order.orderItems.length > 2 ? ` +${order.orderItems.length - 2} más` : '';
+        notifyReception(
+          `Nueva orden #${order.dailyOrderNumber}`,
+          `${order.client?.name ?? 'Cliente'} · ${itemsSummary}${extra}`,
+          'warning',
+        );
       }
     });
 
@@ -182,7 +207,31 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       if (role === 'cook' && isNew) {
         notifyNewKitchenOrder(order);
       }
+
+      if (role === 'reception') {
+        if (isNew) {
+          const itemsSummary = order.orderItems.slice(0, 2).map((i) => i.name).join(', ');
+          const extra = order.orderItems.length > 2 ? ` +${order.orderItems.length - 2} más` : '';
+          notifyReception(
+            `Nueva orden #${order.dailyOrderNumber}`,
+            `${order.client?.name ?? 'Cliente'} · ${itemsSummary}${extra}`,
+            'warning',
+          );
+        } else if (order.courierId && !courierAssignedIdsRef.current.has(order.id)) {
+          notifyReception(
+            `Orden asignada #${order.dailyOrderNumber}`,
+            `${order.courier?.name ?? 'Domiciliario'} · ${order.client?.name ?? 'Cliente'}`,
+            'success',
+          );
+        }
+      }
+
       orderIdsRef.current.add(order.id);
+      if (order.courierId) {
+        courierAssignedIdsRef.current.add(order.id);
+      } else {
+        courierAssignedIdsRef.current.delete(order.id);
+      }
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.set(order.id, order);
@@ -193,6 +242,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     socketRef.current.on('order/remove', (raw: RawSocketOrder) => {
       const order = normalizeSocketOrder(raw);
       orderIdsRef.current.delete(order.id);
+      courierAssignedIdsRef.current.delete(order.id);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.delete(order.id);
@@ -203,6 +253,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     socketRef.current.on('order/delete', (raw: RawSocketOrder) => {
       const order = normalizeSocketOrder(raw);
       orderIdsRef.current.delete(order.id);
+      courierAssignedIdsRef.current.delete(order.id);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.delete(order.id);
