@@ -15,7 +15,8 @@ export const useCouriers = () => {
       if (!user) return;
       try {
         const token = await user.getIdToken();
-        const { body } = await WorkerOrderService.getCouriersList(token);
+        const { body } = await WorkerOrderService.getCouriersList(token, { page: '1', limit: '100' });
+        console.log('Fetched couriers:', body);
 
         setCouriers(body ?? []);
       } catch {

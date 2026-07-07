@@ -132,8 +132,10 @@ export class WorkerOrderService {
     return response.json();
   }
 
-  static async getCouriersList(token: string): Promise<{ body: WorkerUser[] }> {
-    const params = new URLSearchParams({ key: 'roles', value: 'courier' });
+  static async getCouriersList(token: string, pagination: { page: string; limit: string }): Promise<{ body: WorkerUser[] }> {
+    const params = new URLSearchParams({ key: 'roles', value: 'courier', option: 'array-contains' });
+    params.set('page', pagination.page);
+    params.set('limit', pagination.limit);
     const response = await fetch(`${this.API_URL}api/v2/users?${params}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
