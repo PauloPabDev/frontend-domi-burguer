@@ -18,8 +18,8 @@ interface NavLink {
 }
 
 const NAV_LINKS: NavLink[] = [
-  { href: '/admin',          label: 'DASHBOARD', Icon: LayoutDashboard, matchStart: false },
-  { href: '/admin/usuarios', label: 'USUARIOS',  Icon: Users,           matchStart: true  },
+  { href: '/admin', label: 'DASHBOARD', Icon: LayoutDashboard, matchStart: false },
+  { href: '/admin/usuarios', label: 'USUARIOS', Icon: Users, matchStart: true },
 ];
 
 export const AdminNavbar: React.FC = () => {
@@ -52,7 +52,6 @@ export const AdminNavbar: React.FC = () => {
             </Link>
           );
         })}
-        <NavLogoutButton />
       </div>
     </NavPillShell>
   );

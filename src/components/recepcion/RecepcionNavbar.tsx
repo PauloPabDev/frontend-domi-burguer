@@ -59,20 +59,11 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
             leftIcon={<PlusCircle className="w-4 h-4 md:w-5 md:h-5" />}
             className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
           >
-            <span className="hidden sm:inline">NUEVA</span>
+            <span className="hidden sm:inline"></span>
           </Button>
         </Link>
 
-        <Link href="/recepcion/historial" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
-          <Button
-            variant={pathname === '/recepcion/historial' ? 'primary' : 'light-outline'}
-            size="md"
-            leftIcon={<History className="w-4 h-4 md:w-5 md:h-5" />}
-            className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
-          >
-            <span className="hidden sm:inline">HISTORIAL</span>
-          </Button>
-        </Link>
+
 
         <Link href="/recepcion" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
           <Button
@@ -86,7 +77,6 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
           </Button>
         </Link>
 
-        <NavLogoutButton />
       </div>
     </NavPillShell>
   );
