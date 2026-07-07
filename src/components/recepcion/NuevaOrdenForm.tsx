@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { addToast } from '@heroui/toast';
+import { notify } from '@/utils/notify';
 import { useNuevaOrden, PAYMENT_METHODS, OrderItem } from '@/hooks/recepcion/useNuevaOrden';
 import { useComplementEditor } from '@/hooks/recepcion/useComplementEditor';
 import { useChatwootBus } from '@/hooks/recepcion/useChatwootBus';
@@ -88,7 +88,7 @@ export function NuevaOrdenForm() {
 
   useEffect(() => {
     if (form.submitSuccess) {
-      addToast({ title: '¡Orden creada!', description: 'La orden fue enviada a cocina.', color: 'success' });
+      notify.success('¡Orden creada!', 'La orden fue enviada a cocina.');
       form.resetForm();
     }
   }, [form.submitSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
