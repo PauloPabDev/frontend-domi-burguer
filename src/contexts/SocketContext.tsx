@@ -2,6 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { addToast } from '@heroui/toast';
 import { ConnectionStatus } from '@/types/courier';
 import { RawSocketOrder } from '@/types/rawSocketOrder';
 import { WorkerOrder } from '@/types/worker';
@@ -74,6 +75,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
   const [orders, setOrders] = useState<WorkerOrder[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('IDLE');
+  const orderIdsRef = useRef<Set<string>>(new Set());
 
   const sortOrders = useCallback((list: WorkerOrder[]) => {
     return [...list].sort((a, b) => a.dailyOrderNumber - b.dailyOrderNumber);
@@ -132,11 +134,14 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     });
 
     socketRef.current.on('order/init', (incoming: RawSocketOrder[]) => {
-      setOrders(sortOrders(normalizeSocketOrders(incoming)));
+      const normalized = normalizeSocketOrders(incoming);
+      orderIdsRef.current = new Set(normalized.map((o) => o.id));
+      setOrders(sortOrders(normalized));
     });
 
     socketRef.current.on('order/create', (raw: RawSocketOrder) => {
       const order = normalizeSocketOrder(raw);
+      orderIdsRef.current.add(order.id);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.set(order.id, order);
@@ -146,6 +151,15 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
     socketRef.current.on('order/update', (raw: RawSocketOrder) => {
       const order = normalizeSocketOrder(raw);
+      if (role === 'courier' && !orderIdsRef.current.has(order.id)) {
+        addToast({
+          title: 'Nueva orden asignada',
+          description: order.client?.name ?? 'Cliente',
+          color: 'success',
+          timeout: 5000,
+        });
+      }
+      orderIdsRef.current.add(order.id);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.set(order.id, order);
@@ -155,6 +169,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
     socketRef.current.on('order/remove', (raw: RawSocketOrder) => {
       const order = normalizeSocketOrder(raw);
+      orderIdsRef.current.delete(order.id);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.delete(order.id);
@@ -164,6 +179,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
     socketRef.current.on('order/delete', (raw: RawSocketOrder) => {
       const order = normalizeSocketOrder(raw);
+      orderIdsRef.current.delete(order.id);
       setOrders((prev) => {
         const map = new Map(prev.map((o) => [o.id, o]));
         map.delete(order.id);
