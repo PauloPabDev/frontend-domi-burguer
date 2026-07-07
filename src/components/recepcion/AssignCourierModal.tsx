@@ -18,13 +18,19 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
   onAssign,
   onClose,
 }) => {
-  const { activeCouriers, allCouriers, openPanel } = useCourierPanel();
+  const { activeCouriers, allCouriers, filterCourierIds, openPanel } = useCourierPanel();
   const [selected, setSelected] = useState<string | null>(currentCourierId ?? null);
   const [loading, setLoading] = useState(false);
 
   // Use active couriers if any, fall back to all couriers
-  const couriers: WorkerUser[] = activeCouriers.length > 0 ? activeCouriers : allCouriers;
+  const baseCouriers: WorkerUser[] = activeCouriers.length > 0 ? activeCouriers : allCouriers;
   const usingFallback = activeCouriers.length === 0 && allCouriers.length > 0;
+
+  // Apply panel filter if active
+  const couriers: WorkerUser[] =
+    filterCourierIds.size > 0
+      ? baseCouriers.filter((c) => filterCourierIds.has(c.id))
+      : baseCouriers;
 
   const handleAssign = async () => {
     if (!selected) return;
@@ -50,7 +56,11 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
           <div className="flex items-center gap-2">
             <Bike size={16} className="text-primary-red" />
             <h3 className="font-bold text-sm text-neutral-black-80">Asignar domiciliario</h3>
-            {activeCouriers.length > 0 && (
+            {filterCourierIds.size > 0 ? (
+              <span className="text-[10px] font-semibold bg-primary-red/10 text-primary-red px-1.5 py-0.5 rounded-full">
+                {couriers.length} filtrados
+              </span>
+            ) : activeCouriers.length > 0 && (
               <span className="text-[10px] font-semibold bg-primary-red/10 text-primary-red px-1.5 py-0.5 rounded-full">
                 {activeCouriers.length} activos hoy
               </span>

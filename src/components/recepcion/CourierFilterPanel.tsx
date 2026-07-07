@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Bike, ChevronDown, X } from 'lucide-react';
+import { Bike, ChevronDown, Settings, X } from 'lucide-react';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
 import { cn } from '@/lib/utils';
 
@@ -10,11 +10,11 @@ interface CourierFilterPanelProps {
 }
 
 export const CourierFilterPanel: React.FC<CourierFilterPanelProps> = ({ className }) => {
-  const { allCouriers, filterCourierIds, toggleFilterCourier, clearCourierFilter, loading } =
+  const { activeCouriers, filterCourierIds, toggleFilterCourier, clearCourierFilter, openPanel, loading } =
     useCourierPanel();
   const [isOpen, setIsOpen] = useState(true);
 
-  if (loading || allCouriers.length === 0) return null;
+  if (loading || activeCouriers.length === 0) return null;
 
   const hasFilter = filterCourierIds.size > 0;
 
@@ -74,7 +74,17 @@ export const CourierFilterPanel: React.FC<CourierFilterPanelProps> = ({ classNam
             Todos
           </button>
 
-          {allCouriers.map((courier) => {
+          {/* Chip para abrir el panel de gestión */}
+          <button
+            type="button"
+            onClick={openPanel}
+            className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border border-dashed border-neutral-black-20 text-neutral-black-40 hover:border-neutral-black-40 hover:text-neutral-black-60 transition-all"
+          >
+            <Settings size={11} />
+            Gestionar
+          </button>
+
+          {activeCouriers.map((courier) => {
             const active = filterCourierIds.has(courier.id);
             return (
               <button
