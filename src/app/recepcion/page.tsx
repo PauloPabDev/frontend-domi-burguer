@@ -52,8 +52,8 @@ export default function RecepcionPage() {
   };
 
   return (
-    <div className="overflow-x-auto pb-2">
-      <div className="flex gap-3 min-w-max">
+    <div className="overflow-x-auto overflow-y-hidden -mb-4 h-[calc(100vh-106px)]">
+      <div className="flex gap-3 min-w-max h-full">
         {KANBAN_STATUSES.map((status) => (
           <OrderKanbanColumn
             key={status}
