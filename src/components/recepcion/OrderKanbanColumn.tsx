@@ -13,6 +13,7 @@ interface OrderKanbanColumnProps {
   onStatusChange: (orderId: string, prev: OrderStatus, next: OrderStatus) => Promise<void>;
   onAssignCourier: (orderId: string, courierId: string) => Promise<void>;
   onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
+  onDelete: (orderId: string) => Promise<void>;
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid?: (orderId: string) => Promise<void>;
 }
@@ -28,6 +29,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   onStatusChange,
   onAssignCourier,
   onAssignKitchen,
+  onDelete,
   onPaymentMethodChange,
   onMarkPaid,
 }) => {
@@ -82,6 +84,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
               onStatusChange={onStatusChange}
               onAssignCourier={onAssignCourier}
               onAssignKitchen={onAssignKitchen}
+              onDelete={onDelete}
               onPaymentMethodChange={onPaymentMethodChange}
               onMarkPaid={onMarkPaid}
             />

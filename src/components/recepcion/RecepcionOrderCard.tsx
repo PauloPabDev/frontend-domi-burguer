@@ -155,6 +155,7 @@ interface RecepcionOrderCardProps {
   onStatusChange: (orderId: string, prev: OrderStatus, next: OrderStatus) => Promise<void>;
   onAssignCourier: (orderId: string, courierId: string) => Promise<void>;
   onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
+  onDelete: (orderId: string) => Promise<void>;
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid?: (orderId: string) => Promise<void>;
 }
@@ -165,6 +166,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   onStatusChange,
   onAssignCourier,
   onAssignKitchen,
+  onDelete,
   onPaymentMethodChange,
   onMarkPaid,
 }) => {
@@ -274,7 +276,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           order={order}
           onClose={() => setShowOrderMenu(false)}
           onOpenKitchenModal={() => setShowKitchenModal(true)}
-          onDelete={() => onStatusChange(order.id, order.status, 'cancelled')}
+          onDelete={() => onDelete(order.id)}
         />
       )}
 

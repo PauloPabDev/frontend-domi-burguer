@@ -104,6 +104,12 @@ export default function RecepcionMapaPage() {
     await WorkerOrderService.markPaid(token, orderId);
   };
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!user) return;
+    const token = await user.getIdToken();
+    await WorkerOrderService.deleteOrder(token, orderId);
+  };
+
   return (
     <div className="h-[calc(100vh-106px)] flex flex-col lg:flex-row gap-3 -mb-4">
       {/* Map */}
@@ -190,6 +196,7 @@ export default function RecepcionMapaPage() {
                   onStatusChange={handleStatusChange}
                   onAssignCourier={handleAssignCourier}
                   onAssignKitchen={handleAssignKitchen}
+                  onDelete={handleDeleteOrder}
                   onPaymentMethodChange={handlePaymentMethodChange}
                   onMarkPaid={handleMarkPaid}
                 />

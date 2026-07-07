@@ -167,6 +167,14 @@ export class WorkerOrderService {
     return response.json();
   }
 
+  static async deleteOrder(token: string, orderId: string): Promise<void> {
+    const response = await fetch(`${this.API_URL}api/v2/orders/${orderId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Error al eliminar la orden');
+  }
+
   static async getSelectKitchen(
     locationId: string,
     token: string,

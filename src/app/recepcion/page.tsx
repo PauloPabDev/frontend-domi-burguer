@@ -69,6 +69,12 @@ export default function RecepcionPage() {
     await WorkerOrderService.markPaid(token, orderId);
   };
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!user) return;
+    const token = await user.getIdToken();
+    await WorkerOrderService.deleteOrder(token, orderId);
+  };
+
   return (
     <div className="-mb-4 h-[calc(100vh-106px)] flex flex-col gap-2">
       <CourierFilterPanel />
@@ -83,6 +89,7 @@ export default function RecepcionPage() {
               onStatusChange={handleStatusChange}
               onAssignCourier={handleAssignCourier}
               onAssignKitchen={handleAssignKitchen}
+              onDelete={handleDeleteOrder}
               onPaymentMethodChange={handlePaymentMethodChange}
               onMarkPaid={handleMarkPaid}
             />
