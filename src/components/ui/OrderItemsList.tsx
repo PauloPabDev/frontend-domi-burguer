@@ -17,7 +17,7 @@ export function OrderItemsList({ items, circleQty = false, className }: OrderIte
   return (
     <ul className={cn('space-y-3', className)}>
       {items.map((item) => (
-        <li key={item.id} className="flex gap-2">
+        <li key={item.id} className=" flex gap-2">
           {/* Cantidad */}
           {circleQty ? (
             <span className="w-6 h-6 rounded-full bg-primary-red text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
@@ -25,7 +25,7 @@ export function OrderItemsList({ items, circleQty = false, className }: OrderIte
             </span>
           ) : (
             <span className="text-sm font-bold text-primary-red shrink-0 mt-0.5 w-6 text-center">
-              {item.quantity}×
+              {item.quantity}
             </span>
           )}
 

@@ -10,6 +10,14 @@ export interface MapMarker {
   id: string;
   position: { lat: number; lng: number };
   label?: string;
+  color?: string;
+}
+
+function makePinSvgUrl(fill: string, selected: boolean): string {
+  const size = selected ? 48 : 36;
+  const ring = selected ? 6 : 5;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${Math.round(size * 1.25)}" viewBox="0 0 40 50"><path d="M20 0C9 0 0 9 0 20c0 14 20 30 20 30s20-16 20-30C40 9 31 0 20 0z" fill="${fill}"/><circle cx="20" cy="20" r="${ring}" fill="white" opacity="0.9"/></svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
 interface MultiMarkerMapProps {
@@ -83,23 +91,22 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
     >
       {markers.map((marker) => {
         const isSelected = marker.id === selectedMarkerId;
+        const pinUrl = marker.color
+          ? makePinSvgUrl(marker.color, isSelected)
+          : "/Pin.png";
+        const w = marker.color ? (isSelected ? 48 : 36) : (isSelected ? 70 : 50);
+        const h = marker.color ? (isSelected ? 60 : 45) : (isSelected ? 80 : 58);
         return (
           <Marker
             key={marker.id}
             position={marker.position}
             onClick={() => handleMarkerClick(marker.id)}
             icon={{
-              url: "/Pin.png",
-              scaledSize: new google.maps.Size(
-                isSelected ? 70 : 50,
-                isSelected ? 80 : 58
-              ),
-              anchor: new google.maps.Point(
-                isSelected ? 35 : 25,
-                isSelected ? 80 : 58
-              ),
+              url: pinUrl,
+              scaledSize: new google.maps.Size(w, h),
+              anchor: new google.maps.Point(w / 2, h),
             }}
-            opacity={isSelected ? 1 : 0.6}
+            opacity={isSelected ? 1 : 0.7}
             title={marker.label}
           />
         );

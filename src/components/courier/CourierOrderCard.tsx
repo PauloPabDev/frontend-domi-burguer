@@ -1,15 +1,15 @@
 "use client";
 
-import { ShoppingBag } from 'lucide-react';
 import { CourierOrder } from '@/types/courier';
 import { OrderStatus } from '@/types/orders';
-import { OrderItemsList, formatCOP } from '@/components/ui/OrderItemsList';
+import { OrderItemsList } from '@/components/ui/OrderItemsList';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { OrderStatusBadge } from '@/components/ui/OrderStatusBadge';
 import { OrderClientChips } from '@/components/ui/OrderClientChips';
+import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
 import { cn } from '@/lib/utils';
-import { OrderPaymentRow } from '../ui/OrderPaymentRow';
+import { formatTime } from '@/lib/dates';
 
 interface CourierOrderCardProps {
   order: CourierOrder;
@@ -23,6 +23,8 @@ const STATUS_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label
   dispatched: { next: 'delivered', label: 'Marcar entregado' },
 };
 
+const SECTION = 'border-t border-neutral-black-10 p-4';
+
 export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   order,
   isSelected,
@@ -30,7 +32,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   onStatusChange,
 }) => {
   const transition = STATUS_TRANSITIONS[order.status];
-  console.log(order)
+
   return (
     <div
       className={cn(
@@ -39,42 +41,28 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
       )}
       onClick={onSelect}
     >
-      {/* Header: número, cliente, total */}
-      <div className="p-4 pb-3">
-        <div className="flex items-start justify-between gap-3">
-          <OrderClientChips
-            name={order.client?.name}
-            phone={order.client?.phone}
-            clientId={order.clientId}
-            orderNumber={order.dailyOrderNumber}
-          />
+      {/* Cliente */}
+      <div className="p-4 flex items-center justify-between">
+        <OrderClientChips
+          name={order.client?.name}
+          phone={order.client?.phone}
+          clientId={order.clientId}
+          orderNumber={order.dailyOrderNumber}
+        />
+        <span className="text-[10px] text-neutral-black-50 shrink-0">{formatTime(order.createdAt)}</span>
+      </div>
 
-          <div className="text-right shrink-0">
-            <p className="text-xs text-neutral-black-50 leading-none mb-0.5">
-
-              <OrderPaymentRow paymentMethod={order.paymentMethod} className="text-xs text-neutral-black-50 leading-none mb-0.5" />
-            </p>
-            {/* si ya pago se subraya*/}
-            <p className={"text-lg font-bold " + (order?.payment?.status === 'approved' ? ' line-through text-green-500' : 'text-neutral-black-80')}>
-              {formatCOP(order.totalPrice)}
-            </p>
-          </div>
-        </div>
-
+      {/* Dirección */}
+      <div className={SECTION}>
         <OrderAddressRow
           location={order.location}
           address={order.deliveryAddress?.address}
           floor={order.deliveryAddress?.floor}
-          className="mt-3"
         />
       </div>
 
       {/* Productos */}
-      <div className="px-4 pb-3">
-        <div className="flex items-center gap-1.5 mb-2">
-          <ShoppingBag size={13} className="text-neutral-black-50" />
-          <span className="text-xs font-semibold text-neutral-black-50 uppercase tracking-wide">Productos</span>
-        </div>
+      <div className={SECTION}>
         <OrderItemsList items={order.orderItems} />
         {order.comment && (
           <p className="mt-2 text-xs text-neutral-black-50 italic border-l-2 border-neutral-black-20 pl-2">
@@ -83,10 +71,18 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
         )}
       </div>
 
-      {/* Footer: estado + acción */}
-      <div className="px-3 pb-3 pt-3 border-t border-neutral-black-10 flex items-center justify-between gap-3">
-        <OrderStatusBadge status={order.status} />
+      {/* Pago */}
+      <div className={SECTION}>
+        <OrderPaymentRow
+          paymentMethod={order.paymentMethod}
+          total={order.totalPrice}
+          paid={order.payment?.status === 'approved'}
+        />
+      </div>
 
+      {/* Footer: estado + acción */}
+      <div className={cn(SECTION, 'flex items-center justify-between gap-3')}>
+        <OrderStatusBadge status={order.status} />
         {transition && onStatusChange && (
           <OrderActionButtons
             label={transition.label}
