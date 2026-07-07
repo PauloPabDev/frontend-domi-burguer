@@ -52,7 +52,9 @@ export function OrderPaymentRow({
   const [loadingPaid, setLoadingPaid] = useState(false);
 
   const Icon = PAYMENT_ICONS[paymentMethod] ?? CreditCard;
-  const cashChange = paymentMethod === 'cash' && total > 0 ? getCashChange(total) : null;
+  const cashChange =
+    paymentMethod === 'cash' &&
+      total > 0 ? getCashChange(total) : null
 
   const canChangeMethod = recepcionMode && !!onPaymentMethodChange && !paid;
   const canMarkPaid = recepcionMode && !!onMarkPaid && !paid;
@@ -148,7 +150,7 @@ export function OrderPaymentRow({
         </button>
       </div>
 
-      {cashChange && (
+      {cashChange && !paid && (
         <div className="flex items-center justify-between mt-1.5">
           <span className="text-sm text-neutral-black-50">Con {formatCOP(cashChange.bill)}</span>
           <span className="text-sm font-semibold text-amber-600">Devolver {formatCOP(cashChange.change)}</span>

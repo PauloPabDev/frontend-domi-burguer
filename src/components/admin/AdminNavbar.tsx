@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { NavWorkerAvatar } from '@/components/navbar/NavWorkerAvatar';
 import { NavPillShell } from '@/components/navbar/NavPillShell';
 import { NavPillLogo } from '@/components/navbar/NavPillLogo';
-import { NavLogoutButton } from '@/components/navbar/NavLogoutButton';
 
 interface NavLink {
   href: string;

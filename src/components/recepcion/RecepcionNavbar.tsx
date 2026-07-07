@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, History, Map, PlusCircle, Bike } from 'lucide-react';
+import { ClipboardList, Map, PlusCircle, Bike } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,6 @@ import { NavWorkerAvatar } from '@/components/navbar/NavWorkerAvatar';
 import { NavPillShell } from '@/components/navbar/NavPillShell';
 import { NavPillLogo } from '@/components/navbar/NavPillLogo';
 import { NavKitchenDropdown } from '@/components/navbar/NavKitchenDropdown';
-import { NavLogoutButton } from '@/components/navbar/NavLogoutButton';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
 
 interface RecepcionNavbarProps {
