@@ -47,7 +47,6 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
             phone={order.client?.phone}
             clientId={order.clientId}
             orderNumber={order.dailyOrderNumber}
-            onPhoneClick={(e) => e.stopPropagation()}
           />
 
           <div className="text-right shrink-0">

@@ -33,7 +33,7 @@ export interface WorkerOrder {
   orderItems: OrderItem[];
   deliveryAddress?: DeliveryAddress;
   paymentMethod: PaymentMethod;
-  payment: Payment;
+  payment?: Payment;
   comment?: string;
   location?: Location;
 }

@@ -15,7 +15,6 @@ interface OrderClientChipsProps {
   clientId?: string;
   orderNumber: number;
   avatarSrc?: string;
-  onPhoneClick?: (e: React.MouseEvent) => void;
   className?: string;
 }
 
@@ -96,7 +95,6 @@ export function OrderClientChips({
   clientId,
   orderNumber,
   avatarSrc = MOCK_AVATAR,
-  onPhoneClick,
   className,
 }: OrderClientChipsProps) {
   const [menuOpen, setMenuOpen] = useState(false);
