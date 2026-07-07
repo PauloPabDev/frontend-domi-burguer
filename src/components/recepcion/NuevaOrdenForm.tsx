@@ -13,7 +13,7 @@ import { PaymentMethodsSection } from '@/components/cart/PaymentMethodsSection';
 import { Button } from '@/components/ui/button';
 import { Complement, Product } from '@/types/products';
 import { handleAddableComplement, handleSpecialComplement, handleRemovableComplement } from '@/hooks/home/useMenu';
-import { Loader2, Tag, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CustomizationModalSection = dynamic(
@@ -34,7 +34,6 @@ export function NuevaOrdenForm() {
   const pendingComplementsRef = useRef<Complement[]>([]);
   const originalComplementsRef = useRef<Complement[]>([]);
   const [pendingComplements, setPendingComplements] = useState<Complement[]>([]);
-  const [isCotizacion, setIsCotizacion] = useState(false);
   const [summaryExpanded, setSummaryExpanded] = useState(true);
 
   useEffect(() => {
@@ -144,46 +143,12 @@ export function NuevaOrdenForm() {
   }, [form]);
 
   const fmt = (n: number) => `$${n.toLocaleString('es-CO')}`;
-  const clientUnlocked = !!form.client || isCotizacion;
-  const isQuoteOnly = isCotizacion && !form.client;
   const totalUnidades = form.orderItems.reduce((s, i) => s + i.quantity, 0);
 
   return (
     <div className="w-full px-4 lg:px-8 py-6 flex flex-col gap-5">
 
-      {/* Top bar: cotización toggle + indicador de orden */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <label className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-neutral-black-20 bg-white cursor-pointer select-none w-fit">
-          <div className="relative shrink-0">
-            <input
-              type="checkbox"
-              className="sr-only"
-              checked={isCotizacion}
-              onChange={(e) => setIsCotizacion(e.target.checked)}
-            />
-            <div className={cn(
-              'w-9 h-5 rounded-full transition-colors',
-              isCotizacion ? 'bg-primary-red' : 'bg-neutral-black-20'
-            )} />
-            <div className={cn(
-              'absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform',
-              isCotizacion ? 'translate-x-4' : 'translate-x-0'
-            )} />
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Tag className="w-3.5 h-3.5 text-neutral-black-50" />
-            <span className="text-sm font-medium text-neutral-black-80">Modo cotización</span>
-          </div>
-        </label>
 
-        {totalUnidades > 0 && (
-          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-red/8 border border-primary-red/20 text-sm font-semibold text-primary-red">
-            <span>{totalUnidades} {totalUnidades === 1 ? 'producto' : 'productos'}</span>
-            <span className="text-neutral-black-40">·</span>
-            <span>{fmt(form.total)}</span>
-          </div>
-        )}
-      </div>
 
       {/* ── Main layout: stacked on mobile, two-column on lg+ ── */}
       <div className="flex flex-col lg:flex-row gap-5 items-start">
@@ -238,12 +203,7 @@ export function NuevaOrdenForm() {
           </section>
 
           {/* Método de pago */}
-          <section className={cn(
-            'flex flex-col gap-4 p-5 rounded-xl border bg-white shadow-sm transition-opacity duration-200',
-            !clientUnlocked
-              ? 'border-neutral-black-10 opacity-40 pointer-events-none'
-              : 'border-neutral-black-20'
-          )}>
+          <section className="flex flex-col gap-4 p-5 rounded-xl border border-neutral-black-20 bg-white shadow-sm">
             <PaymentMethodsSection
               paymentMethods={PAYMENT_METHODS}
               selectedMethod={form.paymentMethod}
@@ -257,12 +217,7 @@ export function NuevaOrdenForm() {
         <div className="flex-1 flex flex-col gap-4 min-w-0">
 
           {/* Productos */}
-          <section className={cn(
-            'flex flex-col gap-4 p-5 rounded-xl border bg-white shadow-sm transition-opacity duration-200',
-            !clientUnlocked
-              ? 'border-neutral-black-10 opacity-40 pointer-events-none'
-              : 'border-neutral-black-20'
-          )}>
+          <section className="flex flex-col gap-4 p-5 rounded-xl border border-neutral-black-20 bg-white shadow-sm">
             <ProductoSelector
               allProducts={form.allProducts}
               orderItems={form.orderItems}
@@ -273,12 +228,7 @@ export function NuevaOrdenForm() {
           </section>
 
           {/* Comentario */}
-          <section className={cn(
-            'flex flex-col gap-3 p-5 rounded-xl border bg-white shadow-sm transition-opacity duration-200',
-            !clientUnlocked
-              ? 'border-neutral-black-10 opacity-40 pointer-events-none'
-              : 'border-neutral-black-20'
-          )}>
+          <section className="flex flex-col gap-3 p-5 rounded-xl border border-neutral-black-20 bg-white shadow-sm">
             <h3 className="font-bold text-sm text-neutral-black-80">Comentario (opcional)</h3>
             <textarea
               value={form.comment}
@@ -384,35 +334,18 @@ export function NuevaOrdenForm() {
           )}
 
           {/* Botón principal */}
-          {isQuoteOnly ? (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={form.orderItems.length === 0}
-              className="w-full h-12 text-sm font-bold"
-              onClick={() => addToast({
-                title: 'Cotización',
-                description: `Total estimado: ${fmt(form.total)}. Agrega un cliente para crear la orden.`,
-                color: 'default',
-              })}
-            >
-              <Tag className="w-4 h-4 mr-2" />
-              Calcular Cotización — {fmt(form.total)}
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              onClick={form.handleSubmit}
-              disabled={form.isSubmitting || !form.client || !form.selectedLocationId || form.orderItems.length === 0}
-              className="w-full h-12 text-sm font-bold"
-            >
-              {form.isSubmitting ? (
-                <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creando orden...</>
-              ) : (
-                `Crear Orden${totalUnidades > 0 ? ` · ${fmt(form.total)}` : ''}`
-              )}
-            </Button>
-          )}
+          <Button
+            type="button"
+            onClick={form.handleSubmit}
+            disabled={form.isSubmitting || !form.client || !form.selectedLocationId || form.orderItems.length === 0}
+            className="w-full h-12 text-sm font-bold"
+          >
+            {form.isSubmitting ? (
+              <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creando orden...</>
+            ) : (
+              `Crear Orden${totalUnidades > 0 ? ` · ${fmt(form.total)}` : ''}`
+            )}
+          </Button>
 
         </div>
       </div>

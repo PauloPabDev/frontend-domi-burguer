@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from 'react';
-import { Loader2, UserCheck, UserX, Phone } from 'lucide-react';
+import React, { useState } from 'react';
+import { Loader2, UserCheck, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PhoneNumberInput } from '@/components/ui/inputPhone';
 import { ApiClient } from '@/services/clientService';
 import { ClientState } from '@/hooks/recepcion/useNuevaOrden';
 
@@ -33,18 +34,13 @@ export function ClienteSearch({
       <h3 className="font-bold text-sm text-neutral-black-80">Buscar cliente</h3>
 
       <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-black-40" />
-          <Input
-            type="tel"
-            placeholder="+57 300 000 0000"
-            value={phone}
-            onChange={(e) => onPhoneChange(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onSearch(); } }}
-            className="pl-9"
-            disabled={isLoading}
-          />
-        </div>
+        <PhoneNumberInput
+          className="flex-1"
+          value={phone}
+          onChange={(val: string | undefined) => onPhoneChange(val ?? '')}
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') { e.preventDefault(); onSearch(); } }}
+          disabled={isLoading}
+        />
         <Button
           type="button"
           onClick={onSearch}
