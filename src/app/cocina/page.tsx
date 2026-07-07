@@ -86,25 +86,25 @@ export default function CocinaPage() {
           <button
             onClick={() => setSortMode('time')}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer',
               sortMode === 'time'
                 ? 'bg-white text-neutral-black-80 shadow-sm'
                 : 'text-neutral-black-50 hover:text-neutral-black-80'
             )}
           >
-            <Clock size={12} />
+            <Clock size={12} className="pointer-events-none" />
             Hora
           </button>
           <button
             onClick={() => setSortMode('status')}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer',
               sortMode === 'status'
                 ? 'bg-white text-neutral-black-80 shadow-sm'
                 : 'text-neutral-black-50 hover:text-neutral-black-80'
             )}
           >
-            <Layers size={12} />
+            <Layers size={12} className="pointer-events-none" />
             Estado
           </button>
         </div>

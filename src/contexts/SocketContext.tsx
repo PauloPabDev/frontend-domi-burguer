@@ -8,6 +8,7 @@ import { RawSocketOrder } from '@/types/rawSocketOrder';
 import { WorkerOrder } from '@/types/worker';
 import { useAuth } from '@/contexts/AuthContext';
 import { normalizeSocketOrder, normalizeSocketOrders } from '@/utils/normalizeSocketOrder';
+import { playOrderNotification } from '@/utils/notificationSound';
 
 interface SocketContextType {
   orders: WorkerOrder[];
@@ -139,6 +140,18 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       setOrders(sortOrders(normalized));
     });
 
+    const notifyNewKitchenOrder = (order: WorkerOrder) => {
+      playOrderNotification();
+      const itemsSummary = order.orderItems.slice(0, 2).map((i) => i.name).join(', ');
+      const extra = order.orderItems.length > 2 ? ` +${order.orderItems.length - 2} más` : '';
+      addToast({
+        title: `Nueva orden #${order.dailyOrderNumber}`,
+        description: `${order.client?.name ?? 'Cliente'} · ${itemsSummary}${extra}`,
+        color: 'warning',
+        timeout: 2000,
+      });
+    };
+
     socketRef.current.on('order/create', (raw: RawSocketOrder) => {
       const order = normalizeSocketOrder(raw);
       orderIdsRef.current.add(order.id);
@@ -147,17 +160,27 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
         map.set(order.id, order);
         return sortOrders(Array.from(map.values()));
       });
+      console.log(role, 'role')
+      if (role === 'cook') {
+        notifyNewKitchenOrder(order);
+      }
     });
 
     socketRef.current.on('order/update', (raw: RawSocketOrder) => {
       const order = normalizeSocketOrder(raw);
-      if (role === 'courier' && !orderIdsRef.current.has(order.id)) {
+      const isNew = !orderIdsRef.current.has(order.id);
+
+      if (role === 'courier' && isNew) {
         addToast({
           title: 'Nueva orden asignada',
           description: order.client?.name ?? 'Cliente',
           color: 'success',
           timeout: 5000,
         });
+      }
+
+      if (role === 'cook' && isNew) {
+        notifyNewKitchenOrder(order);
       }
       orderIdsRef.current.add(order.id);
       setOrders((prev) => {
