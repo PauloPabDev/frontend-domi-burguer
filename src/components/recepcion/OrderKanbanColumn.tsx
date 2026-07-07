@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useCallback } from 'react';
 import { WorkerOrder, WorkerUser, WorkerKitchen, STATUS_CONFIG } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { RecepcionOrderCard } from './RecepcionOrderCard';
@@ -15,6 +16,10 @@ interface OrderKanbanColumnProps {
   onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
 }
 
+function blend(a: number, b: number, t: number) {
+  return Math.round(a + (b - a) * t);
+}
+
 export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   status,
   orders,
@@ -25,6 +30,25 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   onAssignKitchen,
 }) => {
   const cfg = STATUS_CONFIG[status];
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const max = el.scrollHeight - el.clientHeight;
+    if (max <= 0) return;
+
+    // Curva cuadrática: el color cambia más rápido cerca del fondo
+    const pct = Math.min(el.scrollTop / max, 1);
+    const eased = pct ** 1.8;
+
+    // gris neutro → rojo
+    const r = blend(212, 239, eased);
+    const g = blend(212, 68, eased);
+    const b = blend(212, 68, eased);
+
+    el.style.setProperty('--scroll-thumb', `rgb(${r} ${g} ${b})`);
+  }, []);
 
   return (
     <div className="flex flex-col min-w-[240px] flex-1 h-full">
@@ -38,7 +62,11 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
       </div>
 
       {/* Cards */}
-      <div className="space-y-2 flex-1 overflow-y-auto pr-0.5">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="kanban-scroll space-y-2 flex-1 overflow-y-auto pr-0.5"
+      >
         {orders.length === 0 ? (
           <div className="py-6 text-center text-xs text-neutral-black-50 border border-dashed border-neutral-black-20 rounded-xl">
             Sin pedidos
