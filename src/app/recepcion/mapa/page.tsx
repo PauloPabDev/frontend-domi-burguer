@@ -83,10 +83,10 @@ export default function RecepcionMapaPage() {
     await WorkerOrderService.assignKitchen(token, orderId, kitchenId);
   };
 
-  const handlePaymentMethodChange = async (orderId: string, method: string) => {
+  const handlePaymentMethodChange = async (orderId: string, previousMethod: string, method: string) => {
     if (!user) return;
     const token = await user.getIdToken();
-    await WorkerOrderService.updatePaymentMethod(token, orderId, method);
+    await WorkerOrderService.updatePaymentMethod(token, orderId, previousMethod, method);
   };
 
   const handleMarkPaid = async (orderId: string) => {

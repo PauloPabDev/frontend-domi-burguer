@@ -47,6 +47,7 @@ export function OrderPaymentRow({
   onMarkPaid,
 }: OrderPaymentRowProps) {
   const [showPicker, setShowPicker] = useState(false);
+  const [confirmingPaid, setConfirmingPaid] = useState(false);
   const [loadingMethod, setLoadingMethod] = useState<string | null>(null);
   const [loadingPaid, setLoadingPaid] = useState(false);
 
@@ -72,18 +73,30 @@ export function OrderPaymentRow({
     }
   };
 
-  const handlePriceClick = async () => {
-    if (!canMarkPaid || loadingPaid) return;
+  const handlePriceClick = () => {
+    if (!canMarkPaid) return;
+    setConfirmingPaid(true);
+  };
+
+  const handleConfirmPaid = async () => {
     setLoadingPaid(true);
     try {
       await onMarkPaid!();
+      setConfirmingPaid(false);
     } finally {
       setLoadingPaid(false);
     }
   };
 
+  const isLoading = !!loadingMethod || loadingPaid;
+
   return (
-    <div className={cn(withBorderTop && 'border-t border-neutral-black-10 pt-2', className)}>
+    <div className={cn('relative', withBorderTop && 'border-t border-neutral-black-10 pt-2', className)}>
+      {isLoading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/70 backdrop-blur-[1px]">
+          <Loader2 size={18} className="text-neutral-black-50 animate-spin" />
+        </div>
+      )}
       <div className="flex items-center justify-between">
         {/* Método de pago — clic para abrir selector */}
         <button
@@ -112,7 +125,7 @@ export function OrderPaymentRow({
         <button
           type="button"
           onClick={handlePriceClick}
-          disabled={!canMarkPaid || loadingPaid}
+          disabled={!canMarkPaid}
           className={cn(
             'flex items-center gap-1 rounded-lg px-1 py-0.5 transition-colors',
             canMarkPaid
@@ -120,7 +133,6 @@ export function OrderPaymentRow({
               : 'cursor-default',
           )}
         >
-          {loadingPaid && <Loader2 size={12} className="text-green-500 animate-spin" />}
           <span
             className={cn(
               'text-base font-bold transition-colors',
@@ -140,6 +152,29 @@ export function OrderPaymentRow({
         <div className="flex items-center justify-between mt-1.5">
           <span className="text-sm text-neutral-black-50">Con {formatCOP(cashChange.bill)}</span>
           <span className="text-sm font-semibold text-amber-600">Devolver {formatCOP(cashChange.change)}</span>
+        </div>
+      )}
+
+      {/* Confirmación de pago */}
+      {confirmingPaid && (
+        <div className="flex gap-1.5 mt-2">
+          <button
+            type="button"
+            onClick={() => setConfirmingPaid(false)}
+            disabled={loadingPaid}
+            className="flex-1 py-1.5 rounded-lg bg-neutral-black-5 text-neutral-black-50 text-xs font-semibold hover:bg-neutral-black-10 transition-colors disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirmPaid}
+            disabled={loadingPaid}
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-semibold transition-colors disabled:opacity-60"
+          >
+            {loadingPaid && <Loader2 size={12} className="animate-spin" />}
+            {loadingPaid ? 'Registrando...' : 'Confirmar'}
+          </button>
         </div>
       )}
 

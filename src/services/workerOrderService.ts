@@ -78,12 +78,13 @@ export class WorkerOrderService {
   static async updatePaymentMethod(
     token: string,
     orderId: string,
+    previousPaymentMethod: string,
     paymentMethod: string
   ): Promise<{ body: WorkerOrder }> {
-    const response = await fetch(`${this.API_URL}api/v2/orders/payment-method/${orderId}`, {
+    const response = await fetch(`${this.API_URL}api/v2/orders/paymentMethod/${orderId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ paymentMethod }),
+      body: JSON.stringify({ previousPaymentMethod, paymentMethod }),
     });
     if (!response.ok) throw new Error('Error al actualizar el método de pago');
     return response.json();
@@ -93,7 +94,7 @@ export class WorkerOrderService {
     token: string,
     orderId: string
   ): Promise<{ body: WorkerOrder }> {
-    const response = await fetch(`${this.API_URL}api/v2/orders/mark-paid/${orderId}`, {
+    const response = await fetch(`${this.API_URL}api/v2/orders/payment/${orderId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     });

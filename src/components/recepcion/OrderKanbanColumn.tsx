@@ -13,7 +13,7 @@ interface OrderKanbanColumnProps {
   onStatusChange: (orderId: string, prev: OrderStatus, next: OrderStatus) => Promise<void>;
   onAssignCourier: (orderId: string, courierId: string) => Promise<void>;
   onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
-  onPaymentMethodChange?: (orderId: string, method: string) => Promise<void>;
+  onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid?: (orderId: string) => Promise<void>;
 }
 
