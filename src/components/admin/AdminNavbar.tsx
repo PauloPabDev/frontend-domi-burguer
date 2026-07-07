@@ -1,42 +1,59 @@
 "use client";
 
-import { Users, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { NavStickyShell } from '@/components/navbar/NavStickyShell';
-import { NavLinkItem } from '@/components/navbar/NavLinkItem';
+import { LayoutDashboard, Users } from 'lucide-react';
+import { ElementType } from 'react';
+import { Button } from '@/components/ui/button';
+import { NavWorkerAvatar } from '@/components/navbar/NavWorkerAvatar';
+import { NavPillShell } from '@/components/navbar/NavPillShell';
+import { NavPillLogo } from '@/components/navbar/NavPillLogo';
 import { NavLogoutButton } from '@/components/navbar/NavLogoutButton';
 
-const NAV_LINKS = [
-  { href: '/admin',          label: 'Dashboard', Icon: undefined,  matchStart: false },
-  { href: '/admin/usuarios', label: 'Usuarios',  Icon: Users,      matchStart: true  },
+interface NavLink {
+  href: string;
+  label: string;
+  Icon: ElementType;
+  matchStart: boolean;
+}
+
+const NAV_LINKS: NavLink[] = [
+  { href: '/admin',          label: 'DASHBOARD', Icon: LayoutDashboard, matchStart: false },
+  { href: '/admin/usuarios', label: 'USUARIOS',  Icon: Users,           matchStart: true  },
 ];
 
 export const AdminNavbar: React.FC = () => {
   const pathname = usePathname();
 
   return (
-    <NavStickyShell>
-      <div className="flex items-center gap-3">
-        <span className="font-bold text-primary-red text-sm">DomiBurguer</span>
-        <span className="flex items-center gap-1 text-xs font-semibold text-neutral-black-50 bg-neutral-black-10 px-2 py-0.5 rounded-full">
-          <ShieldCheck size={11} />
-          Admin
-        </span>
+    <NavPillShell>
+      {/* Left: Avatar */}
+      <div className="flex items-center">
+        <NavWorkerAvatar />
       </div>
 
-      <nav className="flex items-center gap-1">
-        {NAV_LINKS.map(({ href, label, Icon, matchStart }) => (
-          <NavLinkItem
-            key={href}
-            href={href}
-            label={label}
-            Icon={Icon}
-            isActive={matchStart ? pathname.startsWith(href) : pathname === href}
-          />
-        ))}
-      </nav>
+      {/* Center: Logo */}
+      <NavPillLogo href="/admin" />
 
-      <NavLogoutButton />
-    </NavStickyShell>
+      {/* Right: Nav buttons + logout */}
+      <div className="flex items-center justify-end gap-2">
+        {NAV_LINKS.map(({ href, label, Icon, matchStart }) => {
+          const isActive = matchStart ? pathname.startsWith(href) : pathname === href;
+          return (
+            <Link key={href} href={href} tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
+              <Button
+                variant={isActive ? 'primary' : 'light-outline'}
+                size="md"
+                leftIcon={<Icon className="w-4 h-4 md:w-5 md:h-5" />}
+                className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
+              >
+                <span className="hidden sm:inline">{label}</span>
+              </Button>
+            </Link>
+          );
+        })}
+        <NavLogoutButton />
+      </div>
+    </NavPillShell>
   );
 };

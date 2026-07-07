@@ -1,26 +1,23 @@
 "use client";
 
-import { ClipboardList, History, PlusCircle } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ClipboardList, History, PlusCircle } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
-import { NavStickyShell } from '@/components/navbar/NavStickyShell';
-import { NavLinkItem } from '@/components/navbar/NavLinkItem';
-import { NavLogoutButton } from '@/components/navbar/NavLogoutButton';
-import { NavConnectionDot } from '@/components/navbar/NavConnectionDot';
+import { Button } from '@/components/ui/button';
+import { useNavShadow } from '@/components/navbar/useNavShadow';
+import { NavWorkerAvatar } from '@/components/navbar/NavWorkerAvatar';
+import { NavPillShell } from '@/components/navbar/NavPillShell';
+import { NavPillLogo } from '@/components/navbar/NavPillLogo';
 import { NavKitchenDropdown } from '@/components/navbar/NavKitchenDropdown';
+import { NavLogoutButton } from '@/components/navbar/NavLogoutButton';
 
 interface RecepcionNavbarProps {
   kitchens?: WorkerKitchen[];
   selectedKitchen?: WorkerKitchen | null;
   onKitchenChange?: (id: string | null) => void;
 }
-
-const NAV_LINKS = [
-  { href: '/recepcion',             label: 'Pedidos',     Icon: ClipboardList },
-  { href: '/recepcion/historial',   label: 'Historial',   Icon: History       },
-  { href: '/recepcion/nueva-orden', label: 'Nueva Orden', Icon: PlusCircle    },
-];
 
 export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
   kitchens = [],
@@ -29,55 +26,68 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
 }) => {
   const { orders, connectionStatus } = useSocket();
   const pathname = usePathname();
+  const navShadow = useNavShadow(connectionStatus);
 
   const activeOrders = orders.filter(
     (o) => o.status === 'fresh' || o.status === 'preparing' || o.status === 'ready_for_pickup',
   );
 
   return (
-    <NavStickyShell>
-      {/* Logo + kitchen selector */}
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="font-bold text-primary-red text-sm">DomiBurguer</span>
-        <span className="text-neutral-black-20">|</span>
-
-        {kitchens.length > 0 ? (
+    <NavPillShell navShadow={navShadow}>
+      {/* Left: Avatar + Kitchen selector */}
+      <div className="flex items-center gap-2">
+        <NavWorkerAvatar />
+        {kitchens.length > 0 && (
           <NavKitchenDropdown
             kitchens={kitchens}
             selectedKitchen={selectedKitchen}
             onKitchenChange={onKitchenChange}
-            variant="inline"
+            variant="pill"
           />
-        ) : (
-          <span className="text-xs font-semibold text-neutral-black-50 bg-neutral-black-10 px-2 py-0.5 rounded-full">
-            Recepción
-          </span>
         )}
       </div>
 
-      {/* Nav links */}
-      <nav className="flex items-center gap-1">
-        {NAV_LINKS.map(({ href, label, Icon }) => (
-          <NavLinkItem
-            key={href}
-            href={href}
-            label={label}
-            Icon={Icon}
-            isActive={pathname === href}
-          />
-        ))}
-      </nav>
+      {/* Center: Logo */}
+      <NavPillLogo href="/recepcion" />
 
-      {/* Right: connection indicator + orders count + logout */}
-      <div className="flex items-center gap-3">
-        <NavConnectionDot status={connectionStatus} />
-        {activeOrders.length > 0 && (
-          <span className="min-w-[20px] h-5 flex items-center justify-center bg-primary-red text-white text-[10px] font-bold rounded-full px-1.5">
-            {activeOrders.length}
-          </span>
-        )}
+      {/* Right: Nav buttons + logout */}
+      <div className="flex items-center justify-end gap-2">
+        <Link href="/recepcion/nueva-orden" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
+          <Button
+            variant={pathname === '/recepcion/nueva-orden' ? 'primary' : 'light-outline'}
+            size="md"
+            leftIcon={<PlusCircle className="w-4 h-4 md:w-5 md:h-5" />}
+            className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
+          >
+            <span className="hidden sm:inline">NUEVA</span>
+          </Button>
+        </Link>
+
+        <Link href="/recepcion/historial" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
+          <Button
+            variant={pathname === '/recepcion/historial' ? 'primary' : 'light-outline'}
+            size="md"
+            leftIcon={<History className="w-4 h-4 md:w-5 md:h-5" />}
+            className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
+          >
+            <span className="hidden sm:inline">HISTORIAL</span>
+          </Button>
+        </Link>
+
+        <Link href="/recepcion" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
+          <Button
+            variant="primary"
+            size="md"
+            leftIcon={<ClipboardList className="w-4 h-4 md:w-5 md:h-5 text-white" />}
+            badge={activeOrders.length > 0 ? activeOrders.length : undefined}
+            className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
+          >
+            <span className="hidden sm:inline">PEDIDOS</span>
+          </Button>
+        </Link>
+
         <NavLogoutButton />
       </div>
-    </NavStickyShell>
+    </NavPillShell>
   );
 };
