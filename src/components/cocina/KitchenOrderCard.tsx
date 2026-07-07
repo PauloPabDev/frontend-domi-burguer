@@ -25,7 +25,7 @@ interface KitchenOrderCardProps {
 }
 
 const COOK_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: string; variant: 'primary' | 'dark' }>> = {
-  fresh:     { next: 'preparing',        label: 'Preparar',            variant: 'primary' },
+  fresh: { next: 'preparing', label: 'Preparar', variant: 'primary' },
   preparing: { next: 'ready_for_pickup', label: 'Listo para despacho', variant: 'dark' },
 };
 
@@ -52,9 +52,6 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onSta
           <OrderTimeChip time={formatTime(order.createdAt)} className="ml-auto" />
         </div>
 
-        <div className="mt-3 px-1">
-          <StatusStepBar steps={KITCHEN_STEPS} currentStatus={order.status} />
-        </div>
 
         {order.comment && <OrderComment comment={order.comment} className="mt-3" />}
       </div>

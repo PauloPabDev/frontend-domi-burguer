@@ -19,7 +19,7 @@ function KitchenLayoutInner({ children }: { children: React.ReactNode }) {
         onKitchenChange={selectKitchen}
         loadingKitchens={loading}
       />
-      <main className="max-w-screen-md mx-auto px-4 mt-[90px] pb-6">
+      <main className="w-full px-4 mt-[90px] pb-6">
         {children}
       </main>
     </SocketProvider>

@@ -11,9 +11,9 @@ import { Button } from '@/components/ui/button';
 import { LogoDesktop, LogoMobile } from '@/components/ui/icons';
 import { cn } from '@/lib/utils';
 
-const GLOW_GREEN  = '0 0 24px 6px rgba(34,197,94,0.45)';
+const GLOW_GREEN = '0 0 24px 6px rgba(34,197,94,0.45)';
 const GLOW_ORANGE = '0 0 24px 6px rgba(249,115,22,0.50)';
-const GLOW_RED    = '0 0 24px 6px rgba(239,68,68,0.45)';
+const GLOW_RED = '0 0 24px 6px rgba(239,68,68,0.45)';
 
 interface KitchenNavbarProps {
   kitchens: WorkerKitchen[];
@@ -121,15 +121,6 @@ export const KitchenNavbar: React.FC<KitchenNavbarProps> = ({
             </span>
           )}
 
-          <Button
-            onClick={handleLogout}
-            variant="ghost"
-            size="md"
-            className="rounded-full h-10 w-10 p-0"
-            title="Cerrar sesión"
-          >
-            <LogOut className="w-4 h-4 text-neutral-black-50" />
-          </Button>
         </div>
       </div>
     </nav>

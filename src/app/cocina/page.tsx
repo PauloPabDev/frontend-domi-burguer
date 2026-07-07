@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 type SortMode = 'time' | 'status';
 
-const STATUS_ORDER: Record<string, number> = { fresh: 0, preparing: 1, ready_for_pickup: 2 };
+const STATUS_ORDER: Record<string, number> = { ready_for_pickup: 0, preparing: 1, fresh: 2 };
 
 export default function CocinaPage() {
   const { user } = useAuth();
@@ -103,7 +103,7 @@ export default function CocinaPage() {
           <p className="text-sm">No hay pedidos activos en tu cocina</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {sortedOrders.map((order) => (
             <KitchenOrderCard
               key={order.id}
