@@ -56,6 +56,8 @@ export default function DomiciliarioPage() {
       position: o.deliveryAddress!.coordinates,
       label: String(o.dailyOrderNumber),
       color: STATUS_CONFIG[o.status]?.hex,
+      avatarUrl: o.client?.photoURL,
+      clientName: o.client?.name,
     }));
 
   const selectedOrder = enrichedOrders.find((o) => o.id === selectedId);

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import { GoogleMap, OverlayView, useLoadScript } from "@react-google-maps/api";
 import { silverMapStyle } from "@/utils/mapStyles";
 
 const libraries: ("places")[] = ["places"];
@@ -11,13 +11,89 @@ export interface MapMarker {
   position: { lat: number; lng: number };
   label?: string;
   color?: string;
+  avatarUrl?: string;
+  clientName?: string;
 }
 
-function makePinSvgUrl(fill: string, selected: boolean): string {
-  const size = selected ? 48 : 36;
-  const ring = selected ? 6 : 5;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${Math.round(size * 1.25)}" viewBox="0 0 40 50"><path d="M20 0C9 0 0 9 0 20c0 14 20 30 20 30s20-16 20-30C40 9 31 0 20 0z" fill="${fill}"/><circle cx="20" cy="20" r="${ring}" fill="white" opacity="0.9"/></svg>`;
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+interface AvatarPinProps {
+  avatarUrl?: string;
+  clientName?: string;
+  color: string;
+  label: string;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+function AvatarPin({ avatarUrl, clientName, color, label, isSelected, onClick }: AvatarPinProps) {
+  const size = isSelected ? 52 : 40;
+  const borderWidth = isSelected ? 3 : 2;
+  const initial = clientName ? clientName.charAt(0).toUpperCase() : label;
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        cursor: "pointer",
+        filter: isSelected
+          ? "drop-shadow(0 4px 10px rgba(0,0,0,0.45))"
+          : "drop-shadow(0 2px 5px rgba(0,0,0,0.3))",
+        transition: "all 0.15s ease",
+        zIndex: isSelected ? 1000 : 1,
+        position: "relative",
+      }}
+    >
+      {/* Circle with avatar or initial */}
+      <div
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          border: `${borderWidth}px solid ${color}`,
+          backgroundColor: "white",
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={clientName || "cliente"}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <span
+            style={{
+              color,
+              fontWeight: "bold",
+              fontSize: isSelected ? 18 : 14,
+              userSelect: "none",
+              lineHeight: 1,
+            }}
+          >
+            {initial}
+          </span>
+        )}
+      </div>
+
+      {/* Triangle pointer */}
+      <div
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: "7px solid transparent",
+          borderRight: "7px solid transparent",
+          borderTop: `10px solid ${color}`,
+          marginTop: -1,
+        }}
+      />
+    </div>
+  );
 }
 
 interface MultiMarkerMapProps {
@@ -43,7 +119,6 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
   defaultZoom = 13,
   selectedZoom = 15,
 }) => {
-  console.log("Markers en MultiMarkerMap:", markers);
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
     libraries,
@@ -72,12 +147,7 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
 
   return (
     <GoogleMap
-      mapContainerStyle={{
-        width: "100%",
-        height: "100%",
-        minHeight,
-      }}
-
+      mapContainerStyle={{ width: "100%", height: "100%", minHeight }}
       mapContainerClassName={className}
       center={mapCenter}
       zoom={zoom}
@@ -92,24 +162,24 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
     >
       {markers.map((marker) => {
         const isSelected = marker.id === selectedMarkerId;
-        const pinUrl = marker.color
-          ? makePinSvgUrl(marker.color, isSelected)
-          : "/Pin.png";
-        const w = marker.color ? (isSelected ? 48 : 36) : (isSelected ? 70 : 50);
-        const h = marker.color ? (isSelected ? 60 : 45) : (isSelected ? 80 : 58);
+        const color = marker.color || "#FF5733";
+
         return (
-          <Marker
+          <OverlayView
             key={marker.id}
             position={marker.position}
-            onClick={() => handleMarkerClick(marker.id)}
-            icon={{
-              url: pinUrl,
-              scaledSize: new google.maps.Size(w, h),
-              anchor: new google.maps.Point(w / 2, h),
-            }}
-            opacity={isSelected ? 1 : 0.7}
-            title={marker.label}
-          />
+            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+            getPixelPositionOffset={(w, h) => ({ x: -w / 2, y: -h })}
+          >
+            <AvatarPin
+              avatarUrl={marker.avatarUrl}
+              clientName={marker.clientName}
+              color={color}
+              label={marker.label || ""}
+              isSelected={isSelected}
+              onClick={() => handleMarkerClick(marker.id)}
+            />
+          </OverlayView>
         );
       })}
     </GoogleMap>
