@@ -7,11 +7,13 @@ import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
 import { MultiMarkerMap, MapMarker } from '@/components/map/MultiMarkerMap';
 import { RecepcionOrderCard } from '@/components/recepcion/RecepcionOrderCard';
+import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
 import { WorkerOrderService } from '@/services/workerOrderService';
 import { OrderStatus } from '@/types/orders';
 import { STATUS_CONFIG } from '@/types/worker';
 import { MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCourierPanel } from '@/contexts/CourierPanelContext';
 
 const MAP_STATUSES: OrderStatus[] = ['fresh', 'preparing', 'ready_for_pickup', 'dispatched'];
 
@@ -21,6 +23,7 @@ export default function RecepcionMapaPage() {
   const { kitchens } = useKitchenSelector();
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
 
+  const { filterCourierIds } = useCourierPanel();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeStatuses, setActiveStatuses] = useState<Set<OrderStatus>>(new Set(MAP_STATUSES));
 
@@ -50,7 +53,10 @@ export default function RecepcionMapaPage() {
   };
 
   const visibleOrders = enrichedOrders.filter(
-    (o) => activeStatuses.has(o.status) && o.deliveryAddress?.coordinates,
+    (o) =>
+      activeStatuses.has(o.status) &&
+      o.deliveryAddress?.coordinates &&
+      (filterCourierIds.size === 0 || (o.courierId && filterCourierIds.has(o.courierId))),
   );
 
   const markers: MapMarker[] = visibleOrders.map((o) => ({
@@ -112,6 +118,9 @@ export default function RecepcionMapaPage() {
 
       {/* Sidebar */}
       <div className="lg:w-[360px] lg:flex-none flex flex-col gap-2 min-h-0 pb-4">
+        {/* Courier filter */}
+        <CourierFilterPanel className="shrink-0" />
+
         {/* Status filter chips */}
         <div className="flex gap-1.5 flex-wrap shrink-0">
           {MAP_STATUSES.map((status) => {

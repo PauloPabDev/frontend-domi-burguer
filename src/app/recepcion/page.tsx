@@ -4,7 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
 import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
+import { useCourierPanel } from '@/contexts/CourierPanelContext';
 import { OrderKanbanColumn } from '@/components/recepcion/OrderKanbanColumn';
+import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
 import { WorkerOrderService } from '@/services/workerOrderService';
 import { OrderStatus } from '@/types/orders';
 
@@ -21,11 +23,17 @@ export default function RecepcionPage() {
   const { user } = useAuth();
   const { orders } = useSocket();
   const { kitchens } = useKitchenSelector();
+  const { filterCourierIds } = useCourierPanel();
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
+
+  const filteredOrders =
+    filterCourierIds.size === 0
+      ? enrichedOrders
+      : enrichedOrders.filter((o) => o.courierId && filterCourierIds.has(o.courierId));
 
   const ordersByStatus = KANBAN_STATUSES.reduce<Record<string, typeof enrichedOrders>>(
     (acc, status) => {
-      acc[status] = enrichedOrders.filter((o) => o.status === status);
+      acc[status] = filteredOrders.filter((o) => o.status === status);
       return acc;
     },
     {}
@@ -62,21 +70,24 @@ export default function RecepcionPage() {
   };
 
   return (
-    <div className="overflow-x-auto overflow-y-hidden -mb-4 h-[calc(100vh-106px)]">
-      <div className="flex gap-3 min-w-max h-full">
-        {KANBAN_STATUSES.map((status) => (
-          <OrderKanbanColumn
-            key={status}
-            status={status}
-            orders={ordersByStatus[status] ?? []}
-            kitchens={kitchens}
-            onStatusChange={handleStatusChange}
-            onAssignCourier={handleAssignCourier}
-            onAssignKitchen={handleAssignKitchen}
-            onPaymentMethodChange={handlePaymentMethodChange}
-            onMarkPaid={handleMarkPaid}
-          />
-        ))}
+    <div className="-mb-4 h-[calc(100vh-106px)] flex flex-col gap-2">
+      <CourierFilterPanel />
+      <div className="flex-1 overflow-x-auto overflow-y-hidden min-h-0">
+        <div className="flex gap-3 min-w-max h-full">
+          {KANBAN_STATUSES.map((status) => (
+            <OrderKanbanColumn
+              key={status}
+              status={status}
+              orders={ordersByStatus[status] ?? []}
+              kitchens={kitchens}
+              onStatusChange={handleStatusChange}
+              onAssignCourier={handleAssignCourier}
+              onAssignKitchen={handleAssignKitchen}
+              onPaymentMethodChange={handlePaymentMethodChange}
+              onMarkPaid={handleMarkPaid}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

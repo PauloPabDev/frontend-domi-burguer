@@ -13,6 +13,9 @@ interface CourierPanelContextValue {
   isPanelOpen: boolean;
   openPanel: () => void;
   closePanel: () => void;
+  filterCourierIds: Set<string>;
+  toggleFilterCourier: (id: string) => void;
+  clearCourierFilter: () => void;
 }
 
 const CourierPanelContext = createContext<CourierPanelContextValue | null>(null);
@@ -20,13 +23,29 @@ const CourierPanelContext = createContext<CourierPanelContextValue | null>(null)
 export const CourierPanelProvider = ({ children }: { children: ReactNode }) => {
   const { allCouriers, activeCouriers, toggleCourier, isActive, loading } = useActiveCouriers();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [filterCourierIds, setFilterCourierIds] = useState<Set<string>>(new Set());
 
   const openPanel = useCallback(() => setIsPanelOpen(true), []);
   const closePanel = useCallback(() => setIsPanelOpen(false), []);
 
+  const toggleFilterCourier = useCallback((id: string) => {
+    setFilterCourierIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const clearCourierFilter = useCallback(() => setFilterCourierIds(new Set()), []);
+
   return (
     <CourierPanelContext.Provider
-      value={{ allCouriers, activeCouriers, toggleCourier, isActive, loading, isPanelOpen, openPanel, closePanel }}
+      value={{
+        allCouriers, activeCouriers, toggleCourier, isActive, loading,
+        isPanelOpen, openPanel, closePanel,
+        filterCourierIds, toggleFilterCourier, clearCourierFilter,
+      }}
     >
       {children}
     </CourierPanelContext.Provider>
