@@ -13,6 +13,9 @@ export interface MapMarker {
   color?: string;
   avatarUrl?: string;
   clientName?: string;
+  isUnassigned?: boolean;
+  courierAvatarUrl?: string;
+  courierName?: string;
 }
 
 interface AvatarPinProps {
@@ -21,13 +24,18 @@ interface AvatarPinProps {
   color: string;
   label: string;
   isSelected: boolean;
+  isUnassigned?: boolean;
+  courierAvatarUrl?: string;
+  courierName?: string;
   onClick: () => void;
 }
 
-function AvatarPin({ avatarUrl, clientName, color, label, isSelected, onClick }: AvatarPinProps) {
+function AvatarPin({ avatarUrl, clientName, color, label, isSelected, isUnassigned, courierAvatarUrl, courierName, onClick }: AvatarPinProps) {
   const size = isSelected ? 52 : 40;
   const borderWidth = isSelected ? 3 : 2;
   const initial = clientName ? clientName.charAt(0).toUpperCase() : label;
+  const courierSize = isSelected ? 22 : 18;
+  const hasCourier = courierAvatarUrl || courierName;
 
   return (
     <div
@@ -45,39 +53,90 @@ function AvatarPin({ avatarUrl, clientName, color, label, isSelected, onClick }:
         position: "relative",
       }}
     >
-      {/* Circle with avatar or initial */}
-      <div
-        style={{
-          width: size,
-          height: size,
-          borderRadius: "50%",
-          border: `${borderWidth}px solid ${color}`,
-          backgroundColor: "white",
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={clientName || "cliente"}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          <span
+      {/* Circle container — relative so ping ring and courier badge can be absolute */}
+      <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+
+        {/* Radar ping ring for unassigned orders */}
+        {isUnassigned && (
+          <div
             style={{
-              color,
-              fontWeight: "bold",
-              fontSize: isSelected ? 18 : 14,
-              userSelect: "none",
-              lineHeight: 1,
+              position: "absolute",
+              inset: 0,
+              borderRadius: "50%",
+              border: `2px solid ${color}`,
+              animation: "marker-ping 1.8s ease-out infinite",
+              pointerEvents: "none",
+            }}
+          />
+        )}
+
+        {/* Main circle with avatar or initial */}
+        <div
+          style={{
+            width: size,
+            height: size,
+            borderRadius: "50%",
+            border: `${borderWidth}px solid ${color}`,
+            backgroundColor: "white",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={clientName || "cliente"}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <span
+              style={{
+                color,
+                fontWeight: "bold",
+                fontSize: isSelected ? 18 : 14,
+                userSelect: "none",
+                lineHeight: 1,
+              }}
+            >
+              {initial}
+            </span>
+          )}
+        </div>
+
+        {/* Courier badge — top-right corner */}
+        {hasCourier && (
+          <div
+            style={{
+              position: "absolute",
+              top: -5,
+              right: -5,
+              width: courierSize,
+              height: courierSize,
+              borderRadius: "50%",
+              border: "2px solid white",
+              backgroundColor: "#374151",
+              overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
+              flexShrink: 0,
             }}
           >
-            {initial}
-          </span>
+            {courierAvatarUrl ? (
+              <img
+                src={courierAvatarUrl}
+                alt={courierName || "domiciliario"}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              <span style={{ color: "white", fontWeight: "bold", fontSize: 8, userSelect: "none", lineHeight: 1 }}>
+                {courierName?.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
@@ -177,6 +236,9 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
               color={color}
               label={marker.label || ""}
               isSelected={isSelected}
+              isUnassigned={marker.isUnassigned}
+              courierAvatarUrl={marker.courierAvatarUrl}
+              courierName={marker.courierName}
               onClick={() => handleMarkerClick(marker.id)}
             />
           </OverlayView>

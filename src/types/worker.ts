@@ -54,6 +54,7 @@ export const STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
   dispatched: { label: 'Despachado', color: 'text-orange-700', bg: 'bg-orange-100', dotColor: 'bg-orange-500', hex: '#f97316' },
   delivered: { label: 'Entregado', color: 'text-teal-700', bg: 'bg-teal-100', dotColor: 'bg-teal-500', hex: '#14b8a6' },
   pending_payment: { label: 'Pago pendiente', color: 'text-red-800', bg: 'bg-red-100', dotColor: 'bg-red-700', hex: '#b91c1c' },
+  invoiced: { label: 'Facturación', color: 'text-emerald-700', bg: 'bg-emerald-100', dotColor: 'bg-emerald-500', hex: '#10b981' },
   cancelled: { label: 'Cancelado', color: 'text-neutral-500', bg: 'bg-neutral-100', dotColor: 'bg-neutral-400', hex: '#a3a3a3' },
 };
 

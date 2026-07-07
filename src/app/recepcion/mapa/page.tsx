@@ -66,6 +66,9 @@ export default function RecepcionMapaPage() {
     color: STATUS_CONFIG[o.status]?.hex,
     avatarUrl: o.client?.photoURL,
     clientName: o.client?.name,
+    isUnassigned: !o.courierId,
+    courierAvatarUrl: o.courier?.photoURL,
+    courierName: o.courier?.name,
   }));
 
   const selectedOrder = visibleOrders.find((o) => o.id === selectedId);

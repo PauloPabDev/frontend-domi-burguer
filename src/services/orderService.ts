@@ -113,6 +113,13 @@ export class OrderService {
         borderColor: 'border-red-800',
         isButton: false
       },
+      invoiced: {
+        label: 'FACTURADO',
+        color: 'text-white',
+        bgColor: 'bg-emerald-600',
+        borderColor: 'border-emerald-600',
+        isButton: false
+      },
       cancelled: {
         label: 'CANCELADO',
         color: 'text-neutral-600',

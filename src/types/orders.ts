@@ -78,6 +78,7 @@ export type OrderStatus =
   | 'ready_for_pickup'
   | 'dispatched'
   | 'delivered'
+  | 'invoiced'
   | 'pending_payment'
   | 'cancelled';
 

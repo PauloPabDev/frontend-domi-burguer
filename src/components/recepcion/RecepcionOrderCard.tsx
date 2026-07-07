@@ -172,7 +172,17 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   const [showCourierModal, setShowCourierModal] = useState(false);
   const [showKitchenModal, setShowKitchenModal] = useState(false);
 
-  const transition = RECEPTION_TRANSITIONS[order.status];
+  const transition = (() => {
+    if (order.status === 'delivered') {
+      return order.payment?.status === 'approved'
+        ? { next: 'invoiced' as const, label: 'Facturar' }
+        : { next: 'pending_payment' as const, label: 'Cobrar' };
+    }
+    if (order.status === 'pending_payment' && order.payment?.status === 'approved') {
+      return { next: 'invoiced' as const, label: 'Facturar' };
+    }
+    return RECEPTION_TRANSITIONS[order.status];
+  })();
 
   return (
     <>

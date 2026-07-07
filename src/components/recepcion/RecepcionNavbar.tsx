@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, Map, PlusCircle, Bike } from 'lucide-react';
+import { useRef, useEffect, useState } from 'react';
+import { ClipboardList, Map, PlusCircle, Bike, MoreHorizontal } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import { NavPillShell } from '@/components/navbar/NavPillShell';
 import { NavPillLogo } from '@/components/navbar/NavPillLogo';
 import { NavKitchenDropdown } from '@/components/navbar/NavKitchenDropdown';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
+import { cn } from '@/lib/utils';
 
 interface RecepcionNavbarProps {
   kitchens?: WorkerKitchen[];
@@ -28,10 +30,23 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
   const { activeCouriers, openPanel } = useCourierPanel();
   const pathname = usePathname();
   const navShadow = useNavShadow(connectionStatus);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
 
   const activeOrders = orders.filter(
     (o) => o.status === 'fresh' || o.status === 'preparing' || o.status === 'ready_for_pickup',
   );
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [moreOpen]);
 
   return (
     <NavPillShell navShadow={navShadow}>
@@ -51,19 +66,53 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
       {/* Center: Logo */}
       <NavPillLogo href="/recepcion" />
 
-      {/* Right: Nav buttons + logout */}
+      {/* Right: Nav buttons */}
       <div className="flex items-center justify-end gap-2">
-        <Button
-          variant="light-outline"
-          size="md"
-          leftIcon={<Bike className="w-4 h-4 md:w-5 md:h-5" />}
-          badge={activeCouriers.length > 0 ? activeCouriers.length : undefined}
-          onClick={openPanel}
-          className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
-        >
-          <span className="hidden sm:inline">MOTOS</span>
-        </Button>
+        {/* More menu: MOTOS + MAPA */}
+        <div ref={moreRef} className="relative">
+          <Button
+            variant="light-outline"
+            size="md"
+            leftIcon={<MoreHorizontal className="w-4 h-4 md:w-5 md:h-5" />}
+            badge={activeCouriers.length > 0 ? activeCouriers.length : undefined}
+            onClick={() => setMoreOpen((v) => !v)}
+            className={cn(
+              'h-10 lg:h-12 px-3 lg:px-4 text-sm lg:text-base',
+              moreOpen && 'bg-neutral-black-10',
+            )}
+          />
 
+          {moreOpen && (
+            <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-neutral-black-20 shadow-lg rounded-2xl py-1.5 z-50">
+              <button
+                onClick={() => { openPanel(); setMoreOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-neutral-black-80 hover:bg-neutral-black-10 rounded-xl transition-colors"
+              >
+                <Bike className="w-4 h-4 shrink-0" />
+                MOTOS
+                {activeCouriers.length > 0 && (
+                  <span className="ml-auto flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full text-sm font-bold bg-accent-yellow-10 text-neutral-black-80">
+                    {activeCouriers.length}
+                  </span>
+                )}
+              </button>
+
+              <Link href="/recepcion/mapa" onClick={() => setMoreOpen(false)}>
+                <span
+                  className={cn(
+                    'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold hover:bg-neutral-black-10 rounded-xl transition-colors',
+                    pathname === '/recepcion/mapa' ? 'text-primary-red' : 'text-neutral-black-80',
+                  )}
+                >
+                  <Map className="w-4 h-4 shrink-0" />
+                  MAPA
+                </span>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* CREAR — siempre visible */}
         <Link href="/recepcion/nueva-orden" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
           <Button
             variant={pathname === '/recepcion/nueva-orden' ? 'primary' : 'light-outline'}
@@ -75,19 +124,7 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
           </Button>
         </Link>
 
-
-
-        <Link href="/recepcion/mapa" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
-          <Button
-            variant={pathname === '/recepcion/mapa' ? 'primary' : 'light-outline'}
-            size="md"
-            leftIcon={<Map className="w-4 h-4 md:w-5 md:h-5" />}
-            className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
-          >
-            <span className="hidden sm:inline">MAPA</span>
-          </Button>
-        </Link>
-
+        {/* PEDIDOS — siempre visible */}
         <Link href="/recepcion" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
           <Button
             variant={pathname === '/recepcion' ? 'primary' : 'light-outline'}
@@ -99,7 +136,6 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
             <span className="hidden sm:inline">PEDIDOS</span>
           </Button>
         </Link>
-
       </div>
     </NavPillShell>
   );
