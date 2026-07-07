@@ -1,10 +1,11 @@
 "use client";
 
-import { Plus, MapPin, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, Loader2, AlertCircle, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Location } from '@/types/locations';
 import { DeliveryInfo } from '@/services/workerOrderService';
-import { cn } from '@/lib/utils';
+import { LocationCard } from './LocationCard';
 
 interface UbicacionesClienteProps {
   locations: Location[];
@@ -19,6 +20,8 @@ interface UbicacionesClienteProps {
   onRetryDelivery?: () => void;
 }
 
+const LOCATIONS_VISIBLE = 3;
+
 export function UbicacionesCliente({
   locations,
   loading,
@@ -31,6 +34,8 @@ export function UbicacionesCliente({
   onCreateLocation,
   onRetryDelivery,
 }: UbicacionesClienteProps) {
+  const [expanded, setExpanded] = useState(false);
+
   if (!clientId) {
     return (
       <div className="flex flex-col gap-3">
@@ -39,6 +44,9 @@ export function UbicacionesCliente({
       </div>
     );
   }
+
+  const visibleLocations = expanded ? locations : locations.slice(0, LOCATIONS_VISIBLE);
+  const hasMore = locations.length > LOCATIONS_VISIBLE;
 
   return (
     <div className="flex flex-col gap-3">
@@ -73,38 +81,34 @@ export function UbicacionesCliente({
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
-          {locations.map((location) => {
-            const isSelected = selectedLocationId === location.id;
-            return (
-              <button
-                key={location.id}
-                type="button"
-                onClick={() => onSelectLocation(location.id)}
-                className={cn(
-                  'flex items-start gap-3 p-3 rounded-lg border text-left transition-colors w-full',
-                  isSelected
-                    ? 'border-primary-red bg-primary-red/5'
-                    : 'border-neutral-black-20 hover:border-neutral-black-40 bg-white'
-                )}
-              >
-                <div className={cn(
-                  'mt-0.5 w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center',
-                  isSelected ? 'border-primary-red' : 'border-neutral-black-30'
-                )}>
-                  {isSelected && <div className="w-2 h-2 rounded-full bg-primary-red" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-neutral-black-80 truncate">{location.name}</p>
-                  <p className="text-xs text-neutral-black-50 truncate">{location.address}</p>
-                  {location.floor && (
-                    <p className="text-xs text-neutral-black-40">Piso / Apto: {location.floor}</p>
-                  )}
-                </div>
-                <MapPin className="w-3.5 h-3.5 text-neutral-black-30 shrink-0 mt-0.5" />
-              </button>
-            );
-          })}
+        <div className="flex flex-col gap-2">
+          {visibleLocations.map((location) => (
+            <LocationCard
+              key={location.id}
+              location={location}
+              isSelected={selectedLocationId === location.id}
+              onSelect={onSelectLocation}
+            />
+          ))}
+          {hasMore && (
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="flex items-center gap-1 text-xs text-neutral-black-50 hover:text-neutral-black-80 transition-colors self-start"
+            >
+              {expanded ? (
+                <>
+                  <ChevronUp className="w-3.5 h-3.5" />
+                  Ver menos
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                  Ver {locations.length - LOCATIONS_VISIBLE} más
+                </>
+              )}
+            </button>
+          )}
         </div>
       )}
 

@@ -78,13 +78,15 @@ export function ResumenPedido({ orderItems, subtotal, total, delivery }: Resumen
               <OrderItemRow key={item.itemId} item={item} />
             ))}
           </div>
+          <div className="border-t border-neutral-black-20" />
 
           <div className="flex flex-col gap-1.5 pt-1">
             <div className="flex justify-between text-sm text-neutral-black-60">
               <span>Subtotal ({totalUnidades} {totalUnidades === 1 ? 'producto' : 'productos'})</span>
               <span>{fmt(subtotal)}</span>
             </div>
-            {delivery && (
+            <div className="border-t border-neutral-black-20" />
+            {delivery ? (
               <div className="flex justify-between text-sm text-neutral-black-60">
                 <span className="flex items-center gap-1.5">
                   Domicilio
@@ -96,6 +98,10 @@ export function ResumenPedido({ orderItems, subtotal, total, delivery }: Resumen
                   )}
                 </span>
                 <span>{fmt(delivery.price)}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-sm text-red-500 font-semibold">
+                <span>Sin domicilio. Recoge o te quedas sin pedido.</span>
               </div>
             )}
             <div className="flex justify-between font-bold text-base text-neutral-black-80 pt-2 border-t border-neutral-black-20">

@@ -1,5 +1,5 @@
 import React from "react";
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import { GoogleMap, OverlayView, useLoadScript } from "@react-google-maps/api";
 import { silverMapStyle } from "@/utils/mapStyles";
 
 const libraries: ("places")[] = ["places"];
@@ -73,14 +73,22 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       }}
     >
       {coordinates && (
-        <Marker
+        <OverlayView
           position={coordinates}
-          icon={{
-            url: markerIcon,
-            scaledSize: new google.maps.Size(markerSize.width, markerSize.height),
-            anchor: new google.maps.Point(markerAnchor.x, markerAnchor.y),
-          }}
-        />
+          mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+          getPixelPositionOffset={() => ({
+            x: -markerAnchor.x,
+            y: -markerAnchor.y,
+          })}
+        >
+          <img
+            src={markerIcon}
+            alt="marker"
+            width={markerSize.width}
+            height={markerSize.height}
+            style={{ display: "block", pointerEvents: "none" }}
+          />
+        </OverlayView>
       )}
     </GoogleMap>
   );

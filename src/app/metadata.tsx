@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 
 export const metadataConfig: Metadata = {
+    metadataBase: new URL('https://domiburguer.com'),
     // Título base y plantilla para páginas internas
     title: {
         default: 'Domi Burguer - ¡Pídela ya!',
