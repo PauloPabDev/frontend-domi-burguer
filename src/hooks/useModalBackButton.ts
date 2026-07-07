@@ -1,5 +1,10 @@
 import { useEffect, useRef, useCallback } from "react";
 
+// Tracks how many history.back() cleanup calls are pending so that the async
+// popstate they fire is not mistaken for a user-initiated back press on a
+// freshly opened modal (race condition when modal closes and immediately reopens).
+let _pendingCleanupBacks = 0;
+
 interface UseModalBackButtonOptions {
   /** Estado de apertura del modal */
   open: boolean;
@@ -50,8 +55,12 @@ export function useModalBackButton({
 
   // Handler estable para popstate
   const handlePopState = useCallback(() => {
-    // Verificar si el state actual corresponde a antes de nuestro push
-    // (es decir, el usuario presiono back)
+    // Ignore popstate events fired by cleanup calls to history.back() from
+    // previously unmounted modal instances (race condition on quick reopen).
+    if (_pendingCleanupBacks > 0) {
+      _pendingCleanupBacks--;
+      return;
+    }
     if (historyPushed.current) {
       closedViaBackButton.current = true;
       historyPushed.current = false;
@@ -90,7 +99,9 @@ export function useModalBackButton({
   useEffect(() => {
     return () => {
       if (historyPushed.current) {
+        _pendingCleanupBacks++;
         window.history.back();
+        historyPushed.current = false;
       }
     };
   }, []);

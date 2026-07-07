@@ -46,19 +46,15 @@ export function NuevaOrdenForm() {
   }, [form.submitSuccess]);
 
   const handleOpenComplementEditor = useCallback((item: OrderItem) => {
+    console.log('Opening complement editor for item:', item);
     complementEditor.initEditor(item.complements);
     form.openComplementEditor(item);
   }, [complementEditor, form]);
 
   const handleAddProduct = useCallback((product: Product) => {
     if (form.showComplementModal) return;
-    if (product.allowCustomization) {
-      complementEditor.initEditor(product.complements);
-      form.addProductAndEdit(product);
-    } else {
-      form.addProduct(product);
-    }
-  }, [form, complementEditor]);
+    form.addProduct(product);
+  }, [form]);
 
   const totalUnidades = form.orderItems.reduce((s, i) => s + i.quantity, 0);
 
