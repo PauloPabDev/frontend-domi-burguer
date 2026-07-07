@@ -30,7 +30,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   const cfg = STATUS_CONFIG[status];
 
   return (
-    <div className="flex flex-col min-w-[280px] max-w-[320px] shrink-0">
+    <div className="flex flex-col min-w-[240px] flex-1">
       {/* Column header */}
       <div
         className={cn('flex items-center justify-between px-3 py-2 rounded-xl mb-2 cursor-pointer', cfg.bg)}

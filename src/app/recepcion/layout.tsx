@@ -18,7 +18,7 @@ function RecepcionLayoutInner({ children }: { children: React.ReactNode }) {
         selectedKitchen={selectedKitchen}
         onKitchenChange={selectKitchen}
       />
-      <main className="max-w-screen-xl mx-auto px-4 mt-[90px] py-4">{children}</main>
+      <main className="w-full px-4 mt-[90px] py-4">{children}</main>
     </SocketProvider>
   );
 }
