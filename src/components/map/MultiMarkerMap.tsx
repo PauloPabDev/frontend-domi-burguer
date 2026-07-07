@@ -77,14 +77,15 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
         height: "100%",
         minHeight,
       }}
+
       mapContainerClassName={className}
       center={mapCenter}
       zoom={zoom}
       options={{
         disableDefaultUI: false,
         zoomControl: true,
-        streetViewControl: false,
-        mapTypeControl: false,
+        streetViewControl: true,
+        mapTypeControl: true,
         fullscreenControl: false,
         styles: silverMapStyle,
       }}

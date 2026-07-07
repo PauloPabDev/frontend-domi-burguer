@@ -34,6 +34,7 @@ export default function DomiciliarioPage() {
     if (!carousel) return;
 
     const handleScrollEnd = () => {
+      if (window.innerWidth >= 1024) return;
       const center = carousel.scrollLeft + carousel.clientWidth / 2;
       let closestId: string | null = null;
       let closestDist = Infinity;
@@ -69,9 +70,9 @@ export default function DomiciliarioPage() {
   const isEmpty = enrichedOrders.length === 0;
 
   return (
-    <div className="h-[calc(100dvh-3.5rem)] flex flex-col py-3 gap-3">
-      {/* Map — always visible, fixed portion of screen */}
-      <div className="rounded-2xl overflow-hidden shadow-sm border border-neutral-black-20 h-[45%] shrink-0">
+    <div className="h-full flex flex-col lg:flex-row py-3 gap-3">
+      {/* Map */}
+      <div className="rounded-2xl overflow-hidden shadow-sm border border-neutral-black-20 h-[45%] shrink-0 lg:h-full lg:flex-1">
         <MultiMarkerMap
           markers={markers}
           selectedMarkerId={selectedId ?? undefined}
@@ -83,8 +84,8 @@ export default function DomiciliarioPage() {
         />
       </div>
 
-      {/* Orders carousel */}
-      <div className="flex-1 min-h-0 flex flex-col">
+      {/* Orders — carousel on mobile, vertical list on desktop */}
+      <div className="flex-1 min-h-0 flex flex-col lg:w-[360px] lg:flex-none">
         {connectionStatus === 'CONNECTING' && (
           <p className="text-sm text-center text-neutral-black-50 animate-pulse py-4">Conectando...</p>
         )}
@@ -97,7 +98,7 @@ export default function DomiciliarioPage() {
         ) : (
           <div
             ref={carouselRef}
-            className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 px-1 h-full items-start"
+            className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 px-1 h-full items-start lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden lg:snap-none lg:pb-2 lg:px-0 lg:items-stretch"
             style={{ scrollbarWidth: 'none' }}
           >
             {enrichedOrders.map((order) => (
@@ -107,7 +108,7 @@ export default function DomiciliarioPage() {
                   if (el) cardRefs.current.set(order.id, el);
                   else cardRefs.current.delete(order.id);
                 }}
-                className="snap-center shrink-0 w-[85vw] max-w-sm"
+                className="snap-center shrink-0 w-[85vw] max-w-sm lg:w-full lg:max-w-none lg:shrink-0 lg:snap-align-none"
               >
                 <CourierOrderCard
                   order={order}
