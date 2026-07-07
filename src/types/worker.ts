@@ -19,6 +19,7 @@ export interface WorkerOrder {
     name: string;
     phone: string;
     email?: string;
+    photoURL?: string;
   };
   courier?: {
     id: string;

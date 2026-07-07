@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import { WorkerOrder } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { StatusStepBar, StatusStep } from '@/components/ui/StatusStepBar';
 import { OrderItemsList } from '@/components/ui/OrderItemsList';
-import { OrderCardNumber } from '@/components/ui/OrderCardNumber';
-import { OrderClientInfo } from '@/components/ui/OrderClientInfo';
 import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
 import { OrderComment } from '@/components/ui/OrderComment';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
+import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
+import { OrderNumberChip, OrderClientChip, OrderTimeChip } from '@/components/ui/OrderClientChips';
+import { formatTime } from '@/lib/dates';
 
 const KITCHEN_STEPS: StatusStep[] = [
   { key: 'fresh', label: 'Nuevo' },
@@ -28,8 +29,10 @@ const COOK_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: 
   preparing: { next: 'ready_for_pickup', label: 'Listo para despacho', variant: 'dark' },
 };
 
+const SECTION = 'border-t border-neutral-black-10 p-4';
+
 export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onStatusChange }) => {
-  const [expanded, setExpanded] = useState(true);
+  const [addressOpen, setAddressOpen] = useState(false);
 
   const transition = COOK_TRANSITIONS[order.status];
 
@@ -39,18 +42,14 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onSta
 
       {/* Header */}
       <div className="p-4 pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <OrderCardNumber number={order.dailyOrderNumber} />
-            <OrderClientInfo name={order.client?.name} phone={order.client?.phone} />
-          </div>
-
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            className="p-1 text-neutral-black-50 hover:text-neutral-black-80 shrink-0"
-          >
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
+        <div className="flex items-center gap-2">
+          <OrderNumberChip orderNumber={order.dailyOrderNumber} />
+          <OrderClientChip
+            name={order.client?.name}
+            phone={order.client?.phone}
+            clientId={order.clientId}
+          />
+          <OrderTimeChip time={formatTime(order.createdAt)} className="ml-auto" />
         </div>
 
         <div className="mt-3 px-1">
@@ -60,13 +59,34 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onSta
         {order.comment && <OrderComment comment={order.comment} className="mt-3" />}
       </div>
 
-      {/* Productos (expandible) */}
-      {expanded && (
-        <div className="px-4 pb-3 border-t border-neutral-black-10 pt-3">
-          <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide mb-3">Productos</p>
-          <OrderItemsList items={order.orderItems} circleQty />
-        </div>
-      )}
+      {/* Productos */}
+      <div className={SECTION}>
+        <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide mb-3">Productos</p>
+        <OrderItemsList items={order.orderItems} circleQty />
+      </div>
+
+      {/* Dirección colapsable */}
+      <div className={SECTION}>
+        <button
+          type="button"
+          onClick={() => setAddressOpen((v) => !v)}
+          className="flex items-center gap-1.5 text-xs font-semibold text-neutral-black-50 hover:text-neutral-black-80 transition-colors"
+        >
+          <MapPin size={13} />
+          Ver dirección
+          {addressOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+        </button>
+
+        {addressOpen && (
+          <div className="mt-3">
+            <OrderAddressRow
+              location={order.location}
+              address={order.deliveryAddress?.address}
+              floor={order.deliveryAddress?.floor}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Acción */}
       {transition && onStatusChange && (

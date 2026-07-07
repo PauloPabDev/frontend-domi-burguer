@@ -1,14 +1,19 @@
 "use client";
 
-import { ChefHat, LogOut, ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { ChefHat, ChevronDown, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
-import { ConnectionStatus } from '@/types/courier';
 import { WorkerKitchen } from '@/types/worker';
+import { Button } from '@/components/ui/button';
+import { LogoDesktop, LogoMobile } from '@/components/ui/icons';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+
+const GLOW_GREEN  = '0 0 24px 6px rgba(34,197,94,0.45)';
+const GLOW_ORANGE = '0 0 24px 6px rgba(249,115,22,0.50)';
+const GLOW_RED    = '0 0 24px 6px rgba(239,68,68,0.45)';
 
 interface KitchenNavbarProps {
   kitchens: WorkerKitchen[];
@@ -16,15 +21,6 @@ interface KitchenNavbarProps {
   onKitchenChange: (id: string | null) => void;
   loadingKitchens?: boolean;
 }
-
-const STATUS_DOT: Record<ConnectionStatus, string> = {
-  CONNECTED:     'bg-green-500',
-  CONNECTING:    'bg-yellow-400 animate-pulse',
-  RECONNECTING:  'bg-yellow-400 animate-pulse',
-  DISCONNECTED:  'bg-red-500',
-  OFFLINE:       'bg-red-500',
-  IDLE:          'bg-neutral-400',
-};
 
 export const KitchenNavbar: React.FC<KitchenNavbarProps> = ({
   kitchens,
@@ -35,10 +31,23 @@ export const KitchenNavbar: React.FC<KitchenNavbarProps> = ({
   const { orders, connectionStatus, changeKitchen } = useSocket();
   const { logout } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [navShadow, setNavShadow] = useState<string | undefined>(undefined);
 
   const activeOrders = orders.filter((o) => o.status === 'fresh' || o.status === 'preparing');
+
+  useEffect(() => {
+    if (connectionStatus === 'CONNECTED') {
+      setNavShadow(GLOW_GREEN);
+      const t = setTimeout(() => setNavShadow(undefined), 2500);
+      return () => clearTimeout(t);
+    }
+    if (connectionStatus === 'RECONNECTING') {
+      setNavShadow(GLOW_ORANGE);
+      return;
+    }
+    setNavShadow(GLOW_RED);
+  }, [connectionStatus]);
 
   const handleKitchenSelect = (id: string | null) => {
     onKitchenChange(id);
@@ -52,69 +61,77 @@ export const KitchenNavbar: React.FC<KitchenNavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-neutral-black-20 shadow-sm">
-      <div className="max-w-screen-md mx-auto px-4 h-14 flex items-center justify-between gap-3">
-        {/* Logo + kitchen selector */}
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-primary-red text-sm">DomiBurguer</span>
-          <span className="text-neutral-black-20">|</span>
-          <div className="relative">
-            <button
-              onClick={() => setDropdownOpen((v) => !v)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-neutral-black-80 hover:text-primary-red transition-colors"
-            >
-              <ChefHat size={14} className="text-primary-red" />
-              <span className="max-w-[100px] truncate">{selectedKitchen?.name ?? 'Seleccionar'}</span>
-              <ChevronDown size={12} />
-            </button>
-            {dropdownOpen && (
-              <div className="absolute top-full left-0 mt-1 w-48 rounded-xl border border-neutral-black-20 bg-white shadow-lg py-1 z-50">
-                {kitchens.map((k) => (
-                  <button
-                    key={k.id}
-                    onClick={() => handleKitchenSelect(k.id)}
-                    className={cn(
-                      'w-full px-3 py-2 text-left text-xs hover:bg-neutral-black-10 transition-colors',
-                      selectedKitchen?.id === k.id ? 'font-bold text-primary-red' : 'text-neutral-black-80'
-                    )}
-                  >
-                    {k.name}
-                  </button>
-                ))}
-              </div>
-            )}
+    <nav className="fixed top-0 left-0 z-40 w-full px-4">
+      <div
+        style={{ boxShadow: navShadow, transition: 'box-shadow 0.8s ease-in-out' }}
+        className="max-w-[828px] md:h-[80px] h-[62px] mt-[20px] mb-[10px] rounded-[60px] border border-neutral-black-20 flex items-center justify-between w-full mx-auto px-4 sm:px-6 bg-white"
+      >
+        {/* Left: kitchen selector */}
+        <div className="flex w-[220px] items-center relative">
+          <Button
+            onClick={() => setDropdownOpen((v) => !v)}
+            variant="light-outline"
+            size="md"
+            leftIcon={<ChefHat className="w-4 h-4 text-primary-red" />}
+            className="rounded-full h-10 lg:h-12 px-4"
+          >
+            <span className="max-w-[90px] truncate text-xs md:text-sm">
+              {selectedKitchen?.name ?? 'Cocina'}
+            </span>
+            <ChevronDown size={13} className="shrink-0" />
+          </Button>
+
+          {dropdownOpen && (
+            <div className="absolute top-full left-0 mt-2 w-52 rounded-2xl border border-neutral-black-20 bg-white shadow-lg py-1.5 z-50">
+              {kitchens.map((k) => (
+                <button
+                  key={k.id}
+                  onClick={() => handleKitchenSelect(k.id)}
+                  className={cn(
+                    'w-full px-4 py-2.5 text-left text-sm hover:bg-neutral-black-10 transition-colors rounded-xl',
+                    selectedKitchen?.id === k.id ? 'font-bold text-primary-red' : 'text-neutral-black-80'
+                  )}
+                >
+                  {k.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Center: Logo */}
+        <div className="flex flex-col w-[130px] h-14 items-center justify-center">
+          <div className="hidden md:block w-[106px] h-14">
+            <Link href="/cocina" className="focus:outline-0! focus:ring-0!">
+              <LogoDesktop height={58} width={106} />
+            </Link>
+          </div>
+          <div className="block md:hidden">
+            <Link href="/cocina">
+              <LogoMobile width={28} height={40} />
+            </Link>
           </div>
         </div>
 
-        {/* Right controls */}
-        <div className="flex items-center gap-3">
-          <div className={cn('w-2.5 h-2.5 rounded-full', STATUS_DOT[connectionStatus])} title={connectionStatus} />
-
+        {/* Right: badge + logout */}
+        <div className="w-[220px] flex items-center justify-end gap-2">
           {activeOrders.length > 0 && (
-            <span className="min-w-[20px] h-5 flex items-center justify-center bg-primary-red text-white text-[10px] font-bold rounded-full px-1.5">
+            <span className="min-w-[28px] h-7 flex items-center justify-center bg-primary-red text-white text-xs font-bold rounded-full px-2">
               {activeOrders.length}
             </span>
           )}
 
-          <Link
-            href="/cocina"
-            className={cn(
-              'text-xs font-semibold',
-              pathname === '/cocina' ? 'text-primary-red' : 'text-neutral-black-50 hover:text-neutral-black-80'
-            )}
-          >
-            Pedidos
-          </Link>
-
-          <button
+          <Button
             onClick={handleLogout}
-            className="p-1.5 rounded-full text-neutral-black-50 hover:text-red-500 hover:bg-red-50 transition-colors"
+            variant="ghost"
+            size="md"
+            className="rounded-full h-10 w-10 p-0"
             title="Cerrar sesión"
           >
-            <LogOut size={15} />
-          </button>
+            <LogOut className="w-4 h-4 text-neutral-black-50" />
+          </Button>
         </div>
       </div>
-    </header>
+    </nav>
   );
 };

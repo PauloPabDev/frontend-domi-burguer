@@ -175,7 +175,7 @@ export function useEnrichedOrders(
         promises.push(
           ClientService.getById(id, token)
             .then(({ body }) => {
-              clientCache.current.set(id, { name: body.name, phone: body.phone, email: body.email });
+              clientCache.current.set(id, { name: body.name, phone: body.phone, email: body.email, photoURL: body.photoUrl });
             })
             .catch(() => { })
             .finally(() => inFlight.current.delete(`client:${id}`)),
