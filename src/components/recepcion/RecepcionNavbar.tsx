@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, History, PlusCircle } from 'lucide-react';
+import { ClipboardList, History, Map, PlusCircle } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
 import { Button } from '@/components/ui/button';
@@ -65,11 +65,22 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
 
 
 
+        <Link href="/recepcion/mapa" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
+          <Button
+            variant={pathname === '/recepcion/mapa' ? 'primary' : 'light-outline'}
+            size="md"
+            leftIcon={<Map className="w-4 h-4 md:w-5 md:h-5" />}
+            className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
+          >
+            <span className="hidden sm:inline">MAPA</span>
+          </Button>
+        </Link>
+
         <Link href="/recepcion" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
           <Button
-            variant="primary"
+            variant={pathname === '/recepcion' ? 'primary' : 'light-outline'}
             size="md"
-            leftIcon={<ClipboardList className="w-4 h-4 md:w-5 md:h-5 text-white" />}
+            leftIcon={<ClipboardList className="w-4 h-4 md:w-5 md:h-5" />}
             badge={activeOrders.length > 0 ? activeOrders.length : undefined}
             className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
           >
