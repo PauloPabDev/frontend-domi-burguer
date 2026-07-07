@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import { WorkerOrder } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
-import { StatusStepBar, StatusStep } from '@/components/ui/StatusStepBar';
 import { OrderItemsList } from '@/components/ui/OrderItemsList';
 import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
 import { OrderComment } from '@/components/ui/OrderComment';
@@ -12,12 +11,6 @@ import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderNumberChip, OrderClientChip, OrderTimeChip } from '@/components/ui/OrderClientChips';
 import { formatTime } from '@/lib/dates';
-
-const KITCHEN_STEPS: StatusStep[] = [
-  { key: 'fresh', label: 'Nuevo' },
-  { key: 'preparing', label: 'Preparando' },
-  { key: 'ready_for_pickup', label: 'Listo' },
-];
 
 interface KitchenOrderCardProps {
   order: WorkerOrder;
