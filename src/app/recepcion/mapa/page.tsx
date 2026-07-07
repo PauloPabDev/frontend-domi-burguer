@@ -112,7 +112,7 @@ export default function RecepcionMapaPage() {
           markers={markers}
           selectedMarkerId={selectedId ?? undefined}
           center={selectedCenter}
-          onMarkerClick={(id) => setSelectedId((prev) => (prev === id ? null : id))}
+          onMarkerClick={(id) => setSelectedId(id)}
           minHeight="100%"
           defaultZoom={13}
           selectedZoom={16}
@@ -173,7 +173,10 @@ export default function RecepcionMapaPage() {
                   if (el) cardRefs.current.set(order.id, el);
                   else cardRefs.current.delete(order.id);
                 }}
-                onClick={() => setSelectedId((prev) => (prev === order.id ? null : order.id))}
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest('button, input, select, a, label')) return;
+                  setSelectedId(order.id);
+                }}
                 className={cn(
                   'rounded-2xl transition-all cursor-pointer',
                   selectedId === order.id
