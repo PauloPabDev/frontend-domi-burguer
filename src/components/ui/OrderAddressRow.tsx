@@ -280,10 +280,29 @@ export function OrderAddressRow({
 
   if (compact) {
     return (
-      <div className={cn('flex items-center gap-1.5', className)}>
-        <MapPin size={11} className="text-neutral-black-50 shrink-0" />
-        <p className="text-xs text-neutral-black-50 line-clamp-1">{displayAddress}</p>
-      </div>
+      <>
+        <div className={cn('flex items-center gap-1.5', className)}>
+          <MapPin size={11} className="text-neutral-black-50 shrink-0" />
+          <p className="text-xs text-neutral-black-50 line-clamp-1 flex-1 min-w-0">{displayAddress}</p>
+          <button
+            type="button"
+            onClick={handleOpenSheet}
+            title="Más opciones"
+            className="flex items-center justify-center w-5 h-5 rounded-md hover:bg-neutral-black-10 transition-colors shrink-0"
+          >
+            <MoreHorizontal size={12} className="text-neutral-black-40" />
+          </button>
+        </div>
+
+        {sheetOpen && (
+          <AddressSheet
+            location={location}
+            address={address}
+            floor={floor}
+            onClose={() => setSheetOpen(false)}
+          />
+        )}
+      </>
     );
   }
 

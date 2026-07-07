@@ -75,6 +75,32 @@ export class WorkerOrderService {
     return response.json();
   }
 
+  static async updatePaymentMethod(
+    token: string,
+    orderId: string,
+    paymentMethod: string
+  ): Promise<{ body: WorkerOrder }> {
+    const response = await fetch(`${this.API_URL}api/v2/orders/payment-method/${orderId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ paymentMethod }),
+    });
+    if (!response.ok) throw new Error('Error al actualizar el método de pago');
+    return response.json();
+  }
+
+  static async markPaid(
+    token: string,
+    orderId: string
+  ): Promise<{ body: WorkerOrder }> {
+    const response = await fetch(`${this.API_URL}api/v2/orders/mark-paid/${orderId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Error al registrar el pago');
+    return response.json();
+  }
+
   static async getOrdersByDay(
     token: string,
     startDate: string,

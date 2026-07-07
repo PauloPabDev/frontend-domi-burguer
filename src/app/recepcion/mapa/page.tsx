@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
-import { useCouriers } from '@/hooks/reception/useCouriers';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
 import { MultiMarkerMap, MapMarker } from '@/components/map/MultiMarkerMap';
 import { RecepcionOrderCard } from '@/components/recepcion/RecepcionOrderCard';
@@ -19,7 +18,6 @@ const MAP_STATUSES: OrderStatus[] = ['fresh', 'preparing', 'ready_for_pickup', '
 export default function RecepcionMapaPage() {
   const { user } = useAuth();
   const { orders, connectionStatus } = useSocket();
-  const { couriers } = useCouriers();
   const { kitchens } = useKitchenSelector();
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
 
@@ -83,6 +81,18 @@ export default function RecepcionMapaPage() {
     if (!user) return;
     const token = await user.getIdToken();
     await WorkerOrderService.assignKitchen(token, orderId, kitchenId);
+  };
+
+  const handlePaymentMethodChange = async (orderId: string, method: string) => {
+    if (!user) return;
+    const token = await user.getIdToken();
+    await WorkerOrderService.updatePaymentMethod(token, orderId, method);
+  };
+
+  const handleMarkPaid = async (orderId: string) => {
+    if (!user) return;
+    const token = await user.getIdToken();
+    await WorkerOrderService.markPaid(token, orderId);
   };
 
   return (
@@ -161,11 +171,12 @@ export default function RecepcionMapaPage() {
               >
                 <RecepcionOrderCard
                   order={order}
-                  couriers={couriers}
                   kitchens={kitchens}
                   onStatusChange={handleStatusChange}
                   onAssignCourier={handleAssignCourier}
                   onAssignKitchen={handleAssignKitchen}
+                  onPaymentMethodChange={handlePaymentMethodChange}
+                  onMarkPaid={handleMarkPaid}
                 />
               </div>
             ))}

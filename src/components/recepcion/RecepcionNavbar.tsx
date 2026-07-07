@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, History, Map, PlusCircle } from 'lucide-react';
+import { ClipboardList, History, Map, PlusCircle, Bike } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { NavPillShell } from '@/components/navbar/NavPillShell';
 import { NavPillLogo } from '@/components/navbar/NavPillLogo';
 import { NavKitchenDropdown } from '@/components/navbar/NavKitchenDropdown';
 import { NavLogoutButton } from '@/components/navbar/NavLogoutButton';
+import { useCourierPanel } from '@/contexts/CourierPanelContext';
 
 interface RecepcionNavbarProps {
   kitchens?: WorkerKitchen[];
@@ -25,6 +26,7 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
   onKitchenChange,
 }) => {
   const { orders, connectionStatus } = useSocket();
+  const { activeCouriers, openPanel } = useCourierPanel();
   const pathname = usePathname();
   const navShadow = useNavShadow(connectionStatus);
 
@@ -52,6 +54,17 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
 
       {/* Right: Nav buttons + logout */}
       <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="light-outline"
+          size="md"
+          leftIcon={<Bike className="w-4 h-4 md:w-5 md:h-5" />}
+          badge={activeCouriers.length > 0 ? activeCouriers.length : undefined}
+          onClick={openPanel}
+          className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
+        >
+          <span className="hidden sm:inline">MOTOS</span>
+        </Button>
+
         <Link href="/recepcion/nueva-orden" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
           <Button
             variant={pathname === '/recepcion/nueva-orden' ? 'primary' : 'light-outline'}

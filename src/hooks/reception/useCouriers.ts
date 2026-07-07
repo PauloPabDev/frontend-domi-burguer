@@ -16,6 +16,7 @@ export const useCouriers = () => {
       try {
         const token = await user.getIdToken();
         const { body } = await WorkerOrderService.getCouriersList(token);
+
         setCouriers(body ?? []);
       } catch {
         setCouriers([]);

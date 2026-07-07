@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useCallback } from 'react';
-import { WorkerOrder, WorkerUser, WorkerKitchen, STATUS_CONFIG } from '@/types/worker';
+import { WorkerOrder, WorkerKitchen, STATUS_CONFIG } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { RecepcionOrderCard } from './RecepcionOrderCard';
 import { cn } from '@/lib/utils';
@@ -9,11 +9,12 @@ import { cn } from '@/lib/utils';
 interface OrderKanbanColumnProps {
   status: OrderStatus;
   orders: WorkerOrder[];
-  couriers: WorkerUser[];
   kitchens: WorkerKitchen[];
   onStatusChange: (orderId: string, prev: OrderStatus, next: OrderStatus) => Promise<void>;
   onAssignCourier: (orderId: string, courierId: string) => Promise<void>;
   onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
+  onPaymentMethodChange?: (orderId: string, method: string) => Promise<void>;
+  onMarkPaid?: (orderId: string) => Promise<void>;
 }
 
 function blend(a: number, b: number, t: number) {
@@ -23,11 +24,12 @@ function blend(a: number, b: number, t: number) {
 export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   status,
   orders,
-  couriers,
   kitchens,
   onStatusChange,
   onAssignCourier,
   onAssignKitchen,
+  onPaymentMethodChange,
+  onMarkPaid,
 }) => {
   const cfg = STATUS_CONFIG[status];
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -76,11 +78,12 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
             <RecepcionOrderCard
               key={order.id}
               order={order}
-              couriers={couriers}
               kitchens={kitchens}
               onStatusChange={onStatusChange}
               onAssignCourier={onAssignCourier}
               onAssignKitchen={onAssignKitchen}
+              onPaymentMethodChange={onPaymentMethodChange}
+              onMarkPaid={onMarkPaid}
             />
           ))
         )}

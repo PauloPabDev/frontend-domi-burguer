@@ -1,7 +1,11 @@
-import { Banknote, Building2, Smartphone, CreditCard } from 'lucide-react';
+'use client';
+
+import { useState } from 'react';
+import { Banknote, Building2, Smartphone, CreditCard, Loader2 } from 'lucide-react';
 import { PAYMENT_LABELS } from '@/types/worker';
 import { formatCOP } from '@/components/ui/OrderItemsList';
 import { cn } from '@/lib/utils';
+import type { PaymentMethod } from '@/types/orders';
 
 const COLOMBIAN_BILLS = [1_000, 2_000, 5_000, 10_000, 20_000, 50_000, 100_000, 200_000];
 
@@ -17,6 +21,8 @@ const PAYMENT_ICONS: Record<string, React.ElementType> = {
   nequi: Smartphone,
 };
 
+const PAYMENT_METHODS: PaymentMethod[] = ['cash', 'bancolombia', 'nequi'];
+
 interface OrderPaymentRowProps {
   paymentMethod: string;
   paid?: boolean;
@@ -24,6 +30,9 @@ interface OrderPaymentRowProps {
   withBorderTop?: boolean;
   muted?: boolean;
   className?: string;
+  recepcionMode?: boolean;
+  onPaymentMethodChange?: (method: string) => Promise<void>;
+  onMarkPaid?: () => Promise<void>;
 }
 
 export function OrderPaymentRow({
@@ -33,20 +42,62 @@ export function OrderPaymentRow({
   withBorderTop = false,
   muted = false,
   className,
+  recepcionMode = false,
+  onPaymentMethodChange,
+  onMarkPaid,
 }: OrderPaymentRowProps) {
+  const [showPicker, setShowPicker] = useState(false);
+  const [loadingMethod, setLoadingMethod] = useState<string | null>(null);
+  const [loadingPaid, setLoadingPaid] = useState(false);
+
   const Icon = PAYMENT_ICONS[paymentMethod] ?? CreditCard;
   const cashChange = paymentMethod === 'cash' && total > 0 ? getCashChange(total) : null;
 
+  const canChangeMethod = recepcionMode && !!onPaymentMethodChange && !paid;
+  const canMarkPaid = recepcionMode && !!onMarkPaid && !paid;
+
+  const handleMethodAreaClick = () => {
+    if (!canChangeMethod) return;
+    setShowPicker((prev) => !prev);
+  };
+
+  const handleMethodSelect = async (method: string) => {
+    if (!onPaymentMethodChange || method === paymentMethod || loadingMethod) return;
+    setLoadingMethod(method);
+    try {
+      await onPaymentMethodChange(method);
+      setShowPicker(false);
+    } finally {
+      setLoadingMethod(null);
+    }
+  };
+
+  const handlePriceClick = async () => {
+    if (!canMarkPaid || loadingPaid) return;
+    setLoadingPaid(true);
+    try {
+      await onMarkPaid!();
+    } finally {
+      setLoadingPaid(false);
+    }
+  };
+
   return (
-    <div
-      className={cn(
-        withBorderTop && 'border-t border-neutral-black-10 pt-2',
-        className,
-      )}
-    >
+    <div className={cn(withBorderTop && 'border-t border-neutral-black-10 pt-2', className)}>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Icon size={16} className="text-neutral-black-50" />
+        {/* Método de pago — clic para abrir selector */}
+        <button
+          type="button"
+          onClick={handleMethodAreaClick}
+          disabled={!canChangeMethod}
+          className={cn(
+            'flex items-center gap-2 rounded-lg transition-colors',
+            canChangeMethod
+              ? 'cursor-pointer hover:bg-neutral-black-5 -mx-1 px-1 py-0.5'
+              : 'cursor-default',
+          )}
+        >
+          <Icon size={16} className="text-neutral-black-50 shrink-0" />
           <span
             className={cn(
               'text-sm font-medium',
@@ -55,20 +106,70 @@ export function OrderPaymentRow({
           >
             {PAYMENT_LABELS[paymentMethod] ?? paymentMethod}
           </span>
-        </div>
-        <span
+        </button>
+
+        {/* Precio — clic para recibir pago */}
+        <button
+          type="button"
+          onClick={handlePriceClick}
+          disabled={!canMarkPaid || loadingPaid}
           className={cn(
-            'text-base font-bold',
-            paid ? 'line-through text-green-500' : 'text-neutral-black-80',
+            'flex items-center gap-1 rounded-lg px-1 py-0.5 transition-colors',
+            canMarkPaid
+              ? 'cursor-pointer hover:bg-green-50'
+              : 'cursor-default',
           )}
         >
-          {formatCOP(total)}
-        </span>
+          {loadingPaid && <Loader2 size={12} className="text-green-500 animate-spin" />}
+          <span
+            className={cn(
+              'text-base font-bold transition-colors',
+              paid
+                ? 'line-through text-green-500'
+                : canMarkPaid
+                  ? 'text-neutral-black-80 hover:text-green-600'
+                  : 'text-neutral-black-80',
+            )}
+          >
+            {formatCOP(total)}
+          </span>
+        </button>
       </div>
+
       {cashChange && (
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center justify-between mt-1.5">
           <span className="text-sm text-neutral-black-50">Con {formatCOP(cashChange.bill)}</span>
           <span className="text-sm font-semibold text-amber-600">Devolver {formatCOP(cashChange.change)}</span>
+        </div>
+      )}
+
+      {/* Selector de método — visible al hacer clic en el método */}
+      {showPicker && (
+        <div className="flex gap-1 mt-2">
+          {PAYMENT_METHODS.map((method) => {
+            const MethodIcon = PAYMENT_ICONS[method] ?? CreditCard;
+            const isActive = method === paymentMethod;
+            const isLoading = loadingMethod === method;
+            return (
+              <button
+                key={method}
+                type="button"
+                onClick={() => handleMethodSelect(method)}
+                disabled={!!loadingMethod}
+                className={cn(
+                  'flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all flex-1 justify-center disabled:opacity-50',
+                  isActive
+                    ? 'bg-neutral-black-80 text-white'
+                    : 'bg-neutral-black-5 text-neutral-black-50 hover:bg-neutral-black-10',
+                )}
+              >
+                {isLoading
+                  ? <Loader2 size={11} className="animate-spin" />
+                  : <MethodIcon size={11} />}
+                <span>{PAYMENT_LABELS[method]}</span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

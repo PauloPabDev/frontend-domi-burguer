@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { SocketProvider } from '@/contexts/SocketContext';
+import { CourierPanelProvider } from '@/contexts/CourierPanelContext';
 import { RecepcionNavbar } from '@/components/recepcion/RecepcionNavbar';
+import { CourierManagerPanel } from '@/components/recepcion/CourierManagerPanel';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
 
 function RecepcionLayoutInner({ children }: { children: React.ReactNode }) {
@@ -13,12 +15,15 @@ function RecepcionLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <SocketProvider role="reception" kitchenId={selectedKitchenId}>
-      <RecepcionNavbar
-        kitchens={kitchens}
-        selectedKitchen={selectedKitchen}
-        onKitchenChange={selectKitchen}
-      />
-      <main className="w-full px-4 mt-[90px] py-4">{children}</main>
+      <CourierPanelProvider>
+        <RecepcionNavbar
+          kitchens={kitchens}
+          selectedKitchen={selectedKitchen}
+          onKitchenChange={selectKitchen}
+        />
+        <main className="w-full px-4 mt-[90px] py-4">{children}</main>
+        <CourierManagerPanel />
+      </CourierPanelProvider>
     </SocketProvider>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
-import { useCouriers } from '@/hooks/reception/useCouriers';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
 import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { OrderKanbanColumn } from '@/components/recepcion/OrderKanbanColumn';
@@ -21,7 +20,6 @@ const KANBAN_STATUSES: OrderStatus[] = [
 export default function RecepcionPage() {
   const { user } = useAuth();
   const { orders } = useSocket();
-  const { couriers } = useCouriers();
   const { kitchens } = useKitchenSelector();
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
 
@@ -51,6 +49,18 @@ export default function RecepcionPage() {
     await WorkerOrderService.assignKitchen(token, orderId, kitchenId);
   };
 
+  const handlePaymentMethodChange = async (orderId: string, method: string) => {
+    if (!user) return;
+    const token = await user.getIdToken();
+    await WorkerOrderService.updatePaymentMethod(token, orderId, method);
+  };
+
+  const handleMarkPaid = async (orderId: string) => {
+    if (!user) return;
+    const token = await user.getIdToken();
+    await WorkerOrderService.markPaid(token, orderId);
+  };
+
   return (
     <div className="overflow-x-auto overflow-y-hidden -mb-4 h-[calc(100vh-106px)]">
       <div className="flex gap-3 min-w-max h-full">
@@ -59,11 +69,12 @@ export default function RecepcionPage() {
             key={status}
             status={status}
             orders={ordersByStatus[status] ?? []}
-            couriers={couriers}
             kitchens={kitchens}
             onStatusChange={handleStatusChange}
             onAssignCourier={handleAssignCourier}
             onAssignKitchen={handleAssignKitchen}
+            onPaymentMethodChange={handlePaymentMethodChange}
+            onMarkPaid={handleMarkPaid}
           />
         ))}
       </div>

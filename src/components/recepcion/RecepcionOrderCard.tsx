@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Bike, ChefHat, Copy, Check, Trash2, Loader2, X } from 'lucide-react';
-import { WorkerOrder, WorkerUser, WorkerKitchen } from '@/types/worker';
+import { WorkerOrder, WorkerKitchen } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
 import { OrderItemsList } from '@/components/ui/OrderItemsList';
@@ -18,10 +18,10 @@ import { formatTime } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 
 const RECEPTION_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: string }>> = {
-  fresh:            { next: 'preparing',        label: 'Enviar a cocina' },
-  preparing:        { next: 'ready_for_pickup', label: 'Marcar listo' },
-  ready_for_pickup: { next: 'dispatched',       label: 'Despachar' },
-  dispatched:       { next: 'delivered',        label: 'Marcar entregado' },
+  fresh: { next: 'preparing', label: 'Enviar a cocina' },
+  preparing: { next: 'ready_for_pickup', label: 'Marcar listo' },
+  ready_for_pickup: { next: 'dispatched', label: 'Despachar' },
+  dispatched: { next: 'delivered', label: 'Marcar entregado' },
 };
 
 const SECTION = 'border-t border-neutral-black-10 px-3 py-2.5';
@@ -151,20 +151,22 @@ function OrderNumberMenu({ order, onClose, onOpenKitchenModal, onDelete }: Order
 
 interface RecepcionOrderCardProps {
   order: WorkerOrder;
-  couriers: WorkerUser[];
   kitchens: WorkerKitchen[];
   onStatusChange: (orderId: string, prev: OrderStatus, next: OrderStatus) => Promise<void>;
   onAssignCourier: (orderId: string, courierId: string) => Promise<void>;
   onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
+  onPaymentMethodChange?: (orderId: string, method: string) => Promise<void>;
+  onMarkPaid?: (orderId: string) => Promise<void>;
 }
 
 export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   order,
-  couriers,
   kitchens,
   onStatusChange,
   onAssignCourier,
   onAssignKitchen,
+  onPaymentMethodChange,
+  onMarkPaid,
 }) => {
   const [showOrderMenu, setShowOrderMenu] = useState(false);
   const [showCourierModal, setShowCourierModal] = useState(false);
@@ -223,8 +225,16 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
         <div className={SECTION}>
           <OrderPaymentRow
             paymentMethod={order.paymentMethod}
+            paid={order.payment?.status === 'approved'}
             total={order.totalPrice}
             muted
+            recepcionMode
+            onPaymentMethodChange={
+              onPaymentMethodChange
+                ? (method) => onPaymentMethodChange(order.id, method)
+                : undefined
+            }
+            onMarkPaid={onMarkPaid ? () => onMarkPaid(order.id) : undefined}
           />
         </div>
 
@@ -260,7 +270,6 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
 
       {showCourierModal && (
         <AssignCourierModal
-          couriers={couriers}
           currentCourierId={order.courierId}
           onAssign={(id) => onAssignCourier(order.id, id)}
           onClose={() => setShowCourierModal(false)}
