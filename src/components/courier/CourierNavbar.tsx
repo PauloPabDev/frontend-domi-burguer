@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { ClipboardList, MapPin } from 'lucide-react';
@@ -8,7 +9,10 @@ import { useSocket } from '@/contexts/SocketContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogoDesktop, LogoMobile } from '@/components/ui/icons';
-import { cn } from '@/lib/utils';
+
+const GLOW_GREEN  = '0 0 24px 6px rgba(34,197,94,0.45)';
+const GLOW_ORANGE = '0 0 24px 6px rgba(249,115,22,0.50)';
+const GLOW_RED    = '0 0 24px 6px rgba(239,68,68,0.45)';
 
 export const CourierNavbar: React.FC = () => {
   const { user } = useAuth();
@@ -16,12 +20,30 @@ export const CourierNavbar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isConnected = connectionStatus === 'CONNECTED';
   const isOnHistorial = pathname === '/domiciliario/historial';
+
+  const [navShadow, setNavShadow] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (connectionStatus === 'CONNECTED') {
+      setNavShadow(GLOW_GREEN);
+      const t = setTimeout(() => setNavShadow(undefined), 2500);
+      return () => clearTimeout(t);
+    }
+    if (connectionStatus === 'RECONNECTING') {
+      setNavShadow(GLOW_ORANGE);
+      return;
+    }
+    // DISCONNECTED
+    setNavShadow(GLOW_RED);
+  }, [connectionStatus]);
 
   return (
     <nav className="fixed top-0 left-0 z-300 w-full px-4">
-      <div className="max-w-[828px] md:h-[80px] h-[62px] gap-2 py-0 mt-[20px] mb-[10px] rounded-[60px] border border-solid border-[#e6e6e6] flex items-center justify-between w-full mx-auto px-4! sm:px-6 lg:px-8 bg-[#ffffff]">
+      <div
+        style={{ boxShadow: navShadow, transition: 'box-shadow 0.8s ease-in-out' }}
+        className="max-w-[828px] md:h-[80px] h-[62px] gap-2 py-0 mt-[20px] mb-[10px] rounded-[60px] border border-solid border-[#e6e6e6] flex items-center justify-between w-full mx-auto px-4! sm:px-6 lg:px-8 bg-[#ffffff]"
+      >
 
         {/* Left: Avatar → perfil */}
         <div className="flex w-[300px] h-14 px-0 py-3 rounded-[50px] overflow-hidden items-center">
@@ -29,31 +51,18 @@ export const CourierNavbar: React.FC = () => {
             onClick={() => router.push('/profile')}
             variant="yellow"
             size="md"
-            className="rounded-full p-2 lg:h-12 lg:px-5 relative"
+            className="rounded-full p-2 lg:h-12 lg:px-5"
           >
-            <span className="relative">
-              {user?.photoURL ? (
-                <Avatar className="w-7 h-7 md:w-8 md:h-8">
-                  <AvatarImage src={user.photoURL} alt={user.displayName || 'Domiciliario'} />
-                  <AvatarFallback>{user.displayName?.charAt(0) ?? 'D'}</AvatarFallback>
-                </Avatar>
-              ) : (
-                <Avatar className="w-7 h-7 md:w-8 md:h-8">
-                  <AvatarFallback>{user?.displayName?.charAt(0) ?? 'D'}</AvatarFallback>
-                </Avatar>
-              )}
-              {/* Connection dot */}
-              <span
-                className={cn(
-                  'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white',
-                  isConnected
-                    ? 'bg-green-500'
-                    : connectionStatus === 'RECONNECTING'
-                      ? 'bg-yellow-400 animate-pulse'
-                      : 'bg-red-500'
-                )}
-              />
-            </span>
+            {user?.photoURL ? (
+              <Avatar className="w-7 h-7 md:w-8 md:h-8">
+                <AvatarImage src={user.photoURL} alt={user.displayName || 'Domiciliario'} />
+                <AvatarFallback>{user.displayName?.charAt(0) ?? 'D'}</AvatarFallback>
+              </Avatar>
+            ) : (
+              <Avatar className="w-7 h-7 md:w-8 md:h-8">
+                <AvatarFallback>{user?.displayName?.charAt(0) ?? 'D'}</AvatarFallback>
+              </Avatar>
+            )}
             <span className="text-neutral-black-80 font-label text-xs md:text-sm">
               {user?.displayName?.split(' ')[0]?.toUpperCase() ?? 'PERFIL'}
             </span>
