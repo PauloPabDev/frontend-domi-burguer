@@ -7,44 +7,34 @@ export class UserService {
   }
 
   static async getUserById(userId: string, token: string): Promise<{ body: UserProfile }> {
-    try {
-      const response = await fetch(`${this.API_URL}api/v2/users/${userId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const response = await fetch(`${this.API_URL}api/v2/users/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error('Error al obtener el usuario');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching user:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Error al obtener el usuario (${response.status})`);
     }
+
+    return await response.json();
   }
 
   static async getCurrentUser(token: string): Promise<{ body: UserProfile }> {
-    try {
-      const response = await fetch(`${this.API_URL}api/v2/users/me`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const response = await fetch(`${this.API_URL}api/v2/users/me`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error('Error al obtener el usuario');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching current user:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Error al obtener el usuario actual (${response.status})`);
     }
+
+    return await response.json();
   }
 }
