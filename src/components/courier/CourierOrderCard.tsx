@@ -6,7 +6,7 @@ import { OrderItemsList } from '@/components/ui/OrderItemsList';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { OrderStatusBadge } from '@/components/ui/OrderStatusBadge';
-import { OrderClientChips } from '@/components/ui/OrderClientChips';
+import { OrderNumberChip, OrderClientChip, OrderTimeChip } from '@/components/ui/OrderClientChips';
 import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/lib/dates';
@@ -42,14 +42,14 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
       onClick={onSelect}
     >
       {/* Cliente */}
-      <div className="p-4 flex items-center justify-between">
-        <OrderClientChips
+      <div className="p-4 flex items-center gap-2">
+        <OrderNumberChip orderNumber={order.dailyOrderNumber} />
+        <OrderClientChip
           name={order.client?.name}
           phone={order.client?.phone}
           clientId={order.clientId}
-          orderNumber={order.dailyOrderNumber}
         />
-        <span className="text-[10px] text-neutral-black-50 shrink-0">{formatTime(order.createdAt)}</span>
+        <OrderTimeChip time={formatTime(order.createdAt)} className="ml-auto" />
       </div>
 
       {/* Dirección */}

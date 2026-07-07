@@ -9,14 +9,22 @@ import { cn } from '@/lib/utils';
 
 const MOCK_AVATAR = 'https://i.pravatar.cc/32?img=12';
 
-interface OrderClientChipsProps {
-  name?: string;
-  phone?: string;
-  clientId?: string;
+// ─── OrderNumberChip ───────────────────────────────────────────────────────────
+
+interface OrderNumberChipProps {
   orderNumber: number;
-  avatarSrc?: string;
   className?: string;
 }
+
+export function OrderNumberChip({ orderNumber, className }: OrderNumberChipProps) {
+  return (
+    <div className={cn('flex items-center bg-primary-red rounded-full px-3.5 py-1.5 shrink-0', className)}>
+      <span className="text-sm font-bold text-white">{orderNumber}</span>
+    </div>
+  );
+}
+
+// ─── OrderClientChip ──────────────────────────────────────────────────────────
 
 interface ClientActionMenuProps {
   name?: string;
@@ -35,7 +43,6 @@ function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientA
         className="relative z-10 w-[300px] bg-white rounded-2xl shadow-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
           <Image
             src={avatarSrc}
@@ -57,7 +64,6 @@ function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientA
           </button>
         </div>
 
-        {/* Acciones */}
         <div className="flex flex-col divide-y divide-neutral-100">
           {phone && (
             <a
@@ -89,50 +95,44 @@ function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientA
   );
 }
 
-export function OrderClientChips({
+interface OrderClientChipProps {
+  name?: string;
+  phone?: string;
+  clientId?: string;
+  avatarSrc?: string;
+  className?: string;
+}
+
+export function OrderClientChip({
   name,
   phone,
   clientId,
-  orderNumber,
   avatarSrc = MOCK_AVATAR,
   className,
-}: OrderClientChipsProps) {
+}: OrderClientChipProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const handleAvatarClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setMenuOpen(true);
-  };
 
   return (
     <>
-      <div className={cn('flex flex-col gap-1.5 min-w-0', className)}>
-        <div className="flex items-center gap-2">
-          {/* Chip: número de pedido */}
-          <div className="flex items-center bg-primary-red rounded-full px-3.5 py-1.5 shrink-0">
-            <span className="text-sm font-bold text-white">{orderNumber}</span>
-          </div>
-          {/* Chip: avatar + nombre */}
-          <button
-            type="button"
-            onClick={handleAvatarClick}
-            className="flex items-center gap-2 bg-neutral-100 rounded-full pl-1 pr-4 py-1 shrink-0 hover:bg-neutral-200 transition-colors"
-          >
-            <Image
-              src={avatarSrc}
-              alt={name ?? 'Cliente'}
-              width={30}
-              height={30}
-              className="rounded-full object-cover"
-            />
-            <span className="text-sm font-semibold text-neutral-black-80 truncate max-w-[110px]">
-              {name ?? 'Cliente'}
-            </span>
-          </button>
-
-
-        </div>
-      </div>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
+        className={cn(
+          'flex items-center gap-2 bg-neutral-100 rounded-full pl-1 pr-4 py-1 shrink-0 hover:bg-neutral-200 transition-colors',
+          className,
+        )}
+      >
+        <Image
+          src={avatarSrc}
+          alt={name ?? 'Cliente'}
+          width={30}
+          height={30}
+          className="rounded-full object-cover"
+        />
+        <span className="text-sm font-semibold text-neutral-black-80 truncate max-w-[110px]">
+          {name ?? 'Cliente'}
+        </span>
+      </button>
 
       {menuOpen && (
         <ClientActionMenu
@@ -144,5 +144,20 @@ export function OrderClientChips({
         />
       )}
     </>
+  );
+}
+
+// ─── OrderTimeChip ────────────────────────────────────────────────────────────
+
+interface OrderTimeChipProps {
+  time: string;
+  className?: string;
+}
+
+export function OrderTimeChip({ time, className }: OrderTimeChipProps) {
+  return (
+    <span className={cn('text-[10px] text-neutral-black-50 shrink-0', className)}>
+      {time}
+    </span>
   );
 }
