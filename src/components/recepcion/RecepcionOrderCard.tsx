@@ -207,6 +207,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               phone={order.client?.phone ?? order.user?.phone}
               clientId={order.clientId}
               avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
+              isUser={!order.clientId && !!order.userId}
             />
             <OrderTimeChip time={formatTime(order.createdAt)} className="ml-auto" />
           </div>

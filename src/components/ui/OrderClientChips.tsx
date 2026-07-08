@@ -101,6 +101,7 @@ interface OrderClientChipProps {
   avatarSrc?: string;
   className?: string;
   phoneVisible?: boolean;
+  isUser?: boolean;
 }
 
 export function OrderClientChip({
@@ -110,6 +111,7 @@ export function OrderClientChip({
   avatarSrc = MOCK_AVATAR,
   className,
   phoneVisible = false,
+  isUser = false,
 }: OrderClientChipProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -118,7 +120,8 @@ export function OrderClientChip({
     <>
       {phoneVisible ? (
         <div className={cn(
-          'flex items-center gap-2 bg-neutral-100 rounded-2xl pl-1 pr-4 py-1 shrink-0',
+          'flex items-center gap-2 rounded-2xl pl-1 pr-4 py-1 shrink-0',
+          isUser ? 'bg-blue-100' : 'bg-neutral-100',
           className,
         )}>
           <img
@@ -151,7 +154,8 @@ export function OrderClientChip({
           type="button"
           onClick={handleOpen}
           className={cn(
-            'flex items-center gap-2 bg-neutral-100 rounded-full pl-1 pr-4 py-1 shrink-0 hover:bg-neutral-200 transition-colors',
+            'flex items-center gap-2 rounded-full pl-1 pr-4 py-1 shrink-0 transition-colors',
+            isUser ? 'bg-blue-100 hover:bg-blue-200' : 'bg-neutral-100 hover:bg-neutral-200',
             className,
           )}
         >
