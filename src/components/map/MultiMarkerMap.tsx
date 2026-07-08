@@ -51,6 +51,7 @@ function AvatarPin({ avatarUrl, clientName, color, label, isSelected, isUnassign
         transition: "all 0.15s ease",
         zIndex: isSelected ? 1000 : 1,
         position: "relative",
+        transform: "translate(-50%, -100%)",
       }}
     >
       {/* Circle container — relative so ping ring and courier badge can be absolute */}
@@ -228,7 +229,7 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
             key={marker.id}
             position={marker.position}
             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            getPixelPositionOffset={(w, h) => ({ x: -w / 2, y: -h })}
+            getPixelPositionOffset={() => ({ x: 0, y: 0 })}
           >
             <AvatarPin
               avatarUrl={marker.avatarUrl}
