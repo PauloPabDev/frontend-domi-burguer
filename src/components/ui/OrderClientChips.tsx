@@ -115,7 +115,6 @@ export function OrderClientChip({
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleOpen = (e: React.MouseEvent) => { e.stopPropagation(); setMenuOpen(true); };
-
   return (
     <>
       {phoneVisible ? (

@@ -13,6 +13,7 @@ import { UserService } from '@/services/userService';
 
 type CourierInfo = NonNullable<WorkerOrder['courier']>;
 type ClientInfo = NonNullable<WorkerOrder['client']>;
+type UserInfo = NonNullable<WorkerOrder['user']>;
 
 function resolveItemNames(
   items: OrderItem[],
@@ -57,6 +58,7 @@ function applyEnrichment(
   productMap: Map<string, Product>,
   courierCache: Map<string, CourierInfo>,
   clientCache: Map<string, ClientInfo>,
+  userCache: Map<string, UserInfo>,
   locCache: Map<string, DeliveryAddress>,
   locationObjCache: Map<string, Location>,
 ): WorkerOrder[] {
@@ -68,6 +70,8 @@ function applyEnrichment(
       order.courier ?? (order.courierId ? courierCache.get(order.courierId) : undefined);
     const client =
       order.client ?? (order.clientId ? clientCache.get(order.clientId) : undefined);
+    const user =
+      order.user ?? (order.userId ? userCache.get(order.userId) : undefined);
     const deliveryAddress =
       order.deliveryAddress ?? (order.locationId ? locCache.get(order.locationId) : undefined);
     const location =
@@ -78,6 +82,7 @@ function applyEnrichment(
       kitchen === order.kitchen &&
       courier === order.courier &&
       client === order.client &&
+      user === order.user &&
       deliveryAddress === order.deliveryAddress &&
       location === order.location &&
       orderItems === order.orderItems
@@ -91,6 +96,7 @@ function applyEnrichment(
       ...(kitchen && { kitchen: { id: kitchen.id, name: kitchen.name } }),
       ...(courier && { courier }),
       ...(client && { client }),
+      ...(user && { user }),
       ...(deliveryAddress && { deliveryAddress }),
       ...(location && { location }),
     };
@@ -116,6 +122,7 @@ export function useEnrichedOrders(
 
   const courierCache = useRef<Map<string, CourierInfo>>(new Map());
   const clientCache = useRef<Map<string, ClientInfo>>(new Map());
+  const userCache = useRef<Map<string, UserInfo>>(new Map());
   const locCache = useRef<Map<string, DeliveryAddress>>(new Map());
   const locationObjCache = useRef<Map<string, Location>>(new Map());
   const inFlight = useRef<Set<string>>(new Set());
@@ -133,6 +140,7 @@ export function useEnrichedOrders(
       products,
       courierCache.current,
       clientCache.current,
+      userCache.current,
       locCache.current,
       locationObjCache.current,
     );
@@ -144,6 +152,7 @@ export function useEnrichedOrders(
 
     const missingCouriers = new Set<string>();
     const missingClients = new Set<string>();
+    const missingUsers = new Set<string>();
     const missingLocations = new Set<string>();
 
     for (const order of syncResult) {
@@ -153,12 +162,15 @@ export function useEnrichedOrders(
       if (order.clientId && !order.client && !clientCache.current.has(order.clientId) && !inFlight.current.has(`client:${order.clientId}`)) {
         missingClients.add(order.clientId);
       }
+      if (order.userId && !order.user && !userCache.current.has(order.userId) && !inFlight.current.has(`user:${order.userId}`)) {
+        missingUsers.add(order.userId);
+      }
       if (order.locationId && (!order.deliveryAddress || !order.location) && !locCache.current.has(order.locationId) && !inFlight.current.has(`location:${order.locationId}`)) {
         missingLocations.add(order.locationId);
       }
     }
 
-    if (missingCouriers.size === 0 && missingClients.size === 0 && missingLocations.size === 0) return;
+    if (missingCouriers.size === 0 && missingClients.size === 0 && missingUsers.size === 0 && missingLocations.size === 0) return;
 
     let cancelled = false;
 
@@ -190,6 +202,18 @@ export function useEnrichedOrders(
         );
       }
 
+      for (const id of missingUsers) {
+        inFlight.current.add(`user:${id}`);
+        promises.push(
+          UserService.getUserById(id, token)
+            .then(({ body }) => {
+              userCache.current.set(id, { name: body.name, phone: body.phone || undefined, email: body.email, photoURL: body.photoUrl });
+            })
+            .catch(() => { })
+            .finally(() => inFlight.current.delete(`user:${id}`)),
+        );
+      }
+
       for (const id of missingLocations) {
         inFlight.current.add(`location:${id}`);
         promises.push(
@@ -218,7 +242,7 @@ export function useEnrichedOrders(
         setEnriched((prev) =>
           setIfChanged(
             prev,
-            applyEnrichment(orders, kitchensRef.current, products, courierCache.current, clientCache.current, locCache.current, locationObjCache.current),
+            applyEnrichment(orders, kitchensRef.current, products, courierCache.current, clientCache.current, userCache.current, locCache.current, locationObjCache.current),
           ),
         );
       }

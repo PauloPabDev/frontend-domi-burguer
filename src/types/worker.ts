@@ -13,11 +13,18 @@ export interface WorkerOrder {
   subtotal: number;
   locationId?: string;
   clientId?: string;
+  userId?: string;
   courierId?: string;
   kitchenId?: string;
   client?: {
     name: string;
     phone: string;
+    email?: string;
+    photoURL?: string;
+  };
+  user?: {
+    name: string;
+    phone?: string;
     email?: string;
     photoURL?: string;
   };

@@ -203,8 +203,8 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               <OrderNumberChip orderNumber={order.dailyOrderNumber} />
             </button>
             <OrderClientChip
-              name={order.client?.name}
-              phone={order.client?.phone}
+              name={order.client?.name ?? order.user?.name}
+              phone={order.client?.phone ?? order.user?.phone}
               clientId={order.clientId}
             />
             <OrderTimeChip time={formatTime(order.createdAt)} className="ml-auto" />

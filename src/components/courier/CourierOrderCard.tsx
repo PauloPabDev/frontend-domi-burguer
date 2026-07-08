@@ -32,7 +32,6 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   onStatusChange,
 }) => {
   const transition = STATUS_TRANSITIONS[order.status];
-
   return (
     <div
       className={cn(
@@ -45,8 +44,8 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
       <div className="p-4 flex items-center gap-2">
         <OrderNumberChip orderNumber={order.dailyOrderNumber} />
         <OrderClientChip
-          name={order.client?.name}
-          phone={order.client?.phone}
+          name={order.client?.name ?? order.user?.name}
+          phone={order.client?.phone ?? order.user?.phone}
           clientId={order.clientId}
           phoneVisible
         />
