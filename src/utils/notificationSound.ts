@@ -3,7 +3,11 @@
 function createCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   try {
-    return new AudioContext();
+    const ctx = new AudioContext();
+    // Los navegadores crean el AudioContext en estado "suspended" si no hubo
+    // interacción previa del usuario. resume() lo activa antes de programar nodos.
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
   } catch {
     return null;
   }
