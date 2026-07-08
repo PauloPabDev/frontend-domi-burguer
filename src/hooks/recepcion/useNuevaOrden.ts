@@ -10,6 +10,12 @@ import { Product, Complement } from '@/types/products';
 import { WorkerKitchen } from '@/types/worker';
 import { PRODUCTS } from '@/data/products';
 import { BancolombiaIcon, MoneyIcon, NequiIcon } from '@/components/ui/icons';
+import {
+  ANNIVERSARY_REWARD_CODE,
+  ANNIVERSARY_COMPLEMENT_ID,
+  ANNIVERSARY_COMPLEMENT_NAME,
+  ANNIVERSARY_ELIGIBLE_PRODUCT_IDS,
+} from '@/hooks/cart/useAnniversaryPromotion';
 import { PaymentMethod } from '@/types/paymentMethod';
 
 export type ClientState = 'idle' | 'loading' | 'found' | 'not_found' | 'creating';
@@ -280,6 +286,61 @@ export function useNuevaOrden() {
 
   const clearSubmitError = useCallback(() => setSubmitError(null), []);
 
+  // ─── Promoción 10° Aniversario ────────────────────────────────────────────────
+  // Si hay un COMBO o HAMBURGUESA, agrega automáticamente el Cheesecake gratis.
+  useEffect(() => {
+    const promoComplement: Complement = {
+      id: ANNIVERSARY_COMPLEMENT_ID,
+      name: ANNIVERSARY_COMPLEMENT_NAME,
+      quantity: 1,
+      price: 0,
+      type: 'special',
+      minusComplement: false,
+      rewardCode: ANNIVERSARY_REWARD_CODE,
+    };
+
+    setOrderItems((prev) => {
+      const eligibleItem = prev.find((i) =>
+        ANNIVERSARY_ELIGIBLE_PRODUCT_IDS.includes(i.product.id)
+      );
+      const hasPromo = prev.some((i) =>
+        i.complements.some((c) => c.rewardCode === ANNIVERSARY_REWARD_CODE)
+      );
+
+      if (!eligibleItem) {
+        if (!hasPromo) return prev;
+        return prev.map((i) => ({
+          ...i,
+          complements: i.complements.filter((c) => c.rewardCode !== ANNIVERSARY_REWARD_CODE),
+        }));
+      }
+
+      if (hasPromo) return prev;
+
+      if (eligibleItem.quantity > 1) {
+        itemIdCounterRef.current += 1;
+        const newItemId = itemIdCounterRef.current;
+        return [
+          ...prev.map((i) =>
+            i.itemId === eligibleItem.itemId ? { ...i, quantity: i.quantity - 1 } : i
+          ),
+          {
+            itemId: newItemId,
+            product: eligibleItem.product,
+            complements: [promoComplement],
+            quantity: 1,
+          },
+        ];
+      }
+
+      return prev.map((i) =>
+        i.itemId === eligibleItem.itemId
+          ? { ...i, complements: [...i.complements, promoComplement] }
+          : i
+      );
+    });
+  }, [orderItems]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const resetForm = useCallback(() => {
     setPhone('');
     setClientState('idle');
@@ -299,6 +360,9 @@ export function useNuevaOrden() {
 
   const subtotal = orderItems.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
   const total = subtotal + (delivery?.price ?? 0);
+  const isAnniversaryPromoActive = orderItems.some((i) =>
+    ANNIVERSARY_ELIGIBLE_PRODUCT_IDS.includes(i.product.id)
+  );
 
   return {
     // Client
@@ -327,5 +391,7 @@ export function useNuevaOrden() {
     handleSubmit, resetForm, clearSubmitError,
     // Totals
     subtotal, total,
+    // Promociones
+    isAnniversaryPromoActive,
   };
 }

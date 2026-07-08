@@ -4,10 +4,11 @@ import { generateCartItemId, calculateTotalPrice } from '@/lib/utils';
 import { Complement } from '@/types/products';
 
 export const ANNIVERSARY_REWARD_CODE = 'ANIVERSARIO-10';
-const ANNIVERSARY_COMPLEMENT_ID = 'T2RTWuDgHWjIy3Vb2BjW';
-const ANNIVERSARY_COMPLEMENT_NAME = 'Cheesecake de Fresa';
+export const ANNIVERSARY_COMPLEMENT_ID = 'T2RTWuDgHWjIy3Vb2BjW';
+export const ANNIVERSARY_COMPLEMENT_NAME = 'Cheesecake de Fresa';
 // Aplica a COMBO (1) y HAMBURGUESA ARTESANAL (2)
-const ELIGIBLE_PRODUCT_IDS = [1, 2];
+export const ANNIVERSARY_ELIGIBLE_PRODUCT_IDS = [1, 2];
+const ELIGIBLE_PRODUCT_IDS = ANNIVERSARY_ELIGIBLE_PRODUCT_IDS;
 
 export const useAnniversaryPromotion = () => {
   const items = useCartStore((s) => s.items);
