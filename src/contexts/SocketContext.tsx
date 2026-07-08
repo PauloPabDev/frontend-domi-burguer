@@ -8,7 +8,7 @@ import { RawSocketOrder } from '@/types/rawSocketOrder';
 import { WorkerOrder } from '@/types/worker';
 import { useAuth } from '@/contexts/AuthContext';
 import { normalizeSocketOrder, normalizeSocketOrders } from '@/utils/normalizeSocketOrder';
-import { playOrderNotification } from '@/utils/notificationSound';
+import { playOrderNotification, playKitchenNotification } from '@/utils/notificationSound';
 
 interface SocketContextType {
   orders: WorkerOrder[];
@@ -143,7 +143,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     });
 
     const notifyNewKitchenOrder = (order: WorkerOrder) => {
-      playOrderNotification();
+      playKitchenNotification();
       const itemsSummary = order.orderItems.slice(0, 2).map((i) => i.name).join(', ');
       const extra = order.orderItems.length > 2 ? ` +${order.orderItems.length - 2} más` : '';
       addToast({
