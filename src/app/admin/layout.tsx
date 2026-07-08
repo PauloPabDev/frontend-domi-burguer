@@ -32,7 +32,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <>
       <AdminNavbar />
-      <main className="max-w-screen-xl mx-auto px-4 mt-[90px] py-6">{children}</main>
+      <main className="max-w-screen-xl mx-auto px-4 mt-[100px] py-6">{children}</main>
     </>
   );
 }
