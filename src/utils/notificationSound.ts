@@ -42,24 +42,71 @@ export function playOrderNotification(): void {
   setTimeout(() => ctx.close(), 2000);
 }
 
-// ─── Cocina — alarma agresiva ────────────────────────────────────────────────
-// Sawtooth (máximos armónicos) en 3 dobles-pulsos rápidos → corta el ruido de cocina
+// ─── Cocina — alarma klaxon industrial ───────────────────────────────────────
+// Sawtooth + Square apilados → WaveShaper distorsión → DynamicsCompressor.
+// Patrón klaxon ALTO-BAJO × 4 pips, dos ciclos. Corta el ruido de cocina.
 export function playKitchenNotification(): void {
   const ctx = createCtx();
   if (!ctx) return;
-  const t = ctx.currentTime;
 
-  // Cada burst: dos pips cortos con forma sawtooth + alta ganancia
-  const burst = (offset: number) => {
-    tone(ctx, 'sawtooth', 1100, 0.65, t + offset,        0.12);
-    tone(ctx, 'sawtooth', 1320, 0.65, t + offset + 0.16, 0.12);
+  // Curva de distorsión soft-clip con drive alto
+  const distortion = ctx.createWaveShaper();
+  const samples = 512;
+  const curve = new Float32Array(samples);
+  const drive = 280;
+  for (let i = 0; i < samples; i++) {
+    const x = (i * 2) / samples - 1;
+    curve[i] = ((Math.PI + drive) * x) / (Math.PI + drive * Math.abs(x));
+  }
+  distortion.curve = curve;
+  distortion.oversample = '4x';
+
+  // Compresor — maximiza volumen percibido
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.setValueAtTime(-4, ctx.currentTime);
+  comp.knee.setValueAtTime(0, ctx.currentTime);
+  comp.ratio.setValueAtTime(20, ctx.currentTime);
+  comp.attack.setValueAtTime(0.001, ctx.currentTime);
+  comp.release.setValueAtTime(0.05, ctx.currentTime);
+
+  distortion.connect(comp);
+  comp.connect(ctx.destination);
+
+  // Pip: sawtooth + square ligeramente desafinados → beating + dureza máxima
+  const pip = (freq: number, start: number, dur: number) => {
+    (['sawtooth', 'square'] as OscillatorType[]).forEach((type, i) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.connect(g);
+      g.connect(distortion);
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq + i * 8, start); // +8 Hz detune → beating
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(0.45, start + 0.003); // ataque fulminante
+      g.gain.setValueAtTime(0.45, start + dur - 0.015);
+      g.gain.linearRampToValueAtTime(0, start + dur);
+      osc.start(start);
+      osc.stop(start + dur);
+    });
   };
 
-  burst(0.00); // burst 1
-  burst(0.42); // burst 2
-  burst(0.84); // burst 3
+  const t = ctx.currentTime;
+  const HI = 1380;
+  const LO = 1020;
+  const pipDur = 0.10;
+  const step   = pipDur + 0.025; // 0.125s por pip
 
-  setTimeout(() => ctx.close(), 3500);
+  // Un ciclo: HI-LO-HI-LO
+  const cycle = (offset: number) => {
+    pip(HI, t + offset + 0 * step, pipDur);
+    pip(LO, t + offset + 1 * step, pipDur);
+    pip(HI, t + offset + 2 * step, pipDur);
+    pip(LO, t + offset + 3 * step, pipDur);
+  };
+
+  cycle(0);
+
+  setTimeout(() => ctx.close(), 1500);
 }
 
 // ─── Éxito — acorde mayor feliz ──────────────────────────────────────────────
