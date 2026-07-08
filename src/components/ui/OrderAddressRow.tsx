@@ -341,18 +341,18 @@ export function OrderAddressRow({
             type="button"
             onClick={handleOpenSheet}
             title="Más opciones"
-            className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-neutral-black-10 transition-colors"
+            className="flex items-center justify-center w-9 h-9 rounded-lg hover:bg-neutral-black-10 transition-colors"
           >
-            <MoreHorizontal size={14} className="text-neutral-black-50" />
+            <MoreHorizontal size={22} className="text-neutral-black-50" />
           </button>
           {hasCoords && (
             <button
               type="button"
               onClick={handleOpenMaps}
               title="Abrir en Google Maps"
-              className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-blue-50 transition-colors"
+              className="flex items-center justify-center w-9 h-9 rounded-lg hover:bg-blue-50 transition-colors"
             >
-              <Navigation size={14} className="text-blue-500" />
+              <Navigation size={26} className="text-blue-500" />
             </button>
           )}
 

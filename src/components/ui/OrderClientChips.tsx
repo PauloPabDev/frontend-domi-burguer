@@ -101,6 +101,7 @@ interface OrderClientChipProps {
   clientId?: string;
   avatarSrc?: string;
   className?: string;
+  phoneVisible?: boolean;
 }
 
 export function OrderClientChip({
@@ -109,30 +110,65 @@ export function OrderClientChip({
   clientId,
   avatarSrc = MOCK_AVATAR,
   className,
+  phoneVisible = false,
 }: OrderClientChipProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const handleOpen = (e: React.MouseEvent) => { e.stopPropagation(); setMenuOpen(true); };
+
   return (
     <>
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
-        className={cn(
-          'flex items-center gap-2 bg-neutral-100 rounded-full pl-1 pr-4 py-1 shrink-0 hover:bg-neutral-200 transition-colors',
+      {phoneVisible ? (
+        <div className={cn(
+          'flex items-center gap-2 bg-neutral-100 rounded-2xl pl-1 pr-4 py-1 shrink-0',
           className,
-        )}
-      >
-        <Image
-          src={avatarSrc}
-          alt={name ?? 'Cliente'}
-          width={30}
-          height={30}
-          className="rounded-full object-cover"
-        />
-        <span className="text-sm font-semibold text-neutral-black-80 truncate max-w-[110px]">
-          {name ?? 'Cliente'}
-        </span>
-      </button>
+        )}>
+          <Image
+            src={avatarSrc}
+            alt={name ?? 'Cliente'}
+            width={30}
+            height={30}
+            className="rounded-full object-cover cursor-pointer shrink-0"
+            onClick={handleOpen}
+          />
+          <div className="flex flex-col items-start min-w-0">
+            <button type="button" onClick={handleOpen} className="text-left w-full">
+              <span className="text-sm font-semibold text-neutral-black-80 truncate max-w-[110px] block">
+                {name ?? 'Cliente'}
+              </span>
+            </button>
+            {phone && (
+              <a
+                href={`tel:${phone}`}
+                onClick={(e) => e.stopPropagation()}
+                className="text-xs text-blue-600 hover:underline leading-tight"
+              >
+                {phone}
+              </a>
+            )}
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={handleOpen}
+          className={cn(
+            'flex items-center gap-2 bg-neutral-100 rounded-full pl-1 pr-4 py-1 shrink-0 hover:bg-neutral-200 transition-colors',
+            className,
+          )}
+        >
+          <Image
+            src={avatarSrc}
+            alt={name ?? 'Cliente'}
+            width={30}
+            height={30}
+            className="rounded-full object-cover"
+          />
+          <span className="text-sm font-semibold text-neutral-black-80 truncate max-w-[110px]">
+            {name ?? 'Cliente'}
+          </span>
+        </button>
+      )}
 
       {menuOpen && (
         <ClientActionMenu
