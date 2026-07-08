@@ -15,6 +15,7 @@ function firestoreTimestampToISO(ts: FirestoreTimestamp | string | null | undefi
 }
 
 function normalizeComplement(raw: RawSocketComplement): OrderComplement {
+  console.log('normalizing complement', raw);
   return {
     name: raw.id,
     price: raw.price,

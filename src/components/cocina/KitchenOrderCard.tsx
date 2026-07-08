@@ -52,7 +52,7 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onSta
       {/* Productos */}
       <div className={SECTION}>
         <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide mb-3">Productos</p>
-        <OrderItemsList items={order.orderItems} circleQty />
+        <OrderItemsList items={order.orderItems} />
       </div>
 
       {/* Dirección colapsable */}

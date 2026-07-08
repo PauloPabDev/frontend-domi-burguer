@@ -21,14 +21,20 @@ function resolveItemNames(
   return items.map((item) => {
     const product = productMap.get(item.name); // item.name holds the raw product ID
     const resolvedName = product?.name ?? item.name;
+    const resolvedColorPrimary = product?.colorPrimary;
+    const resolvedColorSecondary = product?.colorSecondary;
+    console.log('resolving item', item);
 
     const resolvedComplements = item.complements?.map((c): OrderComplement => {
+      console.log('resolving complement', c);
       const comp = productMap.get(c.name); // c.name holds the raw complement ID
-      return comp ? { ...c, name: comp.name } : c;
+      return comp ? { ...c, name: comp.name, ...(comp.colorPrimary && { colorPrimary: comp.colorPrimary }) } : c;
     });
 
     if (
       resolvedName === item.name &&
+      resolvedColorPrimary === item.colorPrimary &&
+      resolvedColorSecondary === item.colorSecondary &&
       (!resolvedComplements || resolvedComplements.every((c, i) => c === item.complements![i]))
     ) {
       return item;
@@ -37,6 +43,8 @@ function resolveItemNames(
     return {
       ...item,
       name: resolvedName,
+      ...(resolvedColorPrimary && { colorPrimary: resolvedColorPrimary }),
+      ...(resolvedColorSecondary && { colorSecondary: resolvedColorSecondary }),
       ...(resolvedComplements && { complements: resolvedComplements }),
     };
   });

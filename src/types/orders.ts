@@ -23,6 +23,8 @@ export interface OrderItem {
   quantity: number;
   image1?: string;
   image2?: string;
+  colorPrimary?: string;
+  colorSecondary?: string;
   modifications?: OrderModification[];
   complements?: OrderComplement[];
 }
@@ -37,6 +39,7 @@ export interface OrderComplement {
   name: string;
   quantity: number;
   price: number;
+  colorPrimary?: string;
 }
 
 export interface CustomerInfo {

@@ -8,31 +8,26 @@ export const formatCOP = (v: number) =>
 
 interface OrderItemsListProps {
   items: OrderItem[];
-  /** Muestra círculo de cantidad (estilo cocina). Por defecto muestra "Nx" en texto */
-  circleQty?: boolean;
   className?: string;
   deliveryPrice?: number;
 }
 
-export function OrderItemsList({ items, circleQty = false, className, deliveryPrice }: OrderItemsListProps) {
+export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsListProps) {
   return (
     <ul className={cn('space-y-3', className)}>
       {items.map((item) => (
-        <li key={item.id} className=" flex gap-2">
+        <li key={item.id} className="flex items-center gap-2">
           {/* Cantidad */}
-          {circleQty ? (
-            <span className="w-6 h-6 rounded-full bg-primary-red text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-              {item.quantity}
-            </span>
-          ) : (
-            <span className="text-sm font-bold text-primary-red shrink-0 mt-0.5 w-6 text-center">
-              {item.quantity}
-            </span>
-          )}
+          <span
+            className="w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0"
+            style={{ backgroundColor: item.colorPrimary ?? 'var(--color-primary-red)' }}
+          >
+            {item.quantity}
+          </span>
 
           {/* Nombre + adicionales */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-baseline justify-between gap-2">
+            <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-semibold text-neutral-black-80 leading-tight">
                 {item.name}
               </p>
@@ -41,15 +36,26 @@ export function OrderItemsList({ items, circleQty = false, className, deliveryPr
               </span>
             </div>
 
-            {/* Complementos — mismo patrón que OrderTotals */}
+            {/* Complementos */}
             {item.complements && item.complements.length > 0 && (
-              <div className="flex flex-col gap-0.5 pl-3 border-l-2 border-neutral-black-20 ml-1 mt-1">
-                {item.complements.map((c, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs text-neutral-black-50">
-                    <span>+ {c.name}{c.quantity > 1 ? ` x${c.quantity}` : ''}</span>
-                    <span>{formatCOP(c.price * (c.quantity || 1))}</span>
-                  </div>
-                ))}
+              <div className="flex flex-col gap-1 ml-1 mt-1">
+                {item.complements.map((c, i) => {
+                  console.log('complement', c);
+                  return (
+                    <div key={i} className="flex items-center gap-2">
+                      <span
+                        className="w-5 h-5 rounded-full text-white text-[10px] font-bold flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: c.colorPrimary ?? 'var(--color-neutral-black-30)' }}
+                      >
+                        {c.quantity} +
+                      </span>
+                      <div className="flex-1 flex items-center justify-between text-xs text-neutral-black-50">
+                        <span>{c.name}</span>
+                        <span className="shrink-0">{formatCOP(c.price * (c.quantity || 1))}</span>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             )}
 
