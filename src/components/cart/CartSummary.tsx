@@ -12,6 +12,7 @@ import { useCartActions } from "@/hooks/cart/useCartActions";
 import { useCartSubmit } from "@/hooks/cart/useCartSubmit";
 import { useComplementsModal } from "@/hooks/cart/useComplementsModal";
 import { useCoupon } from "@/hooks/cart/useCoupon";
+import { useAnniversaryPromotion, ANNIVERSARY_REWARD_CODE } from "@/hooks/cart/useAnniversaryPromotion";
 import { CartItemCard } from "@/components/cart/CartItemCard";
 import { CouponInput } from "@/components/cart/CouponInput";
 import { OrderTotals } from "@/components/cart/OrderTotals";
@@ -53,6 +54,7 @@ export const CartSummary = ({ }) => {
   } = useCartActions();
 
   const { handleEditComplements } = useComplementsModal();
+  const { isPromoActive } = useAnniversaryPromotion();
   const { isSubmitting, error } = useCartSubmit();
   const { setError } = useCheckoutFormStore();
 
@@ -107,13 +109,33 @@ export const CartSummary = ({ }) => {
             </div>
 
             <div className="flex flex-col items-start gap-8 w-full">
-              <div className="flex flex-col items-start gap-4 w-full">
+              {isPromoActive && (
+              <div className="w-full flex items-start gap-3 bg-yellow-50 border border-yellow-300 rounded-xl px-4 py-3">
+                <span className="text-2xl leading-none mt-0.5">🎂</span>
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-sm font-bold text-yellow-800 leading-snug">
+                    ¡10 Años contigo!
+                  </p>
+                  <p className="text-xs text-yellow-700 leading-snug">
+                    Por nuestro <strong>10° Aniversario</strong> te regalamos un{" "}
+                    <strong>Cheesecake de Fresa</strong> 🍰 como postre. ¡Gracias por ser parte de nuestra familia!
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col items-start gap-4 w-full">
                 {items.map((item) => (
                   <CartItemCard
                     key={item.id}
                     item={item}
                     onEditComplements={handleEditComplements}
-                    onRemoveComplement={removeComplement}
+                    onRemoveComplement={(itemId, complementId) => {
+                      const cartItem = items.find((i) => i.id === itemId);
+                      const comp = cartItem?.complements.find((c) => c.id === complementId);
+                      if (comp?.rewardCode === ANNIVERSARY_REWARD_CODE) return;
+                      removeComplement(itemId, complementId);
+                    }}
                     onDecrease={handleDecrease}
                     onIncrease={handleIncrease}
                     onRemoveReward={handleRemoveReward}
