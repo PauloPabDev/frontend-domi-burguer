@@ -47,6 +47,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
           name={order.client?.name ?? order.user?.name}
           phone={order.client?.phone ?? order.user?.phone}
           clientId={order.clientId}
+          avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
           phoneVisible
         />
         <OrderTimeChip time={formatTime(order.createdAt)} className="ml-auto" />

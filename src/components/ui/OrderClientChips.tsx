@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Phone, UserRound, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -44,7 +43,7 @@ function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientA
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
-          <Image
+          <img
             src={avatarSrc}
             alt={name ?? 'Cliente'}
             width={40}
@@ -122,7 +121,7 @@ export function OrderClientChip({
           'flex items-center gap-2 bg-neutral-100 rounded-2xl pl-1 pr-4 py-1 shrink-0',
           className,
         )}>
-          <Image
+          <img
             src={avatarSrc}
             alt={name ?? 'Cliente'}
             width={30}
@@ -156,7 +155,7 @@ export function OrderClientChip({
             className,
           )}
         >
-          <Image
+          <img
             src={avatarSrc}
             alt={name ?? 'Cliente'}
             width={30}
