@@ -12,7 +12,7 @@ import { useCartActions } from "@/hooks/cart/useCartActions";
 import { useCartSubmit } from "@/hooks/cart/useCartSubmit";
 import { useComplementsModal } from "@/hooks/cart/useComplementsModal";
 import { useCoupon } from "@/hooks/cart/useCoupon";
-import { useAnniversaryPromotion, ANNIVERSARY_REWARD_CODE } from "@/hooks/cart/useAnniversaryPromotion";
+import { useAnniversaryPromotion, ANNIVERSARY_COMPLEMENT_ID } from "@/hooks/cart/useAnniversaryPromotion";
 import { CartItemCard } from "@/components/cart/CartItemCard";
 import { CouponInput } from "@/components/cart/CouponInput";
 import { OrderTotals } from "@/components/cart/OrderTotals";
@@ -131,9 +131,7 @@ export const CartSummary = ({ }) => {
                     item={item}
                     onEditComplements={handleEditComplements}
                     onRemoveComplement={(itemId, complementId) => {
-                      const cartItem = items.find((i) => i.id === itemId);
-                      const comp = cartItem?.complements.find((c) => c.id === complementId);
-                      if (comp?.rewardCode === ANNIVERSARY_REWARD_CODE) return;
+                      if (complementId === ANNIVERSARY_COMPLEMENT_ID) return;
                       removeComplement(itemId, complementId);
                     }}
                     onDecrease={handleDecrease}

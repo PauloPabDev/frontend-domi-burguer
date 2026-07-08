@@ -11,7 +11,6 @@ import { WorkerKitchen } from '@/types/worker';
 import { PRODUCTS } from '@/data/products';
 import { BancolombiaIcon, MoneyIcon, NequiIcon } from '@/components/ui/icons';
 import {
-  ANNIVERSARY_REWARD_CODE,
   ANNIVERSARY_COMPLEMENT_ID,
   ANNIVERSARY_COMPLEMENT_NAME,
   ANNIVERSARY_ELIGIBLE_PRODUCT_IDS,
@@ -296,7 +295,6 @@ export function useNuevaOrden() {
       price: 0,
       type: 'special',
       minusComplement: false,
-      rewardCode: ANNIVERSARY_REWARD_CODE,
     };
 
     setOrderItems((prev) => {
@@ -304,14 +302,14 @@ export function useNuevaOrden() {
         ANNIVERSARY_ELIGIBLE_PRODUCT_IDS.includes(i.product.id)
       );
       const hasPromo = prev.some((i) =>
-        i.complements.some((c) => c.rewardCode === ANNIVERSARY_REWARD_CODE)
+        i.complements.some((c) => c.id === ANNIVERSARY_COMPLEMENT_ID)
       );
 
       if (!eligibleItem) {
         if (!hasPromo) return prev;
         return prev.map((i) => ({
           ...i,
-          complements: i.complements.filter((c) => c.rewardCode !== ANNIVERSARY_REWARD_CODE),
+          complements: i.complements.filter((c) => c.id !== ANNIVERSARY_COMPLEMENT_ID),
         }));
       }
 

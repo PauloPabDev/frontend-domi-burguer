@@ -3,12 +3,14 @@ import { useCartStore } from '@/store/cartStore';
 import { generateCartItemId, calculateTotalPrice } from '@/lib/utils';
 import { Complement } from '@/types/products';
 
-export const ANNIVERSARY_REWARD_CODE = 'ANIVERSARIO-10';
 export const ANNIVERSARY_COMPLEMENT_ID = 'T2RTWuDgHWjIy3Vb2BjW';
 export const ANNIVERSARY_COMPLEMENT_NAME = 'Cheesecake de Fresa';
 // Aplica a COMBO (1) y HAMBURGUESA ARTESANAL (2)
 export const ANNIVERSARY_ELIGIBLE_PRODUCT_IDS = [1, 2];
 const ELIGIBLE_PRODUCT_IDS = ANNIVERSARY_ELIGIBLE_PRODUCT_IDS;
+
+const hasAnniversaryComplement = (complements: Complement[]) =>
+  complements.some((c) => c.id === ANNIVERSARY_COMPLEMENT_ID);
 
 export const useAnniversaryPromotion = () => {
   const items = useCartStore((s) => s.items);
@@ -21,21 +23,19 @@ export const useAnniversaryPromotion = () => {
     );
 
     const itemWithPromo = currentItems.find((item) =>
-      item.complements.some((c) => c.rewardCode === ANNIVERSARY_REWARD_CODE)
+      hasAnniversaryComplement(item.complements)
     );
 
     if (eligibleItems.length === 0) {
-      // Sin productos elegibles — quitar el complemento si existe
       if (itemWithPromo) {
         const updatedComplements = itemWithPromo.complements.filter(
-          (c) => c.rewardCode !== ANNIVERSARY_REWARD_CODE
+          (c) => c.id !== ANNIVERSARY_COMPLEMENT_ID
         );
         useCartStore.getState().updateItemComplements(itemWithPromo.id, updatedComplements);
       }
       return;
     }
 
-    // Ya tiene el complemento de aniversario — no duplicar
     if (itemWithPromo) return;
 
     const firstItem = eligibleItems[0];
@@ -47,7 +47,6 @@ export const useAnniversaryPromotion = () => {
       price: 0,
       type: 'special',
       minusComplement: false,
-      rewardCode: ANNIVERSARY_REWARD_CODE,
     };
 
     if (firstItem.quantity > 1) {
