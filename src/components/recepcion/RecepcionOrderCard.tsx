@@ -230,7 +230,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
 
         {/* Productos */}
         <div className={SECTION}>
-          <OrderItemsList items={order.orderItems} />
+          <OrderItemsList items={order.orderItems} deliveryPrice={order.deliveryPrice} />
         </div>
 
         {/* Pago y total */}

@@ -11,9 +11,10 @@ interface OrderItemsListProps {
   /** Muestra círculo de cantidad (estilo cocina). Por defecto muestra "Nx" en texto */
   circleQty?: boolean;
   className?: string;
+  deliveryPrice?: number;
 }
 
-export function OrderItemsList({ items, circleQty = false, className }: OrderItemsListProps) {
+export function OrderItemsList({ items, circleQty = false, className, deliveryPrice }: OrderItemsListProps) {
   return (
     <ul className={cn('space-y-3', className)}>
       {items.map((item) => (
@@ -65,6 +66,16 @@ export function OrderItemsList({ items, circleQty = false, className }: OrderIte
           </div>
         </li>
       ))}
+
+      {deliveryPrice !== undefined && (
+        <li className="flex gap-2 pt-2 border-t border-neutral-black-20">
+          <span className="w-6 shrink-0" />
+          <div className="flex-1 flex items-center justify-between">
+            <p className="text-sm font-semibold text-neutral-black-80">Domicilio</p>
+            <span className="text-xs text-neutral-black-50">{formatCOP(deliveryPrice)}</span>
+          </div>
+        </li>
+      )}
     </ul>
   );
 }
