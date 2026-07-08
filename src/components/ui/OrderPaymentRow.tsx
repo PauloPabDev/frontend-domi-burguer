@@ -75,11 +75,6 @@ export function OrderPaymentRow({
     }
   };
 
-  const handlePriceClick = () => {
-    if (!canMarkPaid) return;
-    setConfirmingPaid(true);
-  };
-
   const handleConfirmPaid = async () => {
     setLoadingPaid(true);
     try {
@@ -123,31 +118,15 @@ export function OrderPaymentRow({
           </span>
         </button>
 
-        {/* Precio — clic para recibir pago */}
-        <button
-          type="button"
-          onClick={handlePriceClick}
-          disabled={!canMarkPaid}
+        {/* Precio */}
+        <span
           className={cn(
-            'flex items-center gap-1 rounded-lg px-1 py-0.5 transition-colors',
-            canMarkPaid
-              ? 'cursor-pointer hover:bg-green-50'
-              : 'cursor-default',
+            'text-base font-bold transition-colors px-1',
+            paid ? 'line-through text-green-500' : 'text-neutral-black-80',
           )}
         >
-          <span
-            className={cn(
-              'text-base font-bold transition-colors',
-              paid
-                ? 'line-through text-green-500'
-                : canMarkPaid
-                  ? 'text-neutral-black-80 hover:text-green-600'
-                  : 'text-neutral-black-80',
-            )}
-          >
-            {formatCOP(total)}
-          </span>
-        </button>
+          {formatCOP(total)}
+        </span>
       </div>
 
       {cashChange && !paid && (
@@ -155,6 +134,17 @@ export function OrderPaymentRow({
           <span className="text-sm text-neutral-black-50">Con {formatCOP(cashChange.bill)}</span>
           <span className="text-sm font-semibold text-amber-600">Devolver {formatCOP(cashChange.change)}</span>
         </div>
+      )}
+
+      {/* Botón discreto para marcar pago — siempre visible */}
+      {canMarkPaid && !confirmingPaid && (
+        <button
+          type="button"
+          onClick={() => setConfirmingPaid(true)}
+          className="w-full mt-2 py-1 rounded-lg border border-neutral-black-10 text-xs text-neutral-black-40 hover:border-neutral-black-20 hover:text-neutral-black-60 transition-colors"
+        >
+          Confirmar pago
+        </button>
       )}
 
       {/* Confirmación de pago */}
