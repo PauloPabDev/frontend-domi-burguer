@@ -55,7 +55,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   }, []);
 
   return (
-    <div className="flex flex-col min-w-[240px] flex-1 h-full">
+    <div className="flex flex-col w-[360px] shrink-0 h-full">
       {/* Column header */}
       <div className={cn('flex items-center gap-2 px-3 py-2 rounded-xl mb-2 shrink-0', cfg.bg)}>
         <div className={cn('w-2 h-2 rounded-full', cfg.dotColor)} />
