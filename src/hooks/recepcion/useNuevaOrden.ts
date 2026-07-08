@@ -51,6 +51,7 @@ export function useNuevaOrden() {
   const [deliveryLoading, setDeliveryLoading] = useState(false);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
   const [selectedKitchenId, setSelectedKitchenId] = useState<string | null>(null);
+  const originalDeliveryPriceRef = useRef<number | null>(null);
 
   // Products step
   const itemIdCounterRef = useRef(0);
@@ -148,6 +149,7 @@ export function useNuevaOrden() {
       );
       setDelivery(body.delivery);
       setKitchen(body.kitchen);
+      originalDeliveryPriceRef.current = body.delivery?.price ?? null;
       if (body.kitchen?.id) setSelectedKitchenId(body.kitchen.id);
     } catch (err) {
       setDeliveryError(err instanceof Error ? err.message : 'Error al calcular delivery');
@@ -176,6 +178,12 @@ export function useNuevaOrden() {
 
   const overrideDeliveryPrice = useCallback((price: number) => {
     setDelivery((prev) => prev ? { ...prev, price, modified: true } : prev);
+  }, []);
+
+  const resetDeliveryPrice = useCallback(() => {
+    const original = originalDeliveryPriceRef.current;
+    if (original === null) return;
+    setDelivery((prev) => prev ? { ...prev, price: original, modified: false } : prev);
   }, []);
 
   // Product management — each call to addProduct creates a new independent line item
@@ -280,6 +288,7 @@ export function useNuevaOrden() {
     setSelectedLocationId(null);
     setDelivery(null);
     setKitchen(null);
+    originalDeliveryPriceRef.current = null;
     setOrderItems([]);
     setPaymentMethod('cash');
     setComment('');
@@ -303,7 +312,9 @@ export function useNuevaOrden() {
     showCreateLocationModal, setShowCreateLocationModal,
     handleSelectLocation, handleLocationCreated,
     // Delivery
-    delivery, kitchen, deliveryLoading, deliveryError, overrideDeliveryPrice,
+    delivery, kitchen, deliveryLoading, deliveryError,
+    overrideDeliveryPrice, resetDeliveryPrice,
+    originalDeliveryPrice: originalDeliveryPriceRef.current,
     // Products
     allProducts: PRODUCTS,
     orderItems, addProduct, removeProduct, changeQuantity,

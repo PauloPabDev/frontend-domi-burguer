@@ -186,6 +186,9 @@ export function NuevaOrdenForm() {
             subtotal={form.subtotal}
             total={form.total}
             delivery={form.delivery}
+            originalDeliveryPrice={form.originalDeliveryPrice}
+            onOverrideDeliveryPrice={form.overrideDeliveryPrice}
+            onResetDeliveryPrice={form.resetDeliveryPrice}
           />
 
           <Button

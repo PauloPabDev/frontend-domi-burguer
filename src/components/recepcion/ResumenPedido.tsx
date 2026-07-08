@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ChevronDown, ChevronUp, Pencil, RotateCcw, Check, X } from 'lucide-react';
 import { OrderItem } from '@/hooks/recepcion/useNuevaOrden';
 import { DeliveryInfo } from '@/services/workerOrderService';
 
@@ -12,6 +12,9 @@ interface ResumenPedidoProps {
   subtotal: number;
   total: number;
   delivery: DeliveryInfo | null;
+  originalDeliveryPrice?: number | null;
+  onOverrideDeliveryPrice?: (price: number) => void;
+  onResetDeliveryPrice?: () => void;
 }
 
 function OrderItemRow({ item }: { item: OrderItem }) {
@@ -48,9 +51,44 @@ function OrderItemRow({ item }: { item: OrderItem }) {
   );
 }
 
-export function ResumenPedido({ orderItems, subtotal, total, delivery }: ResumenPedidoProps) {
+export function ResumenPedido({
+  orderItems,
+  subtotal,
+  total,
+  delivery,
+  originalDeliveryPrice,
+  onOverrideDeliveryPrice,
+  onResetDeliveryPrice,
+}: ResumenPedidoProps) {
   const [expanded, setExpanded] = useState(true);
+  const [editingPrice, setEditingPrice] = useState(false);
+  const [priceInput, setPriceInput] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
   const totalUnidades = orderItems.reduce((s, i) => s + i.quantity, 0);
+
+  useEffect(() => {
+    if (editingPrice) inputRef.current?.focus();
+  }, [editingPrice]);
+
+  const handleStartEdit = () => {
+    setPriceInput(String(delivery?.price ?? ''));
+    setEditingPrice(true);
+  };
+
+  const handleSavePrice = () => {
+    const parsed = parseFloat(priceInput);
+    if (!isNaN(parsed) && parsed >= 0) {
+      onOverrideDeliveryPrice?.(parsed);
+      setEditingPrice(false);
+    }
+  };
+
+  const handleCancelEdit = () => setEditingPrice(false);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') handleSavePrice();
+    if (e.key === 'Escape') handleCancelEdit();
+  };
 
   if (orderItems.length === 0) return null;
 
@@ -87,17 +125,76 @@ export function ResumenPedido({ orderItems, subtotal, total, delivery }: Resumen
             </div>
             <div className="border-t border-neutral-black-20" />
             {delivery ? (
-              <div className="flex justify-between text-sm text-neutral-black-60">
-                <span className="flex items-center gap-1.5">
-                  Domicilio
-                  {delivery.distance > 0 && (
-                    <span className="text-neutral-black-40 text-xs">
-                      {(delivery.distance / 1000).toFixed(1)} km
-                      {delivery.duration ? ` · ~${Math.round(delivery.duration / 60)} min` : ''}
-                    </span>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between text-sm text-neutral-black-60">
+                  <span className="flex items-center gap-1.5">
+                    Domicilio
+                    {delivery.distance > 0 && (
+                      <span className="text-neutral-black-40 text-xs">
+                        {(delivery.distance / 1000).toFixed(1)} km
+                        {delivery.duration ? ` · ~${Math.round(delivery.duration / 60)} min` : ''}
+                      </span>
+                    )}
+                    {delivery.modified && (
+                      <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                        Modificado
+                      </span>
+                    )}
+                  </span>
+                  {editingPrice ? (
+                    <div className="flex items-center gap-1">
+                      <input
+                        ref={inputRef}
+                        type="number"
+                        min={0}
+                        value={priceInput}
+                        onChange={(e) => setPriceInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="w-24 text-right text-sm border border-neutral-black-30 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary-red/50 focus:border-primary-red"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleSavePrice}
+                        className="p-1 rounded text-green-600 hover:bg-green-50 transition-colors"
+                        title="Guardar"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="p-1 rounded text-neutral-black-40 hover:bg-neutral-black-10 transition-colors"
+                        title="Cancelar"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <span>{fmt(delivery.price)}</span>
+                      {onOverrideDeliveryPrice && (
+                        <button
+                          type="button"
+                          onClick={handleStartEdit}
+                          className="p-1 rounded text-neutral-black-40 hover:text-primary-red hover:bg-primary-red/5 transition-colors"
+                          title="Editar precio de domicilio"
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                      )}
+                      {delivery.modified && onResetDeliveryPrice && originalDeliveryPrice != null && (
+                        <button
+                          type="button"
+                          onClick={onResetDeliveryPrice}
+                          className="p-1 rounded text-amber-600 hover:bg-amber-50 transition-colors"
+                          title={`Restaurar precio original (${fmt(originalDeliveryPrice)})`}
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
                   )}
-                </span>
-                <span>{fmt(delivery.price)}</span>
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-1.5 text-sm text-red-500 font-semibold">
