@@ -181,21 +181,6 @@ export function NuevaOrdenForm() {
             />
           </FormCard>
 
-          {form.isAnniversaryPromoActive && (
-            <div className="w-full flex items-start gap-3 bg-yellow-50 border border-yellow-300 rounded-xl px-4 py-3">
-              <span className="text-2xl leading-none mt-0.5">🎂</span>
-              <div className="flex flex-col gap-0.5">
-                <p className="text-sm font-bold text-yellow-800 leading-snug">
-                  ¡10 Años contigo!
-                </p>
-                <p className="text-xs text-yellow-700 leading-snug">
-                  Por nuestro <strong>10° Aniversario</strong> se agrega un{" "}
-                  <strong>Cheesecake de Fresa</strong> 🍰 gratis a la orden.
-                </p>
-              </div>
-            </div>
-          )}
-
           <ResumenPedido
             orderItems={form.orderItems}
             subtotal={form.subtotal}

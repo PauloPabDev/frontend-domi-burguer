@@ -10,11 +10,6 @@ import { Product, Complement } from '@/types/products';
 import { WorkerKitchen } from '@/types/worker';
 import { PRODUCTS } from '@/data/products';
 import { BancolombiaIcon, MoneyIcon, NequiIcon } from '@/components/ui/icons';
-import {
-  ANNIVERSARY_COMPLEMENT_ID,
-  ANNIVERSARY_COMPLEMENT_NAME,
-  ANNIVERSARY_ELIGIBLE_PRODUCT_IDS,
-} from '@/hooks/cart/useAnniversaryPromotion';
 import { PaymentMethod } from '@/types/paymentMethod';
 
 export type ClientState = 'idle' | 'loading' | 'found' | 'not_found' | 'creating';
