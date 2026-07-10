@@ -20,8 +20,16 @@ export function ProductoSelector({
   onChangeQuantity,
   onEditComplements,
 }: ProductoSelectorProps) {
+  const additionsPrice = (item: OrderItem) =>
+    item.complements
+      .filter((c) => !c.minusComplement && c.price)
+      .reduce((s, c) => s + (c.price ?? 0), 0);
+
   const totalUnidades = orderItems.reduce((s, i) => s + i.quantity, 0);
-  const subtotal = orderItems.reduce((s, i) => s + i.product.price * i.quantity, 0);
+  const subtotal = orderItems.reduce(
+    (s, i) => s + (i.product.price + additionsPrice(i)) * i.quantity,
+    0
+  );
 
   // Number of times each product appears in the order
   const countByProduct = (productId: number) =>
@@ -76,6 +84,7 @@ export function ProductoSelector({
             {orderItems.map((item) => {
               const additions = item.complements.filter((c) => !c.minusComplement && c.name);
               const removals = item.complements.filter((c) => c.minusComplement && c.name);
+              const itemAddPrice = additionsPrice(item);
               const hasCustom = additions.length > 0 || removals.length > 0;
 
               return (
@@ -97,7 +106,7 @@ export function ProductoSelector({
                     </div>
                     {additions.length > 0 && (
                       <p className="text-xs text-green-600 truncate mt-0.5">
-                        + {additions.map((c) => c.name).join(', ')}
+                        + {additions.map((c) => `${c.name}${c.price ? ` ($${c.price.toLocaleString('es-CO')})` : ''}`).join(', ')}
                       </p>
                     )}
                     {removals.length > 0 && (
@@ -109,7 +118,7 @@ export function ProductoSelector({
 
                   {/* Price */}
                   <span className="text-sm font-semibold text-neutral-black-70 shrink-0">
-                    ${(item.product.price * item.quantity).toLocaleString('es-CO')}
+                    ${((item.product.price + itemAddPrice) * item.quantity).toLocaleString('es-CO')}
                   </span>
 
                   {/* Actions */}

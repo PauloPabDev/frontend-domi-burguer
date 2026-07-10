@@ -297,7 +297,12 @@ export function useNuevaOrden() {
     setSubmitError(null);
   }, []);
 
-  const subtotal = orderItems.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+  const subtotal = orderItems.reduce((sum, i) => {
+    const addPrice = i.complements
+      .filter((c) => !c.minusComplement && c.price)
+      .reduce((s, c) => s + (c.price ?? 0), 0);
+    return sum + (i.product.price + addPrice) * i.quantity;
+  }, 0);
   const total = subtotal + (delivery?.price ?? 0);
 
   return {

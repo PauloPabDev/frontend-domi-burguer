@@ -20,33 +20,50 @@ interface ResumenPedidoProps {
 function OrderItemRow({ item }: { item: OrderItem }) {
   const additions = item.complements.filter((c) => !c.minusComplement && c.name);
   const removals = item.complements.filter((c) => c.minusComplement && c.name);
+  const addPrice = item.complements
+    .filter((c) => !c.minusComplement && c.price)
+    .reduce((s, c) => s + (c.price ?? 0), 0);
+  const unitPrice = item.product.price + addPrice;
 
   return (
-    <div className="flex gap-3 py-2 border-b border-neutral-black-10 last:border-0">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-sm font-medium text-neutral-black-80">{item.product.name}</span>
+    <div className="py-2 border-b border-neutral-black-10 last:border-0 flex flex-col gap-0.5">
+      {/* Producto base */}
+      <div className="flex items-baseline justify-between gap-2">
+        <div className="flex items-baseline gap-1.5 min-w-0">
+          <span className="text-sm font-medium text-neutral-black-80 truncate">{item.product.name}</span>
           {item.quantity > 1 && (
-            <span className="text-xs text-neutral-black-40">×{item.quantity}</span>
+            <span className="text-xs text-neutral-black-40 shrink-0">×{item.quantity}</span>
           )}
         </div>
-        {item.quantity > 1 && (
-          <p className="text-xs text-neutral-black-40">{fmt(item.product.price)} c/u</p>
-        )}
-        {additions.length > 0 && (
-          <p className="text-xs text-green-600 mt-0.5">
-            + {additions.map((c) => c.name).join(', ')}
-          </p>
-        )}
-        {removals.length > 0 && (
-          <p className="text-xs text-neutral-black-40 line-through mt-0.5">
-            {removals.map((c) => c.name).join(', ')}
-          </p>
-        )}
+        <span className="text-sm font-semibold text-neutral-black-80 shrink-0">
+          {fmt(item.product.price * item.quantity)}
+        </span>
       </div>
-      <span className="text-sm font-semibold text-neutral-black-80 shrink-0">
-        {fmt(item.product.price * item.quantity)}
-      </span>
+
+      {/* Adiciones con precio individual */}
+      {additions.map((c) => (
+        <div key={String(c.id)} className="flex items-baseline justify-between gap-2 pl-2">
+          <span className="text-xs text-green-700 truncate">+ {c.name}</span>
+          {c.price ? (
+            <span className="text-xs text-green-700 shrink-0">{fmt(c.price * item.quantity)}</span>
+          ) : null}
+        </div>
+      ))}
+
+      {/* Eliminaciones */}
+      {removals.length > 0 && (
+        <p className="text-xs text-neutral-black-40 line-through pl-2">
+          {removals.map((c) => c.name).join(', ')}
+        </p>
+      )}
+
+      {/* Total del item solo si tiene adiciones con precio */}
+      {addPrice > 0 && (
+        <div className="flex justify-between gap-2 pl-2 pt-0.5 border-t border-neutral-black-10 mt-0.5">
+          <span className="text-xs text-neutral-black-50">Total</span>
+          <span className="text-xs font-bold text-neutral-black-70">{fmt(unitPrice * item.quantity)}</span>
+        </div>
+      )}
     </div>
   );
 }
