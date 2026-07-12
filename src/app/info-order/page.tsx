@@ -149,10 +149,10 @@ export default function InfoOrder() {
                   {items.map((item: Product) => (
                     <Card
                       key={item.id}
-                      className="flex w-full xl:h-28 items-start gap-4 pl-2 pr-3 xl:pr-4 py-2 bg-[#FFFFFF] rounded-[12px] overflow-hidden border-0"
+                      className="flex w-full items-start gap-4 pl-2 pr-3 py-3 bg-[#FFFFFF] rounded-[12px] border-0"
                     >
-                      <CardContent className="p-0 flex w-full gap-4 items-center justify-start">
-                        <div className="w-24 h-24 min-w-24 bg-accent-yellow-40 rounded-[7.66px] relative">
+                      <CardContent className="p-0 flex w-full gap-3 items-start">
+                        <div className="w-24 h-24 min-w-24 min-h-24 flex-shrink-0 bg-accent-yellow-40 rounded-[7.66px] relative overflow-hidden">
                           <Image
                             src={item.image1}
                             alt="Burger"
@@ -168,7 +168,6 @@ export default function InfoOrder() {
                                   }`
                             }
                           />
-
                           {item.image2 && (
                             <Image
                               src={item.image2}
@@ -180,21 +179,14 @@ export default function InfoOrder() {
                           )}
                         </div>
 
-                        <div className="justify-center w-full max-w-[316px] gap-2 xl:gap-3 pt-1 pb-0 px-0 flex-1 grow flex flex-col items-start self-stretch">
-                          <div className="flex gap-3 self-stretch w-full rounded-[80.62px] flex-col items-start">
-                            <div className="gap-3 self-stretch w-full flex items-center">
-                              <div className="flex-1 font-h4">{item.name}</div>
-                            </div>
-                          </div>
+                        <div className="flex flex-col flex-1 min-w-0 gap-2 py-1">
+                          <p className="font-h4 w-full">{item.name}</p>
 
                           <Complements complements={item.complements} />
 
-                          <div className="flex h-8 items-center justify-between w-full rounded-[50px]">
-                            <h4 className="">
-                              ${item.price.toLocaleString("es-CO")}
-                            </h4>
-
-                            <h4 className="">Cantidad: {item.quantity}</h4>
+                          <div className="flex items-center justify-between w-full mt-1">
+                            <h4>${item.price.toLocaleString("es-CO")}</h4>
+                            <h4>Cantidad: {item.quantity}</h4>
                           </div>
                         </div>
                       </CardContent>

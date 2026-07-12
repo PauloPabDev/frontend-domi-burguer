@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRef, useEffect, useState } from 'react';
-import { ClipboardList, Map, PlusCircle, Bike, MoreHorizontal } from 'lucide-react';
+import { ClipboardList, Map, PlusCircle, Bike, MoreHorizontal, BarChart3 } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
 import { Button } from '@/components/ui/button';
@@ -106,6 +106,18 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
                 >
                   <Map className="w-4 h-4 shrink-0" />
                   MAPA
+                </span>
+              </Link>
+
+              <Link href="/recepcion/contabilidad" onClick={() => setMoreOpen(false)}>
+                <span
+                  className={cn(
+                    'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold hover:bg-neutral-black-10 rounded-xl transition-colors',
+                    pathname === '/recepcion/contabilidad' ? 'text-primary-red' : 'text-neutral-black-80',
+                  )}
+                >
+                  <BarChart3 className="w-4 h-4 shrink-0" />
+                  CONTABILIDAD
                 </span>
               </Link>
             </div>

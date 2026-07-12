@@ -37,8 +37,8 @@ const ProductItem = ({ item }: { item: CartItem }) => (
 
     {item.complements.length > 0 && (
       <div className="flex flex-col gap-1 pl-3 border-l-2 border-neutral-black-20 ml-1">
-        {item.complements.map((comp) => (
-          <ComplementItem key={comp.id} complement={comp} />
+        {item.complements.map((comp, idx) => (
+          <ComplementItem key={`${comp.id}-${idx}`} complement={comp} />
         ))}
       </div>
     )}
