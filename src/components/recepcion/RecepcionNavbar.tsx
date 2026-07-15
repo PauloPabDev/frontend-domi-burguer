@@ -49,7 +49,7 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
   }, [moreOpen]);
 
   return (
-    <NavPillShell navShadow={navShadow}>
+    <NavPillShell navShadow={navShadow} innerClassName="lg:max-w-none">
       {/* Left: Avatar + Kitchen selector */}
       <div className="flex items-center gap-2">
         <NavWorkerAvatar />
@@ -68,8 +68,45 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
 
       {/* Right: Nav buttons */}
       <div className="flex items-center justify-end gap-2">
-        {/* More menu: MOTOS + MAPA */}
-        <div ref={moreRef} className="relative">
+
+        {/* Desktop: botones secundarios visibles en línea */}
+        <div className="hidden lg:flex items-center gap-2">
+          <Button
+            variant="light-outline"
+            size="md"
+            leftIcon={<Bike className="w-5 h-5" />}
+            badge={activeCouriers.length > 0 ? activeCouriers.length : undefined}
+            onClick={openPanel}
+            className="h-12 pl-5 pr-3 text-base"
+          >
+            MOTOS
+          </Button>
+
+          <Link href="/recepcion/contabilidad" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
+            <Button
+              variant={pathname === '/recepcion/contabilidad' ? 'primary' : 'light-outline'}
+              size="md"
+              leftIcon={<BarChart3 className="w-5 h-5" />}
+              className="h-12 pl-5 pr-3 text-base"
+            >
+              CONTABILIDAD
+            </Button>
+          </Link>
+
+          <Link href="/recepcion/mapa" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
+            <Button
+              variant={pathname === '/recepcion/mapa' ? 'primary' : 'light-outline'}
+              size="md"
+              leftIcon={<Map className="w-5 h-5" />}
+              className="h-12 pl-5 pr-3 text-base"
+            >
+              MAPA
+            </Button>
+          </Link>
+        </div>
+
+        {/* Mobile/Tablet: dropdown "más" con los botones secundarios */}
+        <div ref={moreRef} className="relative lg:hidden">
           <Button
             variant="light-outline"
             size="md"
@@ -77,13 +114,13 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
             badge={activeCouriers.length > 0 ? activeCouriers.length : undefined}
             onClick={() => setMoreOpen((v) => !v)}
             className={cn(
-              'h-10 lg:h-12 px-3 lg:px-4 text-sm lg:text-base',
+              'h-10 px-3 text-sm',
               moreOpen && 'bg-neutral-black-10',
             )}
           />
 
           {moreOpen && (
-            <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-neutral-black-20 shadow-lg rounded-2xl py-1.5 z-50">
+            <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-neutral-black-20 shadow-lg rounded-2xl py-1.5 z-50">
               <button
                 onClick={() => { openPanel(); setMoreOpen(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-neutral-black-80 hover:bg-neutral-black-10 rounded-xl transition-colors"
@@ -97,27 +134,23 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
                 )}
               </button>
 
-              <Link href="/recepcion/mapa" onClick={() => setMoreOpen(false)}>
-                <span
-                  className={cn(
-                    'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold hover:bg-neutral-black-10 rounded-xl transition-colors',
-                    pathname === '/recepcion/mapa' ? 'text-primary-red' : 'text-neutral-black-80',
-                  )}
-                >
-                  <Map className="w-4 h-4 shrink-0" />
-                  MAPA
+              <Link href="/recepcion/contabilidad" onClick={() => setMoreOpen(false)}>
+                <span className={cn(
+                  'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold hover:bg-neutral-black-10 rounded-xl transition-colors',
+                  pathname === '/recepcion/contabilidad' ? 'text-primary-red' : 'text-neutral-black-80',
+                )}>
+                  <BarChart3 className="w-4 h-4 shrink-0" />
+                  CONTABILIDAD
                 </span>
               </Link>
 
-              <Link href="/recepcion/contabilidad" onClick={() => setMoreOpen(false)}>
-                <span
-                  className={cn(
-                    'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold hover:bg-neutral-black-10 rounded-xl transition-colors',
-                    pathname === '/recepcion/contabilidad' ? 'text-primary-red' : 'text-neutral-black-80',
-                  )}
-                >
-                  <BarChart3 className="w-4 h-4 shrink-0" />
-                  CONTABILIDAD
+              <Link href="/recepcion/mapa" onClick={() => setMoreOpen(false)}>
+                <span className={cn(
+                  'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold hover:bg-neutral-black-10 rounded-xl transition-colors',
+                  pathname === '/recepcion/mapa' ? 'text-primary-red' : 'text-neutral-black-80',
+                )}>
+                  <Map className="w-4 h-4 shrink-0" />
+                  MAPA
                 </span>
               </Link>
             </div>
@@ -132,7 +165,7 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
             leftIcon={<PlusCircle className="w-4 h-4 md:w-5 md:h-5" />}
             className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
           >
-            <span className="hidden sm:inline"></span>
+            <span className="hidden sm:inline">CREAR</span>
           </Button>
         </Link>
 

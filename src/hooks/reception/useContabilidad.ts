@@ -18,7 +18,14 @@ export const useContabilidad = () => {
     try {
       const token = await user.getIdToken();
       const { body } = await WorkerOrderService.getOrdersByDay(token, startDate, endDate, kitchenId);
-      setOrders(body ?? []);
+      const normalized = (body ?? []).map((o) => {
+        const raw = o as WorkerOrder & { assignedCourierUserId?: string };
+        if (!o.courierId && raw.assignedCourierUserId) {
+          return { ...o, courierId: raw.assignedCourierUserId };
+        }
+        return o;
+      });
+      setOrders(normalized);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al cargar pedidos');
     } finally {

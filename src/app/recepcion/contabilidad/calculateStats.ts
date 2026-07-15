@@ -15,6 +15,8 @@ export interface CourierStat {
   cashCollected: number;
   cashOrderCount: number;
   netToHandOver: number;
+  digitalDeliveryOwed: number;
+  digitalOrderCount: number;
 }
 
 export interface KitchenStat {
@@ -45,7 +47,6 @@ export interface ContabilidadStats {
 
 export const calculateStats = (orders: WorkerOrder[]): ContabilidadStats => {
   const invoiced = orders.filter((o) => o.status === 'invoiced');
-
   let totalSales = 0;
   let totalProductsSold = 0;
   let deliveryCount = 0;
@@ -92,24 +93,29 @@ export const calculateStats = (orders: WorkerOrder[]): ContabilidadStats => {
       totalDeliveryCost += order.deliveryPrice;
     }
 
-    if (order.courierId && order.courier) {
-      if (!salesByCourier[order.courierId]) {
-        salesByCourier[order.courierId] = {
-          name: order.courier.name,
-          photoURL: order.courier.photoURL,
+    if (order.assignedCourierUserId) {
+      if (!salesByCourier[order.assignedCourierUserId]) {
+        salesByCourier[order.assignedCourierUserId] = {
+          name: order.courier?.name || 'Desconocido',
+          photoURL: order.courier?.photoURL,
           orderCount: 0,
           totalDelivery: 0,
           cashCollected: 0,
           cashOrderCount: 0,
           netToHandOver: 0,
+          digitalDeliveryOwed: 0,
+          digitalOrderCount: 0,
         };
       }
-      const stat = salesByCourier[order.courierId];
+      const stat = salesByCourier[order.assignedCourierUserId];
       stat.orderCount++;
       stat.totalDelivery += order.deliveryPrice ?? 0;
       if ((order.paymentMethod ?? '') === 'cash') {
         stat.cashCollected += order.totalPrice ?? 0;
         stat.cashOrderCount++;
+      } else if (order.deliveryPrice && order.deliveryPrice > 0) {
+        stat.digitalDeliveryOwed += order.deliveryPrice;
+        stat.digitalOrderCount++;
       }
       stat.netToHandOver = stat.cashCollected - stat.totalDelivery;
     }

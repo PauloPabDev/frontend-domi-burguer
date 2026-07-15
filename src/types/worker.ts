@@ -15,6 +15,7 @@ export interface WorkerOrder {
   clientId?: string;
   userId?: string;
   courierId?: string;
+  assignedCourierUserId?: string;
   kitchenId?: string;
   client?: {
     name: string;

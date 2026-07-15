@@ -24,7 +24,7 @@ export default function ContabilidadPage() {
   useEffect(() => {
     if (!selectedKitchenId) return;
     fetchOrders(getStartOfDay().toISOString(), getEndOfDay().toISOString(), selectedKitchenId);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedKitchenId]);
 
   const handleFetch = useCallback(() => {
@@ -60,10 +60,11 @@ export default function ContabilidadPage() {
   const couriersFromOrders = useMemo(() => {
     const map = new Map<string, string>();
     allOrders.forEach((o) => {
-      if (o.courierId && o.courier?.name) map.set(o.courierId, o.courier.name);
+      if (o.assignedCourierUserId) map.set(o.assignedCourierUserId, o.courier?.name ?? 'Desconocido');
     });
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
   }, [allOrders]);
+  console.log('Couriers from orders:', couriersFromOrders);
 
   const filteredOrders = useMemo(() => {
     const q = normalize(search);
