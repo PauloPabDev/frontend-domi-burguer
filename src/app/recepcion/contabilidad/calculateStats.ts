@@ -12,6 +12,9 @@ export interface CourierStat {
   photoURL?: string;
   orderCount: number;
   totalDelivery: number;
+  cashCollected: number;
+  cashOrderCount: number;
+  netToHandOver: number;
 }
 
 export interface KitchenStat {
@@ -96,10 +99,19 @@ export const calculateStats = (orders: WorkerOrder[]): ContabilidadStats => {
           photoURL: order.courier.photoURL,
           orderCount: 0,
           totalDelivery: 0,
+          cashCollected: 0,
+          cashOrderCount: 0,
+          netToHandOver: 0,
         };
       }
-      salesByCourier[order.courierId].orderCount++;
-      salesByCourier[order.courierId].totalDelivery += order.deliveryPrice ?? 0;
+      const stat = salesByCourier[order.courierId];
+      stat.orderCount++;
+      stat.totalDelivery += order.deliveryPrice ?? 0;
+      if ((order.paymentMethod ?? '') === 'cash') {
+        stat.cashCollected += order.totalPrice ?? 0;
+        stat.cashOrderCount++;
+      }
+      stat.netToHandOver = stat.cashCollected - stat.totalDelivery;
     }
 
     if (order.kitchenId && order.kitchen) {
