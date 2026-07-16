@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from 'react';
-import { X, Bike, Settings } from 'lucide-react';
+import { X, Bike, Settings, UserX } from 'lucide-react';
 import { WorkerUser } from '@/types/worker';
-import { Button } from '@/components/ui/button';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
 import { cn } from '@/lib/utils';
 
 interface AssignCourierModalProps {
   currentCourierId?: string;
-  onAssign: (courierId: string) => Promise<void>;
+  onAssign: (courierId: string | null) => Promise<void>;
   onClose: () => void;
 }
 
@@ -19,7 +18,6 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
   onClose,
 }) => {
   const { activeCouriers, allCouriers, filterCourierIds, openPanel } = useCourierPanel();
-  const [selected, setSelected] = useState<string | null>(currentCourierId ?? null);
   const [loading, setLoading] = useState(false);
 
   // Use active couriers if any, fall back to all couriers
@@ -32,11 +30,10 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
       ? baseCouriers.filter((c) => filterCourierIds.has(c.id))
       : baseCouriers;
 
-  const handleAssign = async () => {
-    if (!selected) return;
+  const handleSelect = async (courierId: string | null) => {
     setLoading(true);
     try {
-      await onAssign(selected);
+      await onAssign(courierId);
       onClose();
     } finally {
       setLoading(false);
@@ -82,18 +79,32 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
 
         {/* Courier list */}
         <div className="max-h-64 overflow-y-auto p-3 space-y-1">
+          {/* Sin asignar option */}
+          <button
+            disabled={loading}
+            onClick={() => handleSelect(null)}
+            className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:bg-neutral-black-10 transition-colors text-left disabled:opacity-50"
+          >
+            <div className="w-9 h-9 rounded-full bg-neutral-black-10 flex items-center justify-center shrink-0">
+              <UserX size={16} className="text-neutral-black-40" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-neutral-black-60">Sin asignar</p>
+              <p className="text-xs text-neutral-black-40">Ningún domiciliario</p>
+            </div>
+          </button>
+
           {couriers.length === 0 ? (
             <p className="text-sm text-center text-neutral-black-50 py-6">No hay domiciliarios disponibles</p>
           ) : (
             couriers.map((courier) => (
               <button
                 key={courier.id}
-                onClick={() => setSelected(courier.id)}
+                disabled={loading}
+                onClick={() => handleSelect(courier.id)}
                 className={cn(
-                  'w-full flex items-center gap-3 p-3 rounded-xl border transition-colors text-left',
-                  selected === courier.id
-                    ? 'border-primary-red bg-primary-red/5'
-                    : 'border-transparent hover:bg-neutral-black-10',
+                  'w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:bg-neutral-black-10 transition-colors text-left disabled:opacity-50',
+                  currentCourierId === courier.id && 'bg-neutral-black-10',
                 )}
               >
                 <div className="w-9 h-9 rounded-full bg-primary-red/10 flex items-center justify-center shrink-0 text-sm font-bold text-primary-red overflow-hidden">
@@ -107,7 +118,7 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
                   <p className="text-sm font-semibold text-neutral-black-80 truncate">{courier.name}</p>
                   {courier.phone && <p className="text-xs text-neutral-black-50">{courier.phone}</p>}
                 </div>
-                {selected === courier.id && (
+                {currentCourierId === courier.id && (
                   <div className="w-4 h-4 rounded-full bg-primary-red shrink-0" />
                 )}
               </button>
@@ -116,17 +127,7 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-5 pb-5 pt-3 border-t border-neutral-black-10 space-y-2">
-          <Button
-            onClick={handleAssign}
-            disabled={!selected}
-            loading={loading}
-            loadingText="Asignando..."
-            fullWidth
-            variant="primary"
-          >
-            Confirmar asignación
-          </Button>
+        <div className="px-5 pb-4 pt-3 border-t border-neutral-black-10">
           <button
             onClick={handleOpenPanel}
             className="w-full flex items-center justify-center gap-1.5 text-xs text-neutral-black-40 hover:text-neutral-black-60 transition-colors py-1"

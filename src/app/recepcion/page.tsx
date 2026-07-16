@@ -51,7 +51,7 @@ export default function RecepcionPage() {
     }
   };
 
-  const handleAssignCourier = async (orderId: string, courierId: string) => {
+  const handleAssignCourier = async (orderId: string, courierId: string | null) => {
     if (!user) return;
     try {
       const token = await user.getIdToken();

@@ -11,7 +11,7 @@ interface OrderKanbanColumnProps {
   orders: WorkerOrder[];
   kitchens: WorkerKitchen[];
   onStatusChange: (orderId: string, prev: OrderStatus, next: OrderStatus) => Promise<void>;
-  onAssignCourier: (orderId: string, courierId: string) => Promise<void>;
+  onAssignCourier: (orderId: string, courierId: string | null) => Promise<void>;
   onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
   onDelete: (orderId: string) => Promise<void>;
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;

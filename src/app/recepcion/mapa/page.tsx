@@ -80,7 +80,7 @@ export default function RecepcionMapaPage() {
     await WorkerOrderService.changeStatus(token, orderId, prev, next);
   };
 
-  const handleAssignCourier = async (orderId: string, courierId: string) => {
+  const handleAssignCourier = async (orderId: string, courierId: string | null) => {
     if (!user) return;
     const token = await user.getIdToken();
     await WorkerOrderService.assignCourier(token, orderId, courierId);

@@ -50,7 +50,7 @@ export class WorkerOrderService {
   static async assignCourier(
     token: string,
     orderId: string,
-    courierUserId: string
+    courierUserId: string | null
   ): Promise<{ body: WorkerOrder }> {
     const response = await fetch(`${this.API_URL}api/v2/orders/courier/${orderId}`, {
       method: 'PATCH',
