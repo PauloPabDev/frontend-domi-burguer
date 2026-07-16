@@ -153,7 +153,7 @@ export function FilterPanel({
           </span>
           {search && (
             <span className="text-xs font-medium bg-neutral-black-10 text-neutral-black-80 rounded-full px-2.5 py-0.5 flex items-center gap-1">
-              "{search}"
+              &quot;{search}&quot;
               <button onClick={() => onSearchChange('')}><X size={11} /></button>
             </span>
           )}

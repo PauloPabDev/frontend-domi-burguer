@@ -33,20 +33,17 @@ export function HistoryStatsCard({ stats }: HistoryStatsCardProps) {
     month: 'long',
   });
 
-  const avgPerDelivery =
-    stats.deliveries > 0 ? stats.earnings / stats.deliveries : 0;
-
   return (
     <div className="rounded-2xl overflow-hidden shadow-sm border border-neutral-black-20">
       {/* Header: total earnings */}
       <div className="bg-primary-red px-5 pt-5 pb-4">
         <p className="text-xs text-white/70 capitalize mb-1">{today}</p>
-        <p className="text-3xl font-bold text-white">{formatCOP(stats.earnings)}</p>
-        <p className="text-sm text-white/80 mt-0.5">Ganancia del día</p>
+        <p className="text-6xl font-bold text-white">{formatCOP(stats.earnings)}</p>
+        <p className="text-sm text-white/80 mt-0.5">Recaudo del día</p>
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 divide-x divide-white/20 bg-primary-red border-t border-white/20">
+      <div className="grid grid-cols-2 divide-x divide-white/20 bg-primary-red border-t border-white/20">
         <StatItem
           icon={<Bike size={17} className="text-white" />}
           value={String(stats.deliveries)}
@@ -56,11 +53,6 @@ export function HistoryStatsCard({ stats }: HistoryStatsCardProps) {
           icon={<Route size={17} className="text-white" />}
           value={`${(stats.totalDistance / 1000).toFixed(1)} km`}
           label="Recorridos"
-        />
-        <StatItem
-          icon={<TrendingUp size={17} className="text-white" />}
-          value={stats.deliveries > 0 ? formatCOP(avgPerDelivery) : '—'}
-          label="Promedio"
         />
       </div>
     </div>

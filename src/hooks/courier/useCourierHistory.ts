@@ -39,13 +39,13 @@ export const useCourierHistory = () => {
 
   useEffect(() => {
     fetchHistory();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userProfile?.id]);
 
   const stats: CourierStats = {
-    earnings: orders.reduce((sum, o) => sum + (o.deliveryPrice ?? 0), 0),
+    earnings: orders.reduce((sum, o) => sum + (o.delivery.price || 0), 0),
     deliveries: orders.length,
-    totalDistance: orders.reduce((sum, o) => sum + (o.distance ?? 0), 0),
+    totalDistance: orders.reduce((sum, o) => sum + (o.delivery.distance || 0), 0),
   };
 
   return { orders, stats, loading, error, refetch: fetchHistory };

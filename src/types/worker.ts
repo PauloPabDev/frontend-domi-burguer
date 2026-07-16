@@ -17,6 +17,11 @@ export interface WorkerOrder {
   courierId?: string;
   assignedCourierUserId?: string;
   kitchenId?: string;
+  delivery: {
+    price: number;
+    duration: number;
+    distance: number;
+  };
   client?: {
     name: string;
     phone: string;
