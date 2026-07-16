@@ -10,6 +10,9 @@ import { Product, Complement } from '@/types/products';
 import { WorkerKitchen } from '@/types/worker';
 import { PRODUCTS } from '@/data/products';
 import { BancolombiaIcon, MoneyIcon, NequiIcon } from '@/components/ui/icons';
+import bancolombiaLogo from "@/media/img/bancolombia.png";
+import nequiLogo from "@/media/img/nequi.png";
+import efectivoLogo from "@/media/img/efectivo.jpeg";
 import { PaymentMethod } from '@/types/paymentMethod';
 
 export type ClientState = 'idle' | 'loading' | 'found' | 'not_found' | 'creating';
@@ -22,9 +25,9 @@ export interface OrderItem {
 }
 
 export const PAYMENT_METHODS: PaymentMethod[] = [
-  { id: 'cash',        label: 'Efectivo',    iconClass: 'w-[38px] h-[32px]', icon: MoneyIcon,       selected: true  },
-  { id: 'bancolombia', label: 'Bancolombia', iconClass: 'w-[28px] h-[28px]', icon: BancolombiaIcon, selected: false },
-  { id: 'nequi',       label: 'Nequi',       iconClass: 'w-[36px] h-[25px]', icon: NequiIcon,       selected: false },
+  { id: 'cash',        label: 'Efectivo',    iconClass: 'w-[38px] h-[32px]', icon: MoneyIcon,       selected: true,  logo: efectivoLogo    },
+  { id: 'bancolombia', label: 'Bancolombia', iconClass: 'w-[28px] h-[28px]', icon: BancolombiaIcon, selected: false, logo: bancolombiaLogo },
+  { id: 'nequi',       label: 'Nequi',       iconClass: 'w-[36px] h-[25px]', icon: NequiIcon,       selected: false, logo: nequiLogo       },
 ];
 
 export function useNuevaOrden() {

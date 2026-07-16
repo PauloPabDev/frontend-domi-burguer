@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { PaymentMethod } from "@/types/paymentMethod";
 import { track } from "@/utils/analytics";
 
@@ -76,7 +77,17 @@ function PaymentMethodOption({
                     )}
                 </div>
                 <div className="flex flex-col xl:flex-row xl:gap-2 items-center">
-                    <method.icon className={method.iconClass} />
+                    {method.logo ? (
+                        <Image
+                            src={method.logo}
+                            alt={method.label}
+                            width={32}
+                            height={32}
+                            className="object-contain rounded-sm"
+                        />
+                    ) : (
+                        <method.icon className={method.iconClass} />
+                    )}
                     <div
                         className={`w-fit font-normal text-xs text-center leading-[18px] whitespace-nowrap ${isSelected ? "text-neutral-black-80" : "text-neutral-black-50"
                             }`}

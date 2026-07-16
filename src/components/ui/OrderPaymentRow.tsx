@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Banknote, Building2, Smartphone, CreditCard, Loader2 } from 'lucide-react';
+import Image, { StaticImageData } from 'next/image';
+import { CreditCard, Loader2 } from 'lucide-react';
+import bancolombiaLogo from "@/media/img/bancolombia.png";
+import nequiLogo from "@/media/img/nequi.png";
+import efectivoLogo from "@/media/img/efectivo.jpeg";
 import { PAYMENT_LABELS } from '@/types/worker';
 import { formatCOP } from '@/components/ui/OrderItemsList';
 import { cn } from '@/lib/utils';
@@ -15,10 +19,22 @@ function getCashChange(total: number): { bill: number; change: number } | null {
   return { bill, change: bill - total };
 }
 
-const PAYMENT_ICONS: Record<string, React.ElementType> = {
-  cash: Banknote,
-  bancolombia: Building2,
-  nequi: Smartphone,
+const PAYMENT_LOGOS: Record<string, { src: StaticImageData; alt: string }> = {
+  cash: { src: efectivoLogo, alt: 'Efectivo' },
+  bancolombia: { src: bancolombiaLogo, alt: 'Bancolombia' },
+  nequi: { src: nequiLogo, alt: 'Nequi' },
+};
+
+const PAYMENT_ACTIVE_COLORS: Record<string, string> = {
+  cash: 'bg-green-600 text-white',
+  bancolombia: 'bg-neutral-black-80 text-white',
+  nequi: 'bg-[#da0081] text-white',
+};
+
+const PAYMENT_HOVER_COLORS: Record<string, string> = {
+  cash: 'hover:bg-green-100 hover:text-green-700 focus:bg-green-100 focus:text-green-700',
+  bancolombia: 'hover:bg-neutral-black-10 hover:text-neutral-black-80 focus:bg-neutral-black-10 focus:text-neutral-black-80',
+  nequi: 'hover:bg-[#fce4f3] hover:text-[#da0081] focus:bg-[#fce4f3] focus:text-[#da0081]',
 };
 
 const PAYMENT_METHODS: PaymentMethod[] = ['cash', 'bancolombia', 'nequi'];
@@ -46,12 +62,12 @@ export function OrderPaymentRow({
   onPaymentMethodChange,
   onMarkPaid,
 }: OrderPaymentRowProps) {
-  const [showPicker, setShowPicker] = useState(false);
+  const [showPicker, setShowPicker] = useState(true);
   const [confirmingPaid, setConfirmingPaid] = useState(false);
   const [loadingMethod, setLoadingMethod] = useState<string | null>(null);
   const [loadingPaid, setLoadingPaid] = useState(false);
 
-  const Icon = PAYMENT_ICONS[paymentMethod] ?? CreditCard;
+  const currentLogo = PAYMENT_LOGOS[paymentMethod];
   const cashChange =
     paymentMethod === 'cash' &&
       total > 0 ? getCashChange(total) : null
@@ -69,7 +85,6 @@ export function OrderPaymentRow({
     setLoadingMethod(method);
     try {
       await onPaymentMethodChange(method);
-      setShowPicker(false);
     } finally {
       setLoadingMethod(null);
     }
@@ -107,7 +122,11 @@ export function OrderPaymentRow({
               : 'cursor-default',
           )}
         >
-          <Icon size={16} className="text-neutral-black-50 shrink-0" />
+          {currentLogo ? (
+            <Image src={currentLogo.src} alt={currentLogo.alt} width={18} height={18} className="object-contain rounded-sm shrink-0" />
+          ) : (
+            <CreditCard size={16} className="text-neutral-black-50 shrink-0" />
+          )}
           <span
             className={cn(
               'text-sm font-medium',
@@ -174,7 +193,7 @@ export function OrderPaymentRow({
       {showPicker && (
         <div className="flex gap-1 mt-2">
           {PAYMENT_METHODS.map((method) => {
-            const MethodIcon = PAYMENT_ICONS[method] ?? CreditCard;
+            const logo = PAYMENT_LOGOS[method];
             const isActive = method === paymentMethod;
             const isLoading = loadingMethod === method;
             return (
@@ -184,15 +203,19 @@ export function OrderPaymentRow({
                 onClick={() => handleMethodSelect(method)}
                 disabled={!!loadingMethod}
                 className={cn(
-                  'flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all flex-1 justify-center disabled:opacity-50',
+                  'flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium transition-all flex-1 justify-center disabled:opacity-50',
                   isActive
-                    ? 'bg-neutral-black-80 text-white'
-                    : 'bg-neutral-black-5 text-neutral-black-50 hover:bg-neutral-black-10',
+                    ? PAYMENT_ACTIVE_COLORS[method] ?? 'bg-neutral-black-80 text-white'
+                    : cn('bg-neutral-black-5 text-neutral-black-50', PAYMENT_HOVER_COLORS[method]),
                 )}
               >
-                {isLoading
-                  ? <Loader2 size={11} className="animate-spin" />
-                  : <MethodIcon size={11} />}
+                {isLoading ? (
+                  <Loader2 size={11} className="animate-spin" />
+                ) : logo ? (
+                  <Image src={logo.src} alt={logo.alt} width={14} height={14} className="object-contain rounded-sm" />
+                ) : (
+                  <CreditCard size={11} />
+                )}
                 <span>{PAYMENT_LABELS[method]}</span>
               </button>
             );

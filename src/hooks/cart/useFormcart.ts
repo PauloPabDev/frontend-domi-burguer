@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 import { BancolombiaIcon, MoneyIcon, NequiIcon } from "@/components/ui/icons";
+import bancolombiaLogo from "@/media/img/bancolombia.png";
+import nequiLogo from "@/media/img/nequi.png";
+import efectivoLogo from "@/media/img/efectivo.jpeg";
 import { useCartStore } from "@/store/cartStore";
 import { useCheckoutFormStore } from "@/store/checkoutFormStore";
 import { useAppliedCodeStore } from "@/store/appliedCodeStore";
@@ -71,6 +74,7 @@ function useFormCart() {
       iconClass: "w-[38px] h-[32px]",
       icon: MoneyIcon,
       selected: true,
+      logo: efectivoLogo,
     },
     {
       id: "bancolombia",
@@ -78,6 +82,7 @@ function useFormCart() {
       iconClass: "w-[28px] h-[28px]",
       icon: BancolombiaIcon,
       selected: false,
+      logo: bancolombiaLogo,
     },
     {
       id: "nequi",
@@ -85,6 +90,7 @@ function useFormCart() {
       iconClass: "w-[36px] h-[25px]",
       icon: NequiIcon,
       selected: false,
+      logo: nequiLogo,
     },
   ];
 
