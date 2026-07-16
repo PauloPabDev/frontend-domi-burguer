@@ -1,8 +1,13 @@
 'use client';
 
-import { Bike, Route, TrendingUp } from 'lucide-react';
+import { Bike, Route } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import confetti from 'canvas-confetti';
 import { CourierStats } from '@/types/courier';
 import { formatCOP } from '@/components/ui/OrderItemsList';
+
+const GOAL = 80_000;
+const VIBRATE_THRESHOLD = 70_000;
 
 interface StatItemProps {
   icon: React.ReactNode;
@@ -26,21 +31,52 @@ interface HistoryStatsCardProps {
   stats: CourierStats;
 }
 
+function fireConfetti() {
+  confetti({
+    particleCount: 250,
+    startVelocity: 50,
+    spread: 90,
+    ticks: 250,
+    scalar: 1.2,
+    origin: { x: 0.5, y: 0.5 },
+    colors: ['#ff4757', '#1e90ff', '#2ed573', '#ffa502', '#e84393'],
+  });
+}
+
 export function HistoryStatsCard({ stats }: HistoryStatsCardProps) {
+  const goalReachedRef = useRef(false);
+
   const today = new Date().toLocaleDateString('es-CO', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
   });
 
+  const isNearGoal = stats.earnings >= VIBRATE_THRESHOLD && stats.earnings < GOAL;
+  const isGoalReached = stats.earnings >= GOAL;
+
+  useEffect(() => {
+    if (isGoalReached && !goalReachedRef.current) {
+      goalReachedRef.current = true;
+      fireConfetti();
+    }
+    if (!isGoalReached) {
+      goalReachedRef.current = false;
+    }
+  }, [isGoalReached]);
+
   return (
-    <div className="rounded-2xl overflow-hidden shadow-sm border border-neutral-black-20">
-      {/* Header: total earnings */}
-      <div className="bg-primary-red px-5 pt-5 pb-4">
+    <div className={`rounded-2xl overflow-hidden shadow-sm border border-neutral-black-20 ${isNearGoal ? 'animate-card-vibrate' : ''}`}>
+      {/* Header: total earnings — tapping always fires confetti */}
+      <button
+        type="button"
+        className="w-full text-left bg-primary-red px-5 pt-5 pb-4 active:opacity-90 transition-opacity"
+        onClick={isGoalReached ? fireConfetti : undefined}
+      >
         <p className="text-xs text-white/70 capitalize mb-1">{today}</p>
         <p className="text-6xl font-bold text-white">{formatCOP(stats.earnings)}</p>
         <p className="text-sm text-white/80 mt-0.5">Recaudo del día</p>
-      </div>
+      </button>
 
       {/* Stats row */}
       <div className="grid grid-cols-2 divide-x divide-white/20 bg-primary-red border-t border-white/20">
