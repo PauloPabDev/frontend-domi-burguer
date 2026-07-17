@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { MapPin, Package, ChevronRight } from 'lucide-react';
+import { MapPin, Package } from 'lucide-react';
 import { CourierOrder } from '@/types/courier';
 import { OrderNumberChip, OrderClientChip, OrderTimeChip } from '@/components/ui/OrderClientChips';
 import { formatCOP } from '@/components/ui/OrderItemsList';
@@ -13,7 +12,6 @@ interface HistoryOrderCardProps {
 }
 
 export function HistoryOrderCard({ order }: HistoryOrderCardProps) {
-  console.log('Rendering HistoryOrderCard for order:', order);
   const address =
     order.location?.address ?? order.deliveryAddress?.address ?? 'Sin dirección';
 
