@@ -1,7 +1,7 @@
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { HeroUIProvider } from "@heroui/system";
-import { ToastProvider } from "@heroui/toast";
+import { AppToastProvider } from "@/components/AppToastProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProductsProvider } from "@/contexts/ProductsContext";
 import { Metadata, Viewport } from "next";
@@ -42,11 +42,7 @@ export default function RootLayout({
         <AuthProvider>
           <ProductsProvider>
           <HeroUIProvider>
-            <ToastProvider
-              placement="top-right"
-              toastOffset={100}
-              maxVisibleToasts={10}
-            />
+            <AppToastProvider />
             <Suspense fallback={null}>
               <PromoCodeDetector />
             </Suspense>
