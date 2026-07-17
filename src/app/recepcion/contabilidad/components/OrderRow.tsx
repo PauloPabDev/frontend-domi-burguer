@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from 'react';
-import { Bike, ChefHat, Clock, CreditCard } from 'lucide-react';
+import { Bike, ChefHat, Clock, CreditCard, MapPin } from 'lucide-react';
 import { OrderStatusBadge } from '@/components/ui/OrderStatusBadge';
 import { PAYMENT_LABELS, WorkerOrder } from '@/types/worker';
 import { formatCOP, formatTime } from '../utils';
 
 export function OrderRow({ order }: { order: WorkerOrder }) {
+  console.log("order", order);
   const [expanded, setExpanded] = useState(false);
   const clientName = order.client?.name ?? order.user?.name ?? 'Sin cliente';
   const clientPhone = order.client?.phone ?? order.user?.phone;
-  const itemsSummary = (order.orderItems ?? [])
-    .map((i) => `${i.quantity ?? 1}x ${i.name ?? ''}`)
-    .join(', ');
+  const address = order.deliveryAddress?.address;
+  const floor = order.deliveryAddress?.floor;
+  const items = order.orderItems ?? [];
 
   return (
     <div className="rounded-2xl border border-neutral-black-20 bg-white overflow-hidden">
@@ -29,6 +30,15 @@ export function OrderRow({ order }: { order: WorkerOrder }) {
               <p className="font-semibold text-sm text-neutral-black-80 truncate">{clientName}</p>
               {clientPhone && (
                 <p className="text-xs text-neutral-black-50 mt-0.5">{clientPhone}</p>
+              )}
+              {address && (
+                <p className="flex items-start gap-1 text-xs text-neutral-black-50 mt-0.5">
+                  <MapPin size={11} className="shrink-0 mt-0.5" />
+                  <span>
+                    {address}
+                    {floor && ` — ${floor}`}
+                  </span>
+                </p>
               )}
             </div>
           </div>
@@ -61,12 +71,20 @@ export function OrderRow({ order }: { order: WorkerOrder }) {
           )}
         </div>
 
-        <p className="mt-1.5 text-xs text-neutral-black-50 truncate">{itemsSummary}</p>
+        {items.length > 0 && (
+          <ul className="mt-2 space-y-0.5 border-t border-neutral-black-10 pt-2">
+            {items.map((item, idx) => (
+              <li key={idx} className="text-xs text-neutral-black-80">
+                <span className="font-semibold">{item.quantity ?? 1}×</span> {item.name ?? '—'}
+              </li>
+            ))}
+          </ul>
+        )}
       </button>
 
       {expanded && (
         <div className="border-t border-neutral-black-10 px-4 py-3 space-y-2">
-          {(order.orderItems ?? []).map((item, idx) => (
+          {items.map((item, idx) => (
             <div key={idx} className="text-sm">
               <div className="flex justify-between">
                 <span className="font-medium text-neutral-black-80">

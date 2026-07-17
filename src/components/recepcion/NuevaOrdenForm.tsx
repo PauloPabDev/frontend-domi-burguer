@@ -120,6 +120,7 @@ export function NuevaOrdenForm() {
               client={form.client}
               onSearch={form.searchClient}
               onCreateClient={form.createClient}
+              onUpdateName={form.updateClientName}
             />
           </FormCard>
 

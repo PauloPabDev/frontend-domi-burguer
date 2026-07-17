@@ -137,6 +137,14 @@ export function useNuevaOrden() {
     }
   }, [phone, getToken]);
 
+  const updateClientName = useCallback(async (name: string) => {
+    const trimmed = name.trim();
+    if (!client || !trimmed) return;
+    const token = await getToken();
+    await ClientService.update(client.id, { name: trimmed }, token);
+    setClient((prev) => (prev ? { ...prev, name: trimmed } : prev));
+  }, [client, getToken]);
+
   const loadDelivery = useCallback(async (locationId: string, kitchenIdOverride?: string) => {
     setDeliveryLoading(true);
     setDeliveryError(null);
@@ -311,7 +319,7 @@ export function useNuevaOrden() {
   return {
     // Client
     phone, setPhone, clientState, client,
-    searchClient, createClient, handlePhoneSet,
+    searchClient, createClient, handlePhoneSet, updateClientName,
     // Kitchens/sedes
     kitchens, kitchensLoading, selectedKitchenId,
     handleKitchenChange,

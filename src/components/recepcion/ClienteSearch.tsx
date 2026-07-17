@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from 'react';
-import { Loader2, UserCheck, UserX } from 'lucide-react';
+import { Loader2, Pencil, UserCheck, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PhoneNumberInput } from '@/components/ui/inputPhone';
 import { ApiClient } from '@/services/clientService';
 import { ClientState } from '@/hooks/recepcion/useNuevaOrden';
+import { EditClientNameModal } from './EditClientNameModal';
 
 interface ClienteSearchProps {
   phone: string;
@@ -15,9 +16,10 @@ interface ClienteSearchProps {
   client: ApiClient | null;
   onSearch: () => void;
   onCreateClient: (name: string) => void;
+  onUpdateName: (name: string) => Promise<void>;
 }
 
-function ClientFoundCard({ client }: { client: ApiClient }) {
+function ClientFoundCard({ client, onEditName }: { client: ApiClient; onEditName: () => void }) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
       <UserCheck className="w-5 h-5 text-green-600 shrink-0" />
@@ -25,6 +27,14 @@ function ClientFoundCard({ client }: { client: ApiClient }) {
         <p className="font-semibold text-sm text-green-800 truncate">{client.name}</p>
         <p className="text-xs text-green-600">{client.phone}</p>
       </div>
+      <button
+        type="button"
+        onClick={onEditName}
+        title="Modificar nombre"
+        className="p-1.5 rounded-md text-green-600 hover:text-green-800 hover:bg-green-100 shrink-0"
+      >
+        <Pencil className="w-4 h-4" />
+      </button>
     </div>
   );
 }
@@ -74,8 +84,10 @@ export function ClienteSearch({
   client,
   onSearch,
   onCreateClient,
+  onUpdateName,
 }: ClienteSearchProps) {
   const [newName, setNewName] = useState('');
+  const [showEditNameModal, setShowEditNameModal] = useState(false);
 
   const isLoading = clientState === 'loading' || clientState === 'creating';
   const showCreateForm = clientState === 'not_found' || clientState === 'creating';
@@ -109,7 +121,9 @@ export function ClienteSearch({
         </Button>
       </div>
 
-      {clientState === 'found' && client && <ClientFoundCard client={client} />}
+      {clientState === 'found' && client && (
+        <ClientFoundCard client={client} onEditName={() => setShowEditNameModal(true)} />
+      )}
 
       {showCreateForm && (
         <CreateClientForm
@@ -117,6 +131,14 @@ export function ClienteSearch({
           newName={newName}
           onNameChange={setNewName}
           onSubmit={handleCreate}
+        />
+      )}
+
+      {showEditNameModal && client && (
+        <EditClientNameModal
+          currentName={client.name}
+          onSave={onUpdateName}
+          onClose={() => setShowEditNameModal(false)}
         />
       )}
     </div>

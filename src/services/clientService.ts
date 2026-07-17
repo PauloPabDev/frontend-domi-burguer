@@ -38,4 +38,14 @@ export class ClientService {
     if (!response.ok) throw new Error('Error al crear cliente');
     return response.json();
   }
+
+  static async update(id: string, data: Partial<Pick<ApiClient, 'name' | 'email'>>, token: string): Promise<{ body: ApiClient }> {
+    const response = await fetch(`${this.API_URL}api/v2/clients/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Error al actualizar cliente');
+    return response.json();
+  }
 }

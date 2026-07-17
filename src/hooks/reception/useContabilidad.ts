@@ -20,6 +20,7 @@ export const useContabilidad = () => {
       const { body } = await WorkerOrderService.getOrdersByDay(token, startDate, endDate, kitchenId);
       const normalized = (body ?? []).map((o) => {
         const raw = o as WorkerOrder & { assignedCourierUserId?: string };
+        console.log('Raw order:', raw);
         if (!o.courierId && raw.assignedCourierUserId) {
           return { ...o, courierId: raw.assignedCourierUserId };
         }
