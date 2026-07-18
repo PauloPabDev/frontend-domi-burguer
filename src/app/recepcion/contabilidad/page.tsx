@@ -16,7 +16,6 @@ export default function ContabilidadPage() {
   const { orders: rawOrders, loading, error, fetchOrders } = useContabilidad();
   const { kitchens, selectedKitchenId, selectKitchen } = useKitchenSelector();
   const allOrders = useEnrichedOrders(rawOrders, kitchens);
-  console.log('Enriched orders:', allOrders); // Debugging log
   const [startDate, setStartDate] = useState(() => getStartOfDay());
   const [endDate, setEndDate] = useState(() => getEndOfDay());
   const [search, setSearch] = useState('');
