@@ -123,13 +123,13 @@ export function OrderPaymentRow({
           )}
         >
           {currentLogo ? (
-            <Image src={currentLogo.src} alt={currentLogo.alt} width={18} height={18} className="object-contain rounded-sm shrink-0" />
+            <Image src={currentLogo.src} alt={currentLogo.alt} width={22} height={22} className="object-contain rounded-sm shrink-0" />
           ) : (
-            <CreditCard size={16} className="text-neutral-black-50 shrink-0" />
+            <CreditCard size={18} className="text-neutral-black-50 shrink-0" />
           )}
           <span
             className={cn(
-              'text-sm font-bold',
+              'text-base font-bold',
               muted ? 'text-neutral-black-50' : 'text-neutral-black-80',
             )}
           >
@@ -140,7 +140,7 @@ export function OrderPaymentRow({
         {/* Precio */}
         <span
           className={cn(
-            'text-base font-bold transition-colors px-1',
+            'text-lg font-bold transition-colors px-1',
             paid ? 'line-through text-green-500' : 'text-neutral-black-80',
           )}
         >

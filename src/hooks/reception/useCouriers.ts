@@ -16,9 +16,12 @@ export const useCouriers = () => {
       try {
         const token = await user.getIdToken();
         const { body } = await WorkerOrderService.getCouriersList(token, { page: '1', limit: '100' });
-        console.log('Fetched couriers:', body);
-
-        setCouriers(body ?? []);
+        setCouriers(
+          (body ?? []).map((c) => ({
+            ...c,
+            photoURL: c.photoURL ?? (c as unknown as { photoUrl?: string }).photoUrl,
+          })),
+        );
       } catch {
         setCouriers([]);
       } finally {

@@ -137,15 +137,28 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           <button
             type="button"
             onClick={() => setShowCourierModal(true)}
-            className="flex items-center gap-1.5 text-xs text-neutral-black-50 hover:text-primary-red border border-neutral-black-20 rounded-lg px-2 py-1.5 transition-colors shrink-0"
+            className="flex items-center gap-2 text-xs text-neutral-black-50 hover:text-primary-red border border-neutral-black-20 rounded-xl px-3 py-2 transition-colors shrink-0"
           >
-            <Bike size={11} />
+            {order.courier?.photoURL ? (
+              <img
+                src={order.courier.photoURL}
+                alt={order.courier.name}
+                className="w-5 h-5 rounded-full object-cover shrink-0"
+              />
+            ) : order.courier?.name ? (
+              <span className="w-5 h-5 rounded-full bg-primary-red/15 text-primary-red flex items-center justify-center text-[9px] font-bold shrink-0">
+                {order.courier.name.charAt(0).toUpperCase()}
+              </span>
+            ) : (
+              <Bike size={13} />
+            )}
             <span className="max-w-[70px] truncate">{order.courier?.name ?? 'Moto'}</span>
           </button>
 
           {transition && (
             <OrderActionButtons
               label={transition.label}
+              size="md"
               onConfirm={() => onStatusChange(order.id, order.status, transition.next)}
               className="ml-auto"
             />
