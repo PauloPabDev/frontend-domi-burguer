@@ -25,15 +25,9 @@ export interface OrderItem {
   image2?: string;
   colorPrimary?: string;
   colorSecondary?: string;
-  modifications?: OrderModification[];
   complements?: OrderComplement[];
 }
 
-export interface OrderModification {
-  icon: string;
-  text: string;
-  price?: number;
-}
 
 export interface OrderComplement {
   name: string;

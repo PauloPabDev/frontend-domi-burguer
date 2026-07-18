@@ -14,24 +14,15 @@ function firestoreTimestampToISO(ts: FirestoreTimestamp | string | null | undefi
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
-function normalizeComplement(raw: RawSocketComplement): OrderComplement {
-  return {
-    name: raw.id,
-    price: raw.price,
-    quantity: raw.quantity,
-  };
-}
-
 function normalizeOrderItem(raw: RawSocketOrderItem, index: number): OrderItem {
   const complements: OrderComplement[] | undefined = raw.complements?.length
-    ? raw.complements.map(normalizeComplement)
-    : undefined;
-
+    ? raw.complements.map(normalizeOrderItem)
+    : [];
   return {
-    id: `${raw.id}-${index}`,
+    id: raw.id,
     name: raw.id,
     price: raw.price,
-    quantity: raw.quantity,
+    quantity: raw.quantity || 1,
     ...(complements && { complements }),
   };
 }

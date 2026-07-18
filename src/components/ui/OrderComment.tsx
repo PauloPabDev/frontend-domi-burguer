@@ -1,4 +1,3 @@
-import { MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface OrderCommentProps {
@@ -17,7 +16,6 @@ export function OrderComment({ comment, compact = false, className }: OrderComme
         className,
       )}
     >
-      <MessageSquare size={compact ? 10 : 13} className="text-yellow-600 mt-0.5 shrink-0" />
       <p className={cn('text-xs text-yellow-800 leading-relaxed', compact && 'line-clamp-2')}>
         {comment}
       </p>
