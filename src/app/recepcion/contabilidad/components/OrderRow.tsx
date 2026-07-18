@@ -160,12 +160,17 @@ export function OrderRow({ order }: { order: WorkerOrder }) {
         total={order.totalPrice}
       />
 
+      {/* Hora de creación */}
+      <span className="text-xs font-semibold text-neutral-black-40 shrink-0">
+        {formatTime(order.createdAt)}
+      </span>
+
       {/* Dirección abreviada */}
       <AddressCell order={order} />
 
       {/* Ver más */}
       <Link
-        href={`/recepcion/contabilidad/pedido/${order.id}`}
+        href={`/orders/${order.id}`}
         className="flex items-center gap-1 shrink-0 rounded-xl bg-neutral-black-5 hover:bg-neutral-black-10 px-3 py-1.5 text-xs font-semibold text-neutral-black-60 transition-colors"
       >
         Ver más
