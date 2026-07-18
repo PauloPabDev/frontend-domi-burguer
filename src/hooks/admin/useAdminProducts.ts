@@ -40,6 +40,16 @@ export const useAdminProducts = () => {
     return body;
   };
 
+  const createProduct = async (data: Omit<Product, 'id'>) => {
+    if (!user) return;
+    const token = await user.getIdToken();
+    const { body } = await ProductService.create(token, data);
+    if (body) {
+      setAllProducts(prev => [body, ...prev]);
+    }
+    return body;
+  };
+
   const products = allProducts.filter(p => {
     if (!p || !p.id) return false;
     const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
@@ -58,5 +68,6 @@ export const useAdminProducts = () => {
     setTypeFilter,
     refetch: fetchProducts,
     updateProduct,
+    createProduct,
   };
 };

@@ -28,4 +28,17 @@ export class ProductService {
     if (!response.ok) throw new Error('Error al actualizar producto');
     return response.json();
   }
+
+  static async create(
+    token: string,
+    data: Omit<Product, 'id'>
+  ): Promise<{ body: Product }> {
+    const response = await fetch(`${this.API_URL}api/v2/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Error al crear producto');
+    return response.json();
+  }
 }

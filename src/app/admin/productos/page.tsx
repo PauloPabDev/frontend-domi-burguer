@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Search, Loader2, RefreshCw, Package } from 'lucide-react';
+import { Search, Loader2, RefreshCw, Package, Plus } from 'lucide-react';
 import { useAdminProducts } from '@/hooks/admin/useAdminProducts';
 import { ProductCard } from '@/components/admin/ProductCard';
 import { EditProductModal } from '@/components/admin/EditProductModal';
@@ -15,16 +15,19 @@ const TYPE_FILTERS = [
   { value: 'complement' as const, label: 'Complementos' },
 ];
 
+// null = modal de crear, Product = modal de editar, undefined = cerrado
+type ModalState = Product | null | undefined;
+
 export default function AdminProductosPage() {
   const {
     products, total, loading, error,
     search, setSearch,
     typeFilter, setTypeFilter,
-    refetch, updateProduct,
+    refetch, updateProduct, createProduct,
   } = useAdminProducts();
 
   const [inputValue, setInputValue] = useState('');
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [modalState, setModalState] = useState<ModalState>(undefined);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,11 +39,16 @@ export default function AdminProductosPage() {
     setSearch('');
   };
 
-  const handleSave = async (id: string, data: Partial<Omit<Product, 'id'>>) => {
-    await updateProduct(id, data);
+  const handleSave = async (id: string | null, data: Omit<Product, 'id'> | Partial<Omit<Product, 'id'>>) => {
+    if (id) {
+      await updateProduct(id, data as Partial<Omit<Product, 'id'>>);
+    } else {
+      await createProduct(data as Omit<Product, 'id'>);
+    }
   };
 
   const hasFilter = !!search || !!typeFilter;
+  const modalOpen = modalState !== undefined;
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -52,12 +60,22 @@ export default function AdminProductosPage() {
             <span className="text-xs text-neutral-black-40">{total} total</span>
           )}
         </div>
-        <button
-          onClick={refetch}
-          className="p-1.5 rounded-full text-neutral-black-50 hover:text-neutral-black-80 hover:bg-neutral-black-10 transition-colors"
-        >
-          <RefreshCw size={15} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={refetch}
+            className="p-1.5 rounded-full text-neutral-black-50 hover:text-neutral-black-80 hover:bg-neutral-black-10 transition-colors"
+          >
+            <RefreshCw size={15} />
+          </button>
+          <Button
+            variant="primary"
+            size="sm"
+            leftIcon={<Plus size={14} />}
+            onClick={() => setModalState(null)}
+          >
+            Nuevo producto
+          </Button>
+        </div>
       </div>
 
       {/* Type filter */}
@@ -125,18 +143,18 @@ export default function AdminProductosPage() {
             <ProductCard
               key={product.id}
               product={product}
-              onEdit={setEditingProduct}
+              onEdit={(p) => setModalState(p)}
             />
           ))}
         </div>
       )}
 
-      {/* Edit modal */}
-      {editingProduct && (
+      {/* Create / Edit modal */}
+      {modalOpen && (
         <EditProductModal
-          product={editingProduct}
+          product={modalState ?? undefined}
           onSave={handleSave}
-          onClose={() => setEditingProduct(null)}
+          onClose={() => setModalState(undefined)}
         />
       )}
     </div>

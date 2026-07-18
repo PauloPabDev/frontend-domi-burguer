@@ -5,9 +5,20 @@ import { X, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Product } from '@/types/product';
 
+const DEFAULTS = {
+  name: '',
+  price: 0,
+  description: '',
+  status: '',
+  type: '',
+  secret: false,
+  colorPrimary: '#E73533',
+  colorSecondary: '#FF6B6B',
+};
+
 interface EditProductModalProps {
-  product: Product;
-  onSave: (id: string, data: Partial<Omit<Product, 'id'>>) => Promise<void>;
+  product?: Product;
+  onSave: (id: string | null, data: Omit<Product, 'id'> | Partial<Omit<Product, 'id'>>) => Promise<void>;
   onClose: () => void;
 }
 
@@ -15,15 +26,17 @@ const FIELD_CLASS = "w-full px-3 py-2 text-sm rounded-xl border border-neutral-b
 const LABEL_CLASS = "block text-xs font-semibold text-neutral-black-50 mb-1";
 
 export const EditProductModal: React.FC<EditProductModalProps> = ({ product, onSave, onClose }) => {
+  const isCreating = !product;
+
   const [form, setForm] = useState({
-    name: product.name,
-    price: product.price,
-    description: product.description ?? '',
-    status: product.status ?? '',
-    type: product.type ?? '',
-    secret: product.secret,
-    colorPrimary: product.colorPrimary,
-    colorSecondary: product.colorSecondary,
+    name: product?.name ?? DEFAULTS.name,
+    price: product?.price ?? DEFAULTS.price,
+    description: product?.description ?? DEFAULTS.description,
+    status: product?.status ?? DEFAULTS.status,
+    type: product?.type ?? DEFAULTS.type,
+    secret: product?.secret ?? DEFAULTS.secret,
+    colorPrimary: product?.colorPrimary ?? DEFAULTS.colorPrimary,
+    colorSecondary: product?.colorSecondary ?? DEFAULTS.colorSecondary,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +51,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, onS
     setLoading(true);
     setError(null);
     try {
-      await onSave(product.id, {
+      await onSave(product?.id ?? null, {
         name: form.name.trim(),
         price: form.price,
         description: form.description || undefined,
@@ -63,7 +76,9 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, onS
         <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-black-10 shrink-0">
           <div className="flex items-center gap-2">
             <Package size={16} className="text-primary-red" />
-            <h3 className="font-bold text-sm text-neutral-black-80">Editar producto</h3>
+            <h3 className="font-bold text-sm text-neutral-black-80">
+              {isCreating ? 'Nuevo producto' : 'Editar producto'}
+            </h3>
           </div>
           <button onClick={onClose} className="p-1 text-neutral-black-50 hover:text-neutral-black-80">
             <X size={16} />
@@ -198,7 +213,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, onS
         {/* Footer */}
         <div className="px-5 pb-5 pt-3 border-t border-neutral-black-10 shrink-0">
           <Button onClick={handleSave} loading={loading} loadingText="Guardando..." fullWidth variant="primary">
-            Guardar cambios
+            {isCreating ? 'Crear producto' : 'Guardar cambios'}
           </Button>
         </div>
       </div>
