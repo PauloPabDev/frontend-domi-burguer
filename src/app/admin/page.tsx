@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Users, ChefHat, ShieldCheck } from 'lucide-react';
+import { Users, ChefHat, ShieldCheck, Package } from 'lucide-react';
 
 const CARDS = [
   {
@@ -17,6 +17,13 @@ const CARDS = [
     title: 'Cocinas',
     description: 'Ver cocinas registradas en el sistema',
     color: 'bg-violet-50 text-violet-600',
+  },
+  {
+    href: '/admin/productos',
+    Icon: Package,
+    title: 'Productos',
+    description: 'Ver y editar productos del menú',
+    color: 'bg-orange-50 text-orange-600',
   },
 ];
 

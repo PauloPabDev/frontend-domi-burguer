@@ -14,4 +14,18 @@ export class ProductService {
     if (!response.ok) throw new Error('Error fetching products');
     return response.json();
   }
+
+  static async update(
+    token: string,
+    id: string,
+    data: Partial<Omit<Product, 'id'>>
+  ): Promise<{ body: Product }> {
+    const response = await fetch(`${this.API_URL}api/v2/products/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Error al actualizar producto');
+    return response.json();
+  }
 }

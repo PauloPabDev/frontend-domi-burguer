@@ -5,45 +5,66 @@ import { useAuth } from '@/contexts/AuthContext';
 import { WorkerUser } from '@/types/worker';
 import { AdminService } from '@/services/adminService';
 
-export const useUsers = (initialSearch?: string) => {
+const LIMIT = 20;
+
+export const useUsers = () => {
   const { user } = useAuth();
   const [users, setUsers] = useState<WorkerUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState(initialSearch ?? '');
+  const [search, setSearch] = useState('');
+  const [role, setRole] = useState('');
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
 
-  const fetchUsers = useCallback(async (searchValue?: string, pageValue = 1) => {
+  const doFetch = useCallback(async (s: string, r: string, p: number) => {
     if (!user) return;
     setLoading(true);
     setError(null);
     try {
       const token = await user.getIdToken();
-      const q = searchValue ?? search;
-      const { body } = await AdminService.getUsers(
-        token,
-        pageValue,
-        20,
-        q ? 'email' : undefined,
-        q || undefined
-      );
-      setUsers(body ?? []);
+      let key: string | undefined;
+      let value: string | undefined;
+      if (s) { key = 'email'; value = s; }
+      else if (r) { key = 'role'; value = r; }
+      const { body, total: t } = await AdminService.getUsers(token, p, LIMIT, key, value);
+      const list = body ?? [];
+      setUsers(list);
+      setTotal(t ?? 0);
+      setHasNextPage(list.length >= LIMIT);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al cargar usuarios');
     } finally {
       setLoading(false);
     }
-  }, [user, search]);
+  }, [user]);
 
-  useEffect(() => { fetchUsers(); }, [user]);
+  useEffect(() => { doFetch('', '', 1); }, [doFetch]);
 
-  const handleSearch = (value: string) => {
-    setSearch(value);
+  const setFilters = (newSearch: string, newRole: string) => {
+    setSearch(newSearch);
+    setRole(newRole);
     setPage(1);
-    fetchUsers(value, 1);
+    doFetch(newSearch, newRole, 1);
   };
 
-  return { users, loading, error, search, setSearch: handleSearch, page, setPage, refetch: () => fetchUsers() };
+  const handlePage = (p: number) => {
+    setPage(p);
+    doFetch(search, role, p);
+  };
+
+  const totalPages = total > 0 ? Math.ceil(total / LIMIT) : undefined;
+
+  return {
+    users, loading, error,
+    search, role, setFilters,
+    page, setPage: handlePage,
+    total, totalPages,
+    hasNextPage,
+    hasPrevPage: page > 1,
+    refetch: () => doFetch(search, role, page),
+  };
 };
 
 export const useUserDetail = (userId: string) => {
