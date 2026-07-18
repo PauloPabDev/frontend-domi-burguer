@@ -1,4 +1,4 @@
-import { OrderComplement, OrderItem, Payment } from '@/types/orders';
+import { OrderComplement, OrderItem, OrderStatus, Payment } from '@/types/orders';
 import { RawSocketComplement, RawSocketOrder, RawSocketOrderItem, FirestoreTimestamp } from '@/types/rawSocketOrder';
 import { WorkerOrder } from '@/types/worker';
 
@@ -37,7 +37,7 @@ function normalizeOrderItem(raw: RawSocketOrderItem, index: number): OrderItem {
 }
 
 export function normalizeSocketOrder(raw: RawSocketOrder): WorkerOrder {
-  const { payment: rawPayment, ...restRaw } = raw;
+  const { payment: rawPayment, timeLapseStatus: rawTimeLapseStatus, ...restRaw } = raw;
   const deliveryPrice = raw.delivery?.price ?? 0;
   const distance = raw.delivery?.distance;
   return {
@@ -68,6 +68,13 @@ export function normalizeSocketOrder(raw: RawSocketOrder): WorkerOrder {
     }),
     createdAt: firestoreTimestampToISO(raw.createdAt) ?? '',
     updatedAt: firestoreTimestampToISO(raw.updatedAt) ?? '',
+    ...(rawTimeLapseStatus?.length && {
+      timeLapseStatus: rawTimeLapseStatus.map((e) => ({
+        status: e.status as OrderStatus,
+        updatedAt: firestoreTimestampToISO(e.updatedAt) ?? String(e.updatedAt),
+        userId: e.userId,
+      })),
+    }),
   };
 }
 

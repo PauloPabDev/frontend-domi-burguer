@@ -129,7 +129,7 @@ export function OrderPaymentRow({
           )}
           <span
             className={cn(
-              'text-sm font-medium',
+              'text-sm font-bold',
               muted ? 'text-neutral-black-50' : 'text-neutral-black-80',
             )}
           >

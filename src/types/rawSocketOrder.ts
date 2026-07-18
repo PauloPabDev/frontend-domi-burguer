@@ -30,6 +30,12 @@ export interface RawSocketTimeLapse {
   userId: string;
 }
 
+export interface RawSocketStatusTimeLapse {
+  status: string;
+  updatedAt: FirestoreTimestamp | string;
+  userId: string;
+}
+
 export interface RawSocketClient {
   name: string;
   phone: string;
@@ -68,7 +74,7 @@ export interface RawSocketOrder {
   payment?: { status: string };
   origin?: unknown;
   codes?: string[];
-  timeLapseStatus?: unknown[];
+  timeLapseStatus?: RawSocketStatusTimeLapse[];
   timeLapseAssignedCourier?: RawSocketTimeLapse[];
   timeLapseKitchen?: unknown[];
 

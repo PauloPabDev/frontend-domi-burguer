@@ -50,6 +50,11 @@ export interface WorkerOrder {
   payment?: Payment;
   comment?: string;
   location?: Location;
+  timeLapseStatus?: Array<{
+    status: OrderStatus;
+    updatedAt: string;
+    userId: string;
+  }>;
 }
 
 export interface StatusConfig {

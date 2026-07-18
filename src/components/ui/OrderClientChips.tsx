@@ -18,7 +18,7 @@ interface OrderNumberChipProps {
 export function OrderNumberChip({ orderNumber, className }: OrderNumberChipProps) {
   return (
     <div className={cn('flex items-center bg-primary-red rounded-full px-3.5 py-1.5 shrink-0', className)}>
-      <span className="text-sm font-bold text-white">{orderNumber}</span>
+      <span className="text-base font-bold text-white">{orderNumber}</span>
     </div>
   );
 }
@@ -134,7 +134,7 @@ export function OrderClientChip({
           />
           <div className="flex flex-col items-start min-w-0">
             <button type="button" onClick={handleOpen} className="text-left w-full">
-              <span className="text-sm font-semibold text-neutral-black-80 truncate max-w-[110px] block">
+              <span className="text-base font-bold text-neutral-black-80 truncate max-w-[110px] block">
                 {name ?? 'Cliente'}
               </span>
             </button>
@@ -166,7 +166,7 @@ export function OrderClientChip({
             height={30}
             className="rounded-full object-cover"
           />
-          <span className="text-sm font-semibold text-neutral-black-80 truncate max-w-[110px]">
+          <span className="text-base font-bold text-neutral-black-80 truncate max-w-[110px]">
             {name ?? 'Cliente'}
           </span>
         </button>
@@ -194,7 +194,7 @@ interface OrderTimeChipProps {
 
 export function OrderTimeChip({ time, className }: OrderTimeChipProps) {
   return (
-    <span className={cn('text-[10px] text-neutral-black-50 shrink-0', className)}>
+    <span className={cn('text-xs font-semibold text-neutral-black-50 shrink-0', className)}>
       {time}
     </span>
   );

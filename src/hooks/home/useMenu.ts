@@ -243,7 +243,10 @@ export function useMenu() {
         });
 
         if ((ingredient.type === 'special' || ingredient.type === 'addable') && ingredient.additionId) {
-          if ((action === 'plus' && ingredient.quantity > 1) || (action === 'plus' && ingredient.quantity >= 1 && ingredient.id === 7 && product.id === 2)) {
+          // 'special' incluye 1 unidad por defecto (la adición existe desde cantidad 2);
+          // 'addable' parte de 0, así que desde cantidad 1 ya hay adición que incrementar.
+          const minQuantityToIncrement = ingredient.type === 'addable' ? 1 : 2;
+          if (action === 'plus' && ingredient.quantity >= minQuantityToIncrement) {
             const hasAddition = updatedComplements.find(c => c.id === ingredient.additionId);
             if (hasAddition) {
               updatedComplements = updatedComplements.map((c) =>

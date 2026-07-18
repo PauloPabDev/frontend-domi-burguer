@@ -28,10 +28,10 @@ export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsLi
           {/* Nombre + adicionales */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-neutral-black-80 leading-tight">
+              <p className="text-base font-bold text-neutral-black-80 leading-tight">
                 {item.name}
               </p>
-              <span className="text-xs text-neutral-black-50 shrink-0">
+              <span className="text-sm font-medium text-neutral-black-50 shrink-0">
                 {formatCOP(item.price * item.quantity)}
               </span>
             </div>
@@ -49,7 +49,7 @@ export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsLi
                       >
                         {c.quantity} +
                       </span>
-                      <div className="flex-1 flex items-center justify-between text-xs text-neutral-black-50">
+                      <div className="flex-1 flex items-center justify-between text-sm font-semibold text-neutral-black-60">
                         <span>{c.name}</span>
                         <span className="shrink-0">{formatCOP(c.price * (c.quantity || 1))}</span>
                       </div>
@@ -63,7 +63,7 @@ export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsLi
             {item.modifications && item.modifications.length > 0 && (
               <div className="flex flex-col gap-0.5 pl-3 border-l-2 border-yellow-300 ml-1 mt-1">
                 {item.modifications.map((m, i) => (
-                  <span key={i} className="text-xs text-yellow-700">
+                  <span key={i} className="text-sm font-semibold text-yellow-700">
                     {m.icon} {m.text}
                   </span>
                 ))}
@@ -77,8 +77,8 @@ export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsLi
         <li className="flex gap-2 pt-2 border-t border-neutral-black-20">
           <span className="w-6 shrink-0" />
           <div className="flex-1 flex items-center justify-between">
-            <p className="text-sm font-semibold text-neutral-black-80">Domicilio</p>
-            <span className="text-xs text-neutral-black-50">{formatCOP(deliveryPrice)}</span>
+            <p className="text-base font-bold text-neutral-black-80">Domicilio</p>
+            <span className="text-sm font-medium text-neutral-black-50">{formatCOP(deliveryPrice)}</span>
           </div>
         </li>
       )}

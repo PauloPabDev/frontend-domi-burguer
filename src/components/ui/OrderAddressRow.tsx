@@ -283,7 +283,7 @@ export function OrderAddressRow({
       <>
         <div className={cn('flex items-center gap-1.5', className)}>
           <MapPin size={11} className="text-neutral-black-50 shrink-0" />
-          <p className="text-xs text-neutral-black-50 line-clamp-1 flex-1 min-w-0">{displayAddress}</p>
+          <p className="text-sm font-bold text-neutral-black-80 line-clamp-1 flex-1 min-w-0">{displayAddress}</p>
           <button
             type="button"
             onClick={handleOpenSheet}
