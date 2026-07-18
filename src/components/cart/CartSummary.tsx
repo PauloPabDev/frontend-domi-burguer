@@ -192,15 +192,6 @@ export const CartSummary = ({ }) => {
                 <ErrorCard error={error} onClose={() => setError(null)} />
               )}
 
-              <div
-                role="status"
-                className="w-full rounded-xl border border-accent-yellow-40 bg-accent-yellow-10 px-4 py-3 text-center"
-              >
-                <p className="text-sm font-semibold leading-snug text-neutral-black-80">
-                  🧃 Por hoy se te regala un jugo natural de mora si en tu pedido
-                  incluyes una hamburguesa o combo :)
-                </p>
-              </div>
 
               <div className="flex items-center justify-end gap-3 w-full flex-wrap">
                 {!user && (

@@ -55,6 +55,7 @@ export interface WorkerOrder {
     updatedAt: string;
     userId: string;
   }>;
+  origin?: 'public' | null;
 }
 
 export interface StatusConfig {

@@ -94,6 +94,22 @@ function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientA
   );
 }
 
+// Colores por variante de chip y tipo de usuario
+const chipColorMap = {
+  // Chip expandido: muestra nombre + teléfono
+  expanded: {
+    user: 'bg-blue-100 hover:bg-blue-200', // usuario registrado → azul
+    client: 'bg-green-100 hover:bg-green-200',  // cliente creado por recepción → verde
+    'client-user': 'bg-amber-100 hover:bg-amber-200',// cliente sin cuenta → amarillo
+  },
+  // Chip compacto: solo nombre, sin teléfono visible
+  compact: {
+    user: 'bg-blue-200 hover:bg-blue-300', // usuario registrado → azul
+    client: 'bg-green-200 hover:bg-green-300',  // cliente creado por recepción → verde
+    'client-user': 'bg-amber-200 hover:bg-amber-300',// cliente sin cuenta → amarillo
+  },
+} as const;
+
 interface OrderClientChipProps {
   name?: string;
   phone?: string;
@@ -102,6 +118,7 @@ interface OrderClientChipProps {
   className?: string;
   phoneVisible?: boolean;
   isUser?: boolean;
+  origin?: 'public' | null;
 }
 
 export function OrderClientChip({
@@ -112,8 +129,12 @@ export function OrderClientChip({
   className,
   phoneVisible = false,
   isUser = false,
+  origin = null,
 }: OrderClientChipProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  //las opciones son:  usuario registrado (user) o cliente anomimo (client-user) , y cliente credo por recepcion (client)
+  const userKey = isUser ? 'user' : origin === 'public' ? 'client-user' : 'client';
 
   const handleOpen = (e: React.MouseEvent) => { e.stopPropagation(); setMenuOpen(true); };
   return (
@@ -121,7 +142,7 @@ export function OrderClientChip({
       {phoneVisible ? (
         <div className={cn(
           'flex items-center gap-2 rounded-2xl pl-1 pr-4 py-1 shrink-0',
-          isUser ? 'bg-blue-100' : 'bg-neutral-100',
+          chipColorMap.expanded[userKey],
           className,
         )}>
           <img
@@ -155,7 +176,7 @@ export function OrderClientChip({
           onClick={handleOpen}
           className={cn(
             'flex items-center gap-2 rounded-full pl-1 pr-4 py-1 shrink-0 transition-colors',
-            isUser ? 'bg-blue-100 hover:bg-blue-200' : 'bg-neutral-100 hover:bg-neutral-200',
+            chipColorMap.compact[userKey],
             className,
           )}
         >
