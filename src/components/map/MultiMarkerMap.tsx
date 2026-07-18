@@ -19,8 +19,6 @@ export interface MapMarker {
 }
 
 interface AvatarPinProps {
-  avatarUrl?: string;
-  clientName?: string;
   color: string;
   label: string;
   isSelected: boolean;
@@ -30,10 +28,9 @@ interface AvatarPinProps {
   onClick: () => void;
 }
 
-function AvatarPin({ avatarUrl, clientName, color, label, isSelected, isUnassigned, courierAvatarUrl, courierName, onClick }: AvatarPinProps) {
+function AvatarPin({ color, label, isSelected, isUnassigned, courierAvatarUrl, courierName, onClick }: AvatarPinProps) {
   const size = isSelected ? 52 : 40;
   const borderWidth = isSelected ? 3 : 2;
-  const initial = clientName ? clientName.charAt(0).toUpperCase() : label;
   const courierSize = isSelected ? 22 : 18;
   const hasCourier = courierAvatarUrl || courierName;
 
@@ -71,7 +68,7 @@ function AvatarPin({ avatarUrl, clientName, color, label, isSelected, isUnassign
           />
         )}
 
-        {/* Main circle with avatar or initial */}
+        {/* Main circle with order number */}
         <div
           style={{
             width: size,
@@ -79,31 +76,22 @@ function AvatarPin({ avatarUrl, clientName, color, label, isSelected, isUnassign
             borderRadius: "50%",
             border: `${borderWidth}px solid ${color}`,
             backgroundColor: "white",
-            overflow: "hidden",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt={clientName || "cliente"}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          ) : (
-            <span
-              style={{
-                color,
-                fontWeight: "bold",
-                fontSize: isSelected ? 18 : 14,
-                userSelect: "none",
-                lineHeight: 1,
-              }}
-            >
-              {initial}
-            </span>
-          )}
+          <span
+            style={{
+              color,
+              fontWeight: "bold",
+              fontSize: isSelected ? 18 : 14,
+              userSelect: "none",
+              lineHeight: 1,
+            }}
+          >
+            {label}
+          </span>
         </div>
 
         {/* Courier badge — top-right corner */}
@@ -232,8 +220,6 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
             getPixelPositionOffset={() => ({ x: 0, y: 0 })}
           >
             <AvatarPin
-              avatarUrl={marker.avatarUrl}
-              clientName={marker.clientName}
               color={color}
               label={marker.label || ""}
               isSelected={isSelected}
