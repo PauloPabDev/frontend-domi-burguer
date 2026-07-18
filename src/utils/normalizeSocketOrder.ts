@@ -42,6 +42,7 @@ export function normalizeSocketOrder(raw: RawSocketOrder): WorkerOrder {
   const distance = raw.delivery?.distance;
   return {
     ...restRaw,
+    origin: raw.origin === 'public' ? 'public' : null,
     delivery: raw.delivery ?? { price: 0, duration: 0, distance: 0 },
     id: raw.id,
     status: raw.status,
