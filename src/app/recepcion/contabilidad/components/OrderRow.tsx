@@ -7,13 +7,14 @@ import { PAYMENT_LABELS, WorkerOrder } from '@/types/worker';
 import { formatCOP, formatTime } from '../utils';
 
 export function OrderRow({ order }: { order: WorkerOrder }) {
-  console.log("order", order);
   const [expanded, setExpanded] = useState(false);
   const clientName = order.client?.name ?? order.user?.name ?? 'Sin cliente';
   const clientPhone = order.client?.phone ?? order.user?.phone;
   const address = order.deliveryAddress?.address;
   const floor = order.deliveryAddress?.floor;
   const items = order.orderItems ?? [];
+  console.log('Rendering OrderRow for order:', order); // Debugging log
+
 
   return (
     <div className="rounded-2xl border border-neutral-black-20 bg-white overflow-hidden">

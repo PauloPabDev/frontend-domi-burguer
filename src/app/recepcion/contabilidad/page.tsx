@@ -5,6 +5,7 @@ import { BarChart3, ChefHat, ChevronDown, ChevronUp, AlertTriangle, RefreshCw, S
 import { Button } from '@/components/ui/button';
 import { useContabilidad } from '@/hooks/reception/useContabilidad';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
+import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { calculateStats } from './calculateStats';
 import { getStartOfDay, getEndOfDay, normalize } from './utils';
 import { FilterPanel } from './components/FilterPanel';
@@ -12,9 +13,10 @@ import { StatsSection } from './components/StatsSection';
 import { OrderRow } from './components/OrderRow';
 
 export default function ContabilidadPage() {
-  const { orders: allOrders, loading, error, fetchOrders } = useContabilidad();
+  const { orders: rawOrders, loading, error, fetchOrders } = useContabilidad();
   const { kitchens, selectedKitchenId, selectKitchen } = useKitchenSelector();
-
+  const allOrders = useEnrichedOrders(rawOrders, kitchens);
+  console.log('Enriched orders:', allOrders); // Debugging log
   const [startDate, setStartDate] = useState(() => getStartOfDay());
   const [endDate, setEndDate] = useState(() => getEndOfDay());
   const [search, setSearch] = useState('');
@@ -64,7 +66,6 @@ export default function ContabilidadPage() {
     });
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
   }, [allOrders]);
-  console.log('Couriers from orders:', couriersFromOrders);
 
   const filteredOrders = useMemo(() => {
     const q = normalize(search);

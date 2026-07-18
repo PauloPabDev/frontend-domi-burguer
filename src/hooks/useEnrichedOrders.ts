@@ -20,14 +20,12 @@ function resolveItemNames(
   productMap: Map<string, Product>,
 ): OrderItem[] {
   return items.map((item) => {
-    const product = productMap.get(item.name); // item.name holds the raw product ID
+    const product = productMap.get(item.id);
     const resolvedName = product?.name ?? item.name;
     const resolvedColorPrimary = product?.colorPrimary;
     const resolvedColorSecondary = product?.colorSecondary;
-    console.log('resolving item', item);
 
     const resolvedComplements = item.complements?.map((c): OrderComplement => {
-      console.log('resolving complement', c);
       const comp = productMap.get(c.name); // c.name holds the raw complement ID
       return comp ? { ...c, name: comp.name, ...(comp.colorPrimary && { colorPrimary: comp.colorPrimary }) } : c;
     });
