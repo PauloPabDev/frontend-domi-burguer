@@ -83,7 +83,7 @@ function OrderCard({ order }: { order: Order }) {
                         PEDIDO N° {order.orderNumber}
                     </p>
                     <p className="font-bold text-neutral-800">
-                        {formatPrice(order.totalPrice)}
+                        {formatPrice(order.totalPrice ?? 0)}
                     </p>
                 </div>
 

@@ -194,7 +194,7 @@ function OrderCard({ order, onReorder }: OrderCardProps) {
                         Pedido N° {order.orderNumber}
                     </span>
                     <span className="font-bold text-base">
-                        ${order.totalPrice.toLocaleString('es-CO')}
+                        ${(order.totalPrice ?? 0).toLocaleString('es-CO')}
                     </span>
                 </div>
             </div>
