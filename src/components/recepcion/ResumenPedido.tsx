@@ -22,7 +22,7 @@ function OrderItemRow({ item }: { item: OrderItem }) {
   const removals = item.complements.filter((c) => c.minusComplement && c.name);
   const addPrice = item.complements
     .filter((c) => !c.minusComplement && c.price)
-    .reduce((s, c) => s + (c.price ?? 0), 0);
+    .reduce((s, c) => s + (c.price ?? 0) * c.quantity, 0);
   const unitPrice = item.product.price + addPrice;
 
   return (
@@ -43,9 +43,11 @@ function OrderItemRow({ item }: { item: OrderItem }) {
       {/* Adiciones con precio individual */}
       {additions.map((c) => (
         <div key={String(c.id)} className="flex items-baseline justify-between gap-2 pl-2">
-          <span className="text-xs text-green-700 truncate">+ {c.name}</span>
+          <span className="text-xs text-green-700 truncate">
+            + {c.name}{c.quantity > 1 ? ` ×${c.quantity}` : ''}
+          </span>
           {c.price ? (
-            <span className="text-xs text-green-700 shrink-0">{fmt(c.price * item.quantity)}</span>
+            <span className="text-xs text-green-700 shrink-0">{fmt(c.price * c.quantity * item.quantity)}</span>
           ) : null}
         </div>
       ))}

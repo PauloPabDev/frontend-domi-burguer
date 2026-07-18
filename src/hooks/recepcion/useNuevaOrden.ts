@@ -263,7 +263,7 @@ export function useNuevaOrden() {
         Array.from({ length: item.quantity }, () => ({
           id: String(item.product.id),
           ...(item.complements.length > 0
-            ? { complements: item.complements.map((c) => ({ id: String(c.id) })) }
+            ? { complements: item.complements.map((c) => ({ id: String(c.id), quantity: c.quantity })) }
             : {}),
         }))
       );
@@ -311,7 +311,7 @@ export function useNuevaOrden() {
   const subtotal = orderItems.reduce((sum, i) => {
     const addPrice = i.complements
       .filter((c) => !c.minusComplement && c.price)
-      .reduce((s, c) => s + (c.price ?? 0), 0);
+      .reduce((s, c) => s + (c.price ?? 0) * c.quantity, 0);
     return sum + (i.product.price + addPrice) * i.quantity;
   }, 0);
   const total = subtotal + (delivery?.price ?? 0);
