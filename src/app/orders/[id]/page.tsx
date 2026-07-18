@@ -145,30 +145,32 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
 
 
                         {/* Delivery Address */}
-                        <Card>
-                            <CardContent className="p-6">
-                                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                                    <MapPin className="w-5 h-5" />
-                                    Dirección de Entrega
-                                </h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <p className="font-medium">{order.deliveryAddress.name}</p>
-                                        <p className="text-gray-600">{order.deliveryAddress.address}</p>
-                                        {order.deliveryAddress.floor && (
-                                            <p className="text-gray-600">{order.deliveryAddress.floor}</p>
-                                        )}
-                                        <p className="text-gray-600">
-                                            {order.deliveryAddress.city}, {order.deliveryAddress.country}
-                                        </p>
+                        {order.deliveryAddress && (
+                            <Card>
+                                <CardContent className="p-6">
+                                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                                        <MapPin className="w-5 h-5" />
+                                        Dirección de Entrega
+                                    </h3>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <p className="font-medium">{order.deliveryAddress.name}</p>
+                                            <p className="text-gray-600">{order.deliveryAddress.address}</p>
+                                            {order.deliveryAddress.floor && (
+                                                <p className="text-gray-600">{order.deliveryAddress.floor}</p>
+                                            )}
+                                            <p className="text-gray-600">
+                                                {order.deliveryAddress.city}, {order.deliveryAddress.country}
+                                            </p>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Precio de envío:</span>
+                                            <span>${(order.deliveryPrice ?? 0).toLocaleString('es-CO')}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Precio de envío:</span>
-                                        <span>${order.deliveryPrice.toLocaleString('es-CO')}</span>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        )}
 
 
                     </div>
@@ -181,16 +183,16 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                                 <div className="space-y-3">
                                     <div className="flex justify-between">
                                         <span>Subtotal:</span>
-                                        <span>${order.subtotal.toLocaleString('es-CO')}</span>
+                                        <span>${(order.subtotal ?? 0).toLocaleString('es-CO')}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span>Envío:</span>
-                                        <span>${order.deliveryPrice.toLocaleString('es-CO')}</span>
+                                        <span>${(order.deliveryPrice ?? 0).toLocaleString('es-CO')}</span>
                                     </div>
                                     <Separator />
                                     <div className="flex justify-between font-semibold text-lg">
                                         <span>Total:</span>
-                                        <span>${order.totalPrice.toLocaleString('es-CO')}</span>
+                                        <span>${(order.totalPrice ?? 0).toLocaleString('es-CO')}</span>
                                     </div>
                                 </div>
                             </CardContent>

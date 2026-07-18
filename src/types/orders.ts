@@ -4,11 +4,11 @@ export interface Order {
   status: OrderStatus;
   createdAt: string;
   updatedAt: string;
-  totalPrice: number;
-  deliveryPrice: number;
-  subtotal: number;
+  totalPrice?: number;
+  deliveryPrice?: number;
+  subtotal?: number;
   orderItems: OrderItem[];
-  deliveryAddress: DeliveryAddress;
+  deliveryAddress?: DeliveryAddress;
   paymentMethod: PaymentMethod;
   comment?: string;
   estimatedDeliveryTime?: string;
