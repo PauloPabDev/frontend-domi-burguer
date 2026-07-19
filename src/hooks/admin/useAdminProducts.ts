@@ -51,7 +51,7 @@ export const useAdminProducts = () => {
   };
 
   const products = allProducts.filter(p => {
-    if (!p || !p.id) return false;
+    if (!p || !p.id || !p.name) return false;
     const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
     const matchesType = !typeFilter || p.type === typeFilter;
     return matchesSearch && matchesType;

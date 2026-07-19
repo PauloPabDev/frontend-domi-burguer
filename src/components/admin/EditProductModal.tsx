@@ -50,17 +50,26 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, onS
     if (form.price <= 0) { setError('El precio debe ser mayor a 0'); return; }
     setLoading(true);
     setError(null);
+
+    const full = {
+      name: form.name.trim(),
+      price: form.price,
+      description: form.description || undefined,
+      status: form.status || undefined,
+      type: (form.type as 'product' | 'complement') || undefined,
+      secret: form.secret,
+      colorPrimary: form.colorPrimary,
+      colorSecondary: form.colorSecondary,
+    };
+
+    const payload = isCreating
+      ? full
+      : (Object.fromEntries(
+          Object.entries(full).filter(([k, v]) => v !== (product as Record<string, unknown>)[k])
+        ) as Partial<Omit<Product, 'id'>>);
+
     try {
-      await onSave(product?.id ?? null, {
-        name: form.name.trim(),
-        price: form.price,
-        description: form.description || undefined,
-        status: form.status || undefined,
-        type: (form.type as 'product' | 'complement') || undefined,
-        secret: form.secret,
-        colorPrimary: form.colorPrimary,
-        colorSecondary: form.colorSecondary,
-      });
+      await onSave(product?.id ?? null, payload);
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al guardar');

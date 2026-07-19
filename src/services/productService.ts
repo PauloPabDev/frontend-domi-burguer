@@ -21,7 +21,7 @@ export class ProductService {
     data: Partial<Omit<Product, 'id'>>
   ): Promise<{ body: Product }> {
     const response = await fetch(`${this.API_URL}api/v2/products/${id}`, {
-      method: 'PATCH',
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(data),
     });
