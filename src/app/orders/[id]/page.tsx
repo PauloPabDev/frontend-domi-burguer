@@ -1,73 +1,121 @@
 "use client";
 
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { use, useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, ArrowLeft, MapPin } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, CreditCard } from "lucide-react";
 import { Order } from "@/types/orders";
+import { type Location, PropertyType } from "@/types/locations";
 import { OrderService } from "@/services/orderService";
 import { useRouter } from "next/navigation";
+import { useOrderSocket } from "@/hooks/useOrderSocket";
+import { OrderStatusBadge } from "@/components/ui/OrderStatusBadge";
+import { OrderItemsList, formatCOP } from "@/components/ui/OrderItemsList";
+import { OrderComment } from "@/components/ui/OrderComment";
+import { OrderAddressRow } from "@/components/ui/OrderAddressRow";
+import { PAYMENT_LABELS } from "@/types/worker";
+import { cn } from "@/lib/utils";
 
 interface OrderDetailPageProps {
-    params: Promise<{
-        id: string;
-    }>;
+    params: Promise<{ id: string }>;
+}
+
+function formatDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleDateString("es-CO", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
+
+function toDeliveryLocation(d: NonNullable<Order["deliveryAddress"]>): Location {
+    return {
+        name: d.name,
+        address: d.address,
+        city: d.city,
+        country: d.country,
+        floor: d.floor ?? "",
+        comment: d.comment ?? "",
+        coordinates: d.coordinates,
+        propertyType: "house" as PropertyType,
+    } as unknown as Location;
+}
+
+function SectionCard({ children, className }: { children: ReactNode; className?: string }) {
+    return (
+        <div className={cn("border border-gray-200 rounded-2xl", className)}>
+            {children}
+        </div>
+    );
+}
+
+function SectionLabel({ icon, children, className }: { icon?: ReactNode; children: ReactNode; className?: string }) {
+    return (
+        <div className={cn("flex items-center gap-2", className)}>
+            {icon}
+            <p className="text-xs text-neutral-400 uppercase font-bold tracking-wide">{children}</p>
+        </div>
+    );
 }
 
 export default function OrderDetailPage({ params }: OrderDetailPageProps) {
-    const { id } = React.use(params);
-    const { user } = useAuth();
+    const { id } = use(params);
+    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
-    const [order, setOrder] = React.useState<Order | null>(null);
-    const [loading, setLoading] = React.useState(true);
-    const [error, setError] = React.useState<string | null>(null);
+    const [order, setOrder] = useState<Order | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [cancelling, setCancelling] = useState(false);
 
-    React.useEffect(() => {
+    const { orderUpdate } = useOrderSocket(id);
+
+    useEffect(() => {
+        if (!orderUpdate) return;
+        setOrder((prev) => (prev ? { ...prev, status: orderUpdate.status } : prev));
+    }, [orderUpdate]);
+
+    useEffect(() => {
+        if (authLoading) return;
+        if (!user) { router.replace("/login"); return; }
+
         const fetchOrder = async () => {
-            if (!user) {
-                router.push('/login');
-                return;
-            }
-
             try {
-                setLoading(true);
+                setIsLoading(true);
                 setError(null);
-
                 const token = await user.getIdToken();
                 const response = await OrderService.getOrderById(id, token);
                 setOrder(response.body);
             } catch (err) {
-                const errorMessage = err instanceof Error ? err.message : 'Error al cargar el pedido';
-                setError(errorMessage);
-                console.error('Error fetching order:', err);
+                setError(err instanceof Error ? err.message : "Error al cargar el pedido");
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
 
         fetchOrder();
-    }, [user, id, router]);
+    }, [authLoading, user, id, router]);
 
     const handleCancelOrder = async () => {
         if (!order || !user) return;
-
         try {
+            setCancelling(true);
             const token = await user.getIdToken();
             const response = await OrderService.cancelOrder(order.id, token);
             setOrder(response.body);
-        } catch (error) {
-            console.error('Error cancelling order:', error);
+        } catch {
+            // silent — order stays as-is
+        } finally {
+            setCancelling(false);
         }
     };
 
-    if (loading) {
+    if (authLoading || isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="min-h-screen flex items-center justify-center mt-[130px]">
                 <div className="text-center">
-                    <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4" />
-                    <p className="text-gray-600">Cargando detalles del pedido...</p>
+                    <Loader2 className="animate-spin h-8 w-8 mx-auto mb-3 text-[#e73533]" />
+                    <p className="text-neutral-500 text-sm">Cargando detalles del pedido...</p>
                 </div>
             </div>
         );
@@ -75,152 +123,122 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
 
     if (error || !order) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <Card className="w-full max-w-md p-8 text-center">
-                    <h1 className="text-2xl font-bold mb-4 text-red-600">Error</h1>
-                    <p className="text-gray-600 mb-6">{error || 'Pedido no encontrado'}</p>
-                    <Button onClick={() => router.push('/orders')} className="w-full">
+            <div className="min-h-screen flex items-center justify-center mt-[130px] px-4">
+                <div className="w-full max-w-md text-center">
+                    <p className="text-red-600 font-semibold mb-2">Error</p>
+                    <p className="text-neutral-500 text-sm mb-6">{error ?? "Pedido no encontrado"}</p>
+                    <button
+                        onClick={() => router.push("/orders")}
+                        className="px-6 py-2 rounded-full bg-[#e73533] text-white text-sm font-bold"
+                    >
                         Volver a Mis Pedidos
-                    </Button>
-                </Card>
+                    </button>
+                </div>
             </div>
         );
     }
 
-    const statusInfo = OrderService.getOrderStatusInfo(order.status);
-    const canCancel = ['pending', 'confirmed'].includes(order.status);
+    const canCancel = order.status === "fresh";
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-4xl mx-auto px-4 py-8">
-                <div className="flex items-center gap-4 mb-8">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push('/orders')}
-                        className="flex items-center gap-2"
+        <div className="min-h-screen bg-white mt-[130px]">
+            <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-2">
+                    <button
+                        onClick={() => router.back()}
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                     >
-                        <ArrowLeft className="w-4 h-4" />
-                        Volver
-                    </Button>
-                    <h1 className="text-3xl font-bold">Detalles del Pedido</h1>
+                        <ArrowLeft className="w-5 h-5 text-neutral-700" />
+                    </button>
+                    <h1 className="text-lg font-bold text-neutral-800 uppercase">
+                        Detalle del Pedido
+                    </h1>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Order Information */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <Card>
-                            <CardContent className="p-6">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h2 className="text-xl font-semibold">Pedido #{order.orderNumber}</h2>
-                                        <p className="text-gray-600 text-sm">
-                                            {new Date(order.createdAt).toLocaleDateString('es-CO', {
-                                                day: 'numeric',
-                                                month: 'long',
-                                                year: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </p>
-                                    </div>
-                                    <div className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor} ${statusInfo.color} ${statusInfo.borderColor} border`}>
-                                        {statusInfo.label}
-                                    </div>
-                                </div>
-
-                                {canCancel && (
-                                    <Button
-                                        variant="destructive"
-                                        onClick={handleCancelOrder}
-                                        className="w-full"
-                                    >
-                                        Cancelar Pedido
-                                    </Button>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* Customer Information */}
-
-
-                        {/* Delivery Address */}
-                        {order.deliveryAddress && (
-                            <Card>
-                                <CardContent className="p-6">
-                                    <h3 className="font-semibold mb-4 flex items-center gap-2">
-                                        <MapPin className="w-5 h-5" />
-                                        Dirección de Entrega
-                                    </h3>
-                                    <div className="space-y-3">
-                                        <div>
-                                            <p className="font-medium">{order.deliveryAddress.name}</p>
-                                            <p className="text-gray-600">{order.deliveryAddress.address}</p>
-                                            {order.deliveryAddress.floor && (
-                                                <p className="text-gray-600">{order.deliveryAddress.floor}</p>
-                                            )}
-                                            <p className="text-gray-600">
-                                                {order.deliveryAddress.city}, {order.deliveryAddress.country}
-                                            </p>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Precio de envío:</span>
-                                            <span>${(order.deliveryPrice ?? 0).toLocaleString('es-CO')}</span>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-
-
+                {/* Estado y número de pedido */}
+                <SectionCard className="p-5">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-xs text-neutral-400 uppercase font-bold tracking-wide">
+                                Pedido N°
+                            </p>
+                            <p className="text-xl font-bold text-neutral-800">{order.orderNumber}</p>
+                            <p className="text-xs text-neutral-400 mt-1">{formatDate(order.createdAt)}</p>
+                        </div>
+                        <OrderStatusBadge status={order.status} />
                     </div>
 
-                    {/* Order Summary */}
-                    <div className="space-y-6">
-                        <Card>
-                            <CardContent className="p-6">
-                                <h3 className="font-semibold mb-4">Resumen del Pedido</h3>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between">
-                                        <span>Subtotal:</span>
-                                        <span>${(order.subtotal ?? 0).toLocaleString('es-CO')}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Envío:</span>
-                                        <span>${(order.deliveryPrice ?? 0).toLocaleString('es-CO')}</span>
-                                    </div>
-                                    <Separator />
-                                    <div className="flex justify-between font-semibold text-lg">
-                                        <span>Total:</span>
-                                        <span>${(order.totalPrice ?? 0).toLocaleString('es-CO')}</span>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                    {canCancel && (
+                        <button
+                            onClick={handleCancelOrder}
+                            disabled={cancelling}
+                            className="mt-4 w-full py-2.5 rounded-full border border-red-400 text-red-500 text-sm font-bold uppercase hover:bg-red-50 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                        >
+                            {cancelling && <Loader2 className="w-4 h-4 animate-spin" />}
+                            Cancelar Pedido
+                        </button>
+                    )}
+                </SectionCard>
 
-                        <Card>
-                            <CardContent className="p-6">
-                                <h3 className="font-semibold mb-4">Método de Pago</h3>
-                                <div className="space-y-2">
-                                    <p className="capitalize">
-                                        {order.paymentMethod === 'cash' && 'Efectivo'}
-                                        {order.paymentMethod === 'bancolombia' && 'Bancolombia'}
-                                        {order.paymentMethod === 'nequi' && 'Nequi'}
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {order.comment && (
-                            <Card>
-                                <CardContent className="p-6">
-                                    <h3 className="font-semibold mb-4">Comentarios</h3>
-                                    <p className="text-gray-600">{order.comment}</p>
-                                </CardContent>
-                            </Card>
-                        )}
+                {/* Productos */}
+                <SectionCard className="px-5">
+                    <div className="py-4 border-b border-gray-100">
+                        <SectionLabel>Productos</SectionLabel>
                     </div>
-                </div>
+                    <OrderItemsList items={order.orderItems} className="py-4" />
+                </SectionCard>
+
+                {/* Dirección de entrega */}
+                {order.deliveryAddress && (
+                    <SectionCard className="p-5">
+                        <SectionLabel
+                            icon={<MapPin className="w-4 h-4 text-[#e73533]" />}
+                            className="mb-4"
+                        >
+                            Dirección de Entrega
+                        </SectionLabel>
+                        <OrderAddressRow location={toDeliveryLocation(order.deliveryAddress)} />
+                    </SectionCard>
+                )}
+
+                {/* Resumen del pago */}
+                <SectionCard className="p-5">
+                    <SectionLabel className="mb-4">Resumen del Pago</SectionLabel>
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-sm text-neutral-600">
+                            <span>Subtotal</span>
+                            <span>{formatCOP(order.subtotal ?? 0)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-neutral-600">
+                            <span>Envío</span>
+                            <span>{formatCOP(order.deliveryPrice ?? 0)}</span>
+                        </div>
+                        <div className="border-t border-gray-100 pt-2 flex justify-between font-bold text-neutral-800">
+                            <span>Total</span>
+                            <span>{formatCOP(order.totalPrice ?? 0)}</span>
+                        </div>
+                    </div>
+                </SectionCard>
+
+                {/* Método de pago */}
+                <SectionCard className="p-5">
+                    <SectionLabel
+                        icon={<CreditCard className="w-4 h-4 text-neutral-400" />}
+                        className="mb-3"
+                    >
+                        Método de Pago
+                    </SectionLabel>
+                    <p className="text-sm font-semibold text-neutral-800">
+                        {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}
+                    </p>
+                </SectionCard>
+
+                {/* Comentario */}
+                {order.comment && <OrderComment comment={order.comment} />}
+
+                <div className="pb-8" />
             </div>
         </div>
     );
