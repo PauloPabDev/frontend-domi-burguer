@@ -70,7 +70,7 @@ export const calculateStats = (orders: WorkerOrder[]): ContabilidadStats => {
       const qty = item.quantity ?? 1;
       totalProductsSold += qty;
       if (!productsSold[item.id]) {
-        productsSold[item.id] = { name: item.name, quantity: 0, total: 0, image: item.image1 };
+        productsSold[item.id] = { name: item.name ?? '', quantity: 0, total: 0, image: item.image1 };
       }
       productsSold[item.id].quantity += qty;
       productsSold[item.id].total += (item.price ?? 0) * qty;
@@ -80,7 +80,7 @@ export const calculateStats = (orders: WorkerOrder[]): ContabilidadStats => {
         totalProductsSold += cqty;
         const key = `comp:${comp.name}`;
         if (!productsSold[key]) {
-          productsSold[key] = { name: comp.name, quantity: 0, total: 0 };
+          productsSold[key] = { name: comp.name ?? '', quantity: 0, total: 0 };
         }
         productsSold[key].quantity += cqty;
         productsSold[key].total += (comp.price ?? 0) * cqty;

@@ -38,7 +38,7 @@ export default function OrdersPage() {
         return {
             id: generateCartItemId(Number(item.id), complements),
             productId: Number(item.id),
-            name: item.name,
+            name: item.name ?? '',
             price: item.price,
             basePrice: item.price,
             quantity: item.quantity,
@@ -150,7 +150,7 @@ function ProductImages({ items }: ProductImagesProps) {
                     {item.image1 ? (
                         <Image
                             src={item.image1}
-                            alt={item.name}
+                            alt={item.name ?? ''}
                             fill
                             className="object-cover"
                             sizes="56px"

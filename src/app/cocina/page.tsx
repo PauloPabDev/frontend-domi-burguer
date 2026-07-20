@@ -21,7 +21,8 @@ function buildProductSummary(orders: WorkerOrder[]) {
   const map = new Map<string, number>();
   for (const order of orders) {
     for (const item of order.orderItems) {
-      map.set(item.name, (map.get(item.name) ?? 0) + item.quantity);
+      if (!item.id) continue;
+      map.set(item.id, (map.get(item.id) ?? 0) + item.quantity);
     }
   }
   return Array.from(map.entries())

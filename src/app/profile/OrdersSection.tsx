@@ -32,7 +32,7 @@ function OrderImages({ items }: { items: Order["orderItems"] }) {
                     {item.image1 ? (
                         <Image
                             src={item.image1}
-                            alt={item.name}
+                            alt={item.name ?? ''}
                             fill
                             className="object-cover"
                             sizes="64px"

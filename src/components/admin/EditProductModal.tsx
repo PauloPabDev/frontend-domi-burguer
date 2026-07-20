@@ -65,7 +65,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, onS
     const payload = isCreating
       ? full
       : (Object.fromEntries(
-          Object.entries(full).filter(([k, v]) => v !== (product as Record<string, unknown>)[k])
+          Object.entries(full).filter(([k, v]) => v !== (product as unknown as Record<string, unknown>)[k])
         ) as Partial<Omit<Product, 'id'>>);
 
     try {
