@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProducts } from '@/contexts/ProductsContext';
 import { WorkerOrder, WorkerKitchen } from '@/types/worker';
-import { DeliveryAddress, OrderItem, OrderComplement } from '@/types/orders';
+import { DeliveryAddress, OrderItem } from '@/types/orders';
 import { Location } from '@/types/locations';
 import { Product } from '@/types/product';
 import { ClientService } from '@/services/clientService';
@@ -21,30 +21,20 @@ function resolveItemNames(
 ): OrderItem[] {
   return items.map((item) => {
     const product = productMap.get(item.id);
-    const resolvedName = product?.name ?? item.name;
-    const resolvedColorPrimary = product?.colorPrimary;
-    const resolvedColorSecondary = product?.colorSecondary;
 
-    const resolvedComplements = item.complements?.map((c): OrderComplement => {
-      const comp = productMap.get(c.name); // c.name holds the raw complement ID
-      return comp ? { ...c, name: comp.name, ...(comp.colorPrimary && { colorPrimary: comp.colorPrimary }) } : c;
+    const resolvedComplements = item.complements?.map((c): OrderItem => {
+      const comp = productMap.get(c.id);
+      return {
+        ...comp,
+        ...c,
+      }
     });
 
-    if (
-      resolvedName === item.name &&
-      resolvedColorPrimary === item.colorPrimary &&
-      resolvedColorSecondary === item.colorSecondary &&
-      (!resolvedComplements || resolvedComplements.every((c, i) => c === item.complements![i]))
-    ) {
-      return item;
-    }
 
     return {
+      ...product,
       ...item,
-      name: resolvedName,
-      ...(resolvedColorPrimary && { colorPrimary: resolvedColorPrimary }),
-      ...(resolvedColorSecondary && { colorSecondary: resolvedColorSecondary }),
-      ...(resolvedComplements && { complements: resolvedComplements }),
+      complements: resolvedComplements || []
     };
   });
 }
@@ -61,6 +51,7 @@ function applyEnrichment(
   locationObjCache: Map<string, Location>,
 ): WorkerOrder[] {
   return orders.map((order) => {
+    console.log("name order productos ", order.orderItems.map(item => item.name).join(', '));
     const kitchen =
       order.kitchen ??
       (order.kitchenId ? kitchens.find((k) => k.id === order.kitchenId) ?? undefined : undefined);
@@ -85,6 +76,7 @@ function applyEnrichment(
       location === order.location &&
       orderItems === order.orderItems
     ) {
+      console.log('No changes for order:', order.id);
       return order;
     }
 

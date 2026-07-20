@@ -33,6 +33,7 @@ function ColoredPill({
 }
 
 export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsListProps) {
+  console.log('OrderItemsList items:', items);
   return (
     <ul className={cn('space-y-2', className)}>
       {items.map((item, index) => (
@@ -74,7 +75,7 @@ export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsLi
                       {c.quantity}
                     </span>
                     {/* Col 2: nombre complemento */}
-                    <span className="text-base font-bold text-neutral-black-50 truncate ">{c.name}</span>
+                    <span className="text-base font-bold text-neutral-black-50 truncate ">{c.name} {c.codes ? '(' + c.codes.join(', ') + ')' : ''}</span>
                   </ColoredPill>
                   {/* Col 3: precio complemento */}
                   <span className="text-xs text-neutral-black-50 shrink-0">

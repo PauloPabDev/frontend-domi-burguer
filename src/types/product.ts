@@ -10,5 +10,6 @@ export interface Product {
   colorSecondary: string;
   secret: boolean;
   type?: 'product' | 'complement';
+  codes?: string[];
 
 }

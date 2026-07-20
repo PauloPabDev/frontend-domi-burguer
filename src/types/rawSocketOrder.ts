@@ -8,14 +8,18 @@ export interface FirestoreTimestamp {
 export interface RawSocketOrderItem {
   id: string;
   price: number;
-  quantity: number;
-  complements?: RawSocketComplement[];
+  quantity?: number;
+  name: string;
+  codes?: string[];
+  notes?: string;
+  complements?: RawSocketOrderItem[];
 }
 
 export interface RawSocketComplement {
   id: string;
   price: number;
   quantity: number;
+  codes?: string[];
 }
 
 export interface RawSocketDelivery {

@@ -18,22 +18,16 @@ export interface Order {
 
 export interface OrderItem {
   id: string;
-  name: string;
+  name?: string;
   price: number;
   quantity: number;
   image1?: string;
   image2?: string;
   colorPrimary?: string;
   colorSecondary?: string;
-  complements?: OrderComplement[];
-}
-
-
-export interface OrderComplement {
-  name: string;
-  quantity: number;
-  price: number;
-  colorPrimary?: string;
+  complements?: OrderItem[];
+  codes?: string[];
+  notes?: string;
 }
 
 export interface CustomerInfo {

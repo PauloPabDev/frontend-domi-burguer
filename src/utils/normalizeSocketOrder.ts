@@ -1,4 +1,4 @@
-import { OrderComplement, OrderItem, OrderStatus, Payment } from '@/types/orders';
+import { OrderItem, OrderStatus, Payment } from '@/types/orders';
 import { RawSocketOrder, RawSocketOrderItem, FirestoreTimestamp } from '@/types/rawSocketOrder';
 import { WorkerOrder } from '@/types/worker';
 
@@ -15,13 +15,15 @@ function firestoreTimestampToISO(ts: FirestoreTimestamp | string | null | undefi
 }
 
 function normalizeOrderItem(raw: RawSocketOrderItem): OrderItem {
-  const complements: OrderComplement[] | undefined = raw.complements?.length
+  const complements: OrderItem[] = raw.complements?.length
     ? raw.complements.map(normalizeOrderItem)
     : [];
   return {
     id: raw.id,
-    name: raw.id,
     price: raw.price,
+    ...(raw.notes && { notes: raw.notes }),
+    ...(raw.name && { name: raw.name }),
+    ...(raw.codes && { codes: raw.codes }),
     quantity: raw.quantity || 1,
     ...(complements && { complements }),
   };
