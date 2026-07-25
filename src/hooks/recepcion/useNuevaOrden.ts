@@ -7,7 +7,7 @@ import { LocationService } from '@/services/locationService';
 import { WorkerOrderService, DeliveryInfo, KitchenInfo } from '@/services/workerOrderService';
 import { Location } from '@/types/locations';
 import { Product, Complement } from '@/types/products';
-import { WorkerKitchen } from '@/types/worker';
+import { WorkerKitchen, WorkerOrder } from '@/types/worker';
 import { PRODUCTS } from '@/data/products';
 import { BancolombiaIcon, MoneyIcon, NequiIcon } from '@/components/ui/icons';
 import bancolombiaLogo from "@/media/img/bancolombia.png";
@@ -16,6 +16,8 @@ import efectivoLogo from "@/media/img/efectivo.jpeg";
 import { PaymentMethod } from '@/types/paymentMethod';
 
 export type ClientState = 'idle' | 'loading' | 'found' | 'not_found' | 'creating';
+
+const ORDERS_HISTORY_LIMIT = 15;
 
 export interface OrderItem {
   itemId: number;
@@ -37,6 +39,8 @@ export function useNuevaOrden() {
   const [phone, setPhone] = useState('');
   const [clientState, setClientState] = useState<ClientState>('idle');
   const [client, setClient] = useState<ApiClient | null>(null);
+  const [orders, setOrders] = useState<WorkerOrder[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   // Location step
   const [locations, setLocations] = useState<Location[]>([]);
@@ -102,6 +106,7 @@ export function useNuevaOrden() {
     setLocations([]);
     setSelectedLocationId(null);
     setDelivery(null);
+    setOrders([]);
     try {
       const token = await getToken();
       const { body } = await ClientService.findByPhone(searchPhone, token);
@@ -115,6 +120,12 @@ export function useNuevaOrden() {
       } finally {
         setLocationsLoading(false);
       }
+      // Load order history in the background (doesn't affect client state on failure)
+      setOrdersLoading(true);
+      WorkerOrderService.getOrdersByClientId(token, body.id, { limit: ORDERS_HISTORY_LIMIT })
+        .then((ordersRes) => setOrders(ordersRes.body ?? []))
+        .catch(() => setOrders([]))
+        .finally(() => setOrdersLoading(false));
     } catch {
       setClientState('not_found');
     }
@@ -138,6 +149,7 @@ export function useNuevaOrden() {
       setClient(body);
       setClientState('found');
       setLocations([]);
+      setOrders([]);
     } catch {
       setClientState('not_found');
     }
@@ -301,6 +313,8 @@ export function useNuevaOrden() {
     setPhone('');
     setClientState('idle');
     setClient(null);
+    setOrders([]);
+    setOrdersLoading(false);
     setLocations([]);
     setSelectedLocationId(null);
     setDelivery(null);
@@ -326,6 +340,7 @@ export function useNuevaOrden() {
     // Client
     phone, setPhone, clientState, client,
     searchClient, createClient, handlePhoneSet, updateClientName,
+    orders, ordersLoading,
     // Kitchens/sedes
     kitchens, kitchensLoading, selectedKitchenId,
     handleKitchenChange,

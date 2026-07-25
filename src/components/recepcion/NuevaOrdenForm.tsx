@@ -7,6 +7,7 @@ import { useNuevaOrden, PAYMENT_METHODS, OrderItem } from '@/hooks/recepcion/use
 import { useComplementEditor } from '@/hooks/recepcion/useComplementEditor';
 import { useChatwootBus } from '@/hooks/recepcion/useChatwootBus';
 import { ClienteSearch } from './ClienteSearch';
+import { PersonaOrdersSection } from './cliente/PersonaOrdersSection';
 import { UbicacionesCliente } from './UbicacionesCliente';
 import { ProductoSelector } from './ProductoSelector';
 import { SedeSelector } from './SedeSelector';
@@ -123,6 +124,12 @@ export function NuevaOrdenForm() {
               onUpdateName={form.updateClientName}
             />
           </FormCard>
+
+          {form.client && (
+            <FormCard>
+              <PersonaOrdersSection orders={form.orders} loading={form.ordersLoading} />
+            </FormCard>
+          )}
 
           <FormCard disabled={!form.client}>
             <UbicacionesCliente
