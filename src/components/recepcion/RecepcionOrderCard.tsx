@@ -106,7 +106,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
         {/* Comentario */}
         {order.comment && (
           <div className="px-3 pb-2">
-            <OrderComment comment={order.comment} compact />
+            <OrderComment comment={order.comment} />
           </div>
         )}
 

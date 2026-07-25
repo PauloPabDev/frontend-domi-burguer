@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRef, useEffect, useState } from 'react';
-import { ClipboardList, Map, PlusCircle, Bike, MoreHorizontal, BarChart3 } from 'lucide-react';
+import { ClipboardList, Map, PlusCircle, Bike, MoreHorizontal, BarChart3, IdCard } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
 import { Button } from '@/components/ui/button';
@@ -103,6 +103,17 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
               MAPA
             </Button>
           </Link>
+
+          <Link href="/recepcion/cliente" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
+            <Button
+              variant={pathname === '/recepcion/cliente' ? 'primary' : 'light-outline'}
+              size="md"
+              leftIcon={<IdCard className="w-5 h-5" />}
+              className="h-12 pl-5 pr-3 text-base"
+            >
+              CLIENTE
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile/Tablet: dropdown "más" con los botones secundarios */}
@@ -151,6 +162,16 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
                 )}>
                   <Map className="w-4 h-4 shrink-0" />
                   MAPA
+                </span>
+              </Link>
+
+              <Link href="/recepcion/cliente" onClick={() => setMoreOpen(false)}>
+                <span className={cn(
+                  'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold hover:bg-neutral-black-10 rounded-xl transition-colors',
+                  pathname === '/recepcion/cliente' ? 'text-primary-red' : 'text-neutral-black-80',
+                )}>
+                  <IdCard className="w-4 h-4 shrink-0" />
+                  CLIENTE
                 </span>
               </Link>
             </div>

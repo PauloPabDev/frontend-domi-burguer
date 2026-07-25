@@ -102,6 +102,37 @@ export class WorkerOrderService {
     return response.json();
   }
 
+  static async getOrdersByClientId(
+    token: string,
+    clientId: string,
+    pagination: { page?: number; limit?: number } = {}
+  ): Promise<{ body: WorkerOrder[] }> {
+    const params = new URLSearchParams();
+    if (pagination.page) params.set('page', String(pagination.page));
+    if (pagination.limit) params.set('limit', String(pagination.limit));
+    const response = await fetch(`${this.API_URL}api/v2/orders/last/${clientId}?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (response.status === 404) return { body: [] };
+    if (!response.ok) throw new Error('Error al obtener los pedidos del cliente');
+    return response.json();
+  }
+
+  static async getOrdersByUserId(
+    token: string,
+    userId: string,
+    pagination: { page?: number; limit?: number } = {}
+  ): Promise<{ body: WorkerOrder[] }> {
+    const params = new URLSearchParams({ key: 'userId', value: userId, option: '==' });
+    if (pagination.page) params.set('page', String(pagination.page));
+    if (pagination.limit) params.set('limit', String(pagination.limit));
+    const response = await fetch(`${this.API_URL}api/v2/orders?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Error al obtener los pedidos del usuario');
+    return response.json();
+  }
+
   static async getOrdersByDay(
     token: string,
     startDate: string,

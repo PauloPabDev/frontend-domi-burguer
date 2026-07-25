@@ -37,4 +37,12 @@ export class UserService {
 
     return await response.json();
   }
+
+  static async findByPhone(phone: string, token: string): Promise<{ body: UserProfile }> {
+    const response = await fetch(`${this.API_URL}api/v2/users/phone/${encodeURIComponent(phone)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Usuario no encontrado');
+    return response.json();
+  }
 }

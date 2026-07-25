@@ -6,4 +6,7 @@ const toDate = (d: string | FirestoreTimestamp): Date =>
 const formatTime = (d: string | FirestoreTimestamp) =>
     toDate(d).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 
-export { formatTime };
+const formatDateTime = (d: string | FirestoreTimestamp) =>
+    toDate(d).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+export { formatTime, formatDateTime };
