@@ -94,8 +94,9 @@ export function useNuevaOrden() {
     return user.getIdToken();
   }, [user]);
 
-  const searchClient = useCallback(async () => {
-    if (!phone) return;
+  const searchClient = useCallback(async (phoneOverride?: string) => {
+    const searchPhone = phoneOverride ?? phone;
+    if (!searchPhone) return;
     setClientState('loading');
     setClient(null);
     setLocations([]);
@@ -103,7 +104,7 @@ export function useNuevaOrden() {
     setDelivery(null);
     try {
       const token = await getToken();
-      const { body } = await ClientService.findByPhone(phone, token);
+      const { body } = await ClientService.findByPhone(searchPhone, token);
       setClient(body);
       setClientState('found');
       // Load locations immediately
@@ -119,8 +120,13 @@ export function useNuevaOrden() {
     }
   }, [phone, getToken]);
 
+  // Autorellena el teléfono y busca de inmediato (usado por el bus de Chatwoot).
+  // Se le pasa el teléfono explícitamente a searchClient para no depender del
+  // estado `phone`, que todavía no se habría actualizado en este mismo tick.
   const handlePhoneSet = useCallback((incomingPhone: string) => {
     setPhone(incomingPhone);
+    searchClient(incomingPhone);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const createClient = useCallback(async (name: string) => {

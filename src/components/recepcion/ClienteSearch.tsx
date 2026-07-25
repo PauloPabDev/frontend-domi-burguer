@@ -113,7 +113,7 @@ export function ClienteSearch({
         />
         <Button
           type="button"
-          onClick={onSearch}
+          onClick={() => onSearch()}
           disabled={isLoading || !phone}
           className="shrink-0"
         >
