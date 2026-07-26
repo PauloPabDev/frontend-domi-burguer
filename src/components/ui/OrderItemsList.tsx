@@ -65,8 +65,8 @@ export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsLi
           {item.complements && item.complements.length > 0 && (
             <div className="flex flex-col gap-1 pl-4">
               {item.complements.map((c, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <ColoredPill color={c.colorPrimary} className="flex-1 min-w-0">
+                <div key={i} className="flex items-center gap-2 ">
+                  <ColoredPill color={c.colorPrimary} className="flex-1 min-w-0 animate-card-vibrate">
                     {/* Col 1: cantidad complemento */}
                     <span
                       className="w-5 h-5 rounded-full text-white text-base font-bold flex items-center justify-center shrink-0"

@@ -59,7 +59,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
     <div
       className={cn(
         'flex flex-col shrink-0 h-full transition-[width] duration-200 ease-out',
-        isEmpty ? 'w-14' : 'w-[320px]'
+        isEmpty ? 'w-14' : 'w-[310px]'
       )}
     >
       {/* Column header */}
