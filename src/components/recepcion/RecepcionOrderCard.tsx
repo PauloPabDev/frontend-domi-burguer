@@ -10,7 +10,7 @@ import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderComment } from '@/components/ui/OrderComment';
-import { OrderNumberChip, OrderClientChip, OrderTimeChip } from '@/components/ui/OrderClientChips';
+import { OrderNumberChip, OrderClientChip, OrderTimeChip, getClientOriginKey, cardOriginColorMap } from '@/components/ui/OrderClientChips';
 import { OrderNumberMenu } from './OrderNumberMenu';
 import { AssignCourierModal } from './AssignCourierModal';
 import { AssignKitchenModal } from './AssignKitchenModal';
@@ -65,9 +65,17 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
     return RECEPTION_TRANSITIONS[order.status];
   })();
 
+  const isUser = !order.clientId && !!order.userId;
+  const cardColor = cardOriginColorMap[getClientOriginKey(isUser, order?.origin)];
+
   return (
     <>
-      <div className="rounded-2xl border border-neutral-black-20 bg-white shadow-sm overflow-hidden">
+      <div
+        className={cn(
+          'rounded-2xl border shadow-sm overflow-hidden',
+          cardColor ?? 'border-neutral-black-20 bg-white'
+        )}
+      >
         <OrderStatusStrip status={order.status} />
 
         {/* Header: número · cliente · hora */}
@@ -86,7 +94,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               phone={order.client?.phone ?? order.user?.phone}
               clientId={order.clientId}
               avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
-              isUser={!order.clientId && !!order.userId}
+              isUser={isUser}
               origin={order?.origin}
             />
             <OrderTimeChip time={formatTime(order.createdAt)} className="ml-auto" />

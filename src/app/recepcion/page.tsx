@@ -112,7 +112,7 @@ export default function RecepcionPage() {
     <div className="-mb-4 h-[calc(100vh-106px)] flex flex-col gap-2">
       <CourierFilterPanel />
       <div className="flex-1 overflow-x-auto overflow-y-hidden min-h-0">
-        <div className="flex gap-3 min-w-max h-full">
+        <div className="flex gap-2 min-w-max h-full">
           {KANBAN_STATUSES.map((status) => (
             <OrderKanbanColumn
               key={status}

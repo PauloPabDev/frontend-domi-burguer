@@ -34,6 +34,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   onMarkPaid,
 }) => {
   const cfg = STATUS_CONFIG[status];
+  const isEmpty = orders.length === 0;
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = useCallback(() => {
@@ -55,28 +56,41 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   }, []);
 
   return (
-    <div className="flex flex-col w-[360px] shrink-0 h-full">
+    <div
+      className={cn(
+        'flex flex-col shrink-0 h-full transition-[width] duration-200 ease-out',
+        isEmpty ? 'w-14' : 'w-[320px]'
+      )}
+    >
       {/* Column header */}
-      <div className={cn('flex items-center gap-2 px-3 py-2 rounded-xl mb-2 shrink-0', cfg.bg)}>
-        <div className={cn('w-2 h-2 rounded-full', cfg.dotColor)} />
-        <span className={cn('text-xs font-bold', cfg.color)}>{cfg.label}</span>
-        <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/60', cfg.color)}>
+      <div
+        className={cn(
+          'flex items-center gap-2 px-3 py-2 rounded-xl mb-2 shrink-0',
+          cfg.bg,
+          isEmpty && 'justify-center px-1.5'
+        )}
+      >
+        <div className={cn('w-2 h-2 rounded-full shrink-0', cfg.dotColor)} />
+        {!isEmpty && <span className={cn('text-xs font-bold truncate', cfg.color)}>{cfg.label}</span>}
+        <span
+          className={cn(
+            'text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/60 shrink-0',
+            cfg.color,
+            isEmpty && 'ml-0'
+          )}
+        >
           {orders.length}
         </span>
       </div>
 
       {/* Cards */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="kanban-scroll space-y-2 flex-1 overflow-y-auto pr-0.5"
-      >
-        {orders.length === 0 ? (
-          <div className="py-6 text-center text-xs text-neutral-black-50 border border-dashed border-neutral-black-20 rounded-xl">
-            Sin pedidos
-          </div>
-        ) : (
-          orders.map((order) => (
+      {!isEmpty && (
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="kanban-scroll space-y-2 flex-1 overflow-y-auto pr-0.5"
+        >
+          {orders.map((order) => (
             <RecepcionOrderCard
               key={order.id}
               order={order}
@@ -88,9 +102,9 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
               onPaymentMethodChange={onPaymentMethodChange}
               onMarkPaid={onMarkPaid}
             />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

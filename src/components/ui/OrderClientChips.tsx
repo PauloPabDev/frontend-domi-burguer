@@ -94,6 +94,21 @@ function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientA
   );
 }
 
+// Origen del cliente en la orden: usuario registrado, cliente creado por recepción, o cliente anónimo
+export type ClientOriginKey = 'user' | 'client' | 'client-user';
+
+export function getClientOriginKey(isUser: boolean, origin?: 'public' | null): ClientOriginKey {
+  return isUser ? 'user' : origin === 'public' ? 'client-user' : 'client';
+}
+
+// Color de fondo de toda la card de orden según origen.
+// `client` (creado por recepción) no se pinta: queda con el fondo por defecto.
+export const cardOriginColorMap: Record<ClientOriginKey, string | null> = {
+  user: 'bg-blue-50 border-blue-200',
+  'client-user': 'bg-amber-50 border-amber-200',
+  client: null,
+};
+
 // Colores por variante de chip y tipo de usuario
 const chipColorMap = {
   // Chip expandido: muestra nombre + teléfono
@@ -134,7 +149,7 @@ export function OrderClientChip({
   const [menuOpen, setMenuOpen] = useState(false);
 
   //las opciones son:  usuario registrado (user) o cliente anomimo (client-user) , y cliente credo por recepcion (client)
-  const userKey = isUser ? 'user' : origin === 'public' ? 'client-user' : 'client';
+  const userKey = getClientOriginKey(isUser, origin);
 
   const handleOpen = (e: React.MouseEvent) => { e.stopPropagation(); setMenuOpen(true); };
   return (

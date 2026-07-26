@@ -125,11 +125,7 @@ export function NuevaOrdenForm() {
             />
           </FormCard>
 
-          {form.client && (
-            <FormCard>
-              <PersonaOrdersSection orders={form.orders} loading={form.ordersLoading} />
-            </FormCard>
-          )}
+
 
           <FormCard disabled={!form.client}>
             <UbicacionesCliente
@@ -165,6 +161,12 @@ export function NuevaOrdenForm() {
               onChange={(e) => form.setPaymentMethod(e.target.value)}
             />
           </FormCard>
+
+          {form.client && (
+            <FormCard>
+              <PersonaOrdersSection orders={form.orders} loading={form.ordersLoading} />
+            </FormCard>
+          )}
         </div>
 
         <div className="flex-1 flex flex-col gap-4 min-w-0">
