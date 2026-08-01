@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from 'react';
 import { X, Bike, Settings, UserX } from 'lucide-react';
 import { WorkerUser } from '@/types/worker';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
@@ -18,7 +17,6 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
   onClose,
 }) => {
   const { activeCouriers, allCouriers, filterCourierIds, openPanel } = useCourierPanel();
-  const [loading, setLoading] = useState(false);
 
   // Use active couriers if any, fall back to all couriers
   const baseCouriers: WorkerUser[] = activeCouriers.length > 0 ? activeCouriers : allCouriers;
@@ -30,14 +28,9 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
       ? baseCouriers.filter((c) => filterCourierIds.has(c.id))
       : baseCouriers;
 
-  const handleSelect = async (courierId: string | null) => {
-    setLoading(true);
-    try {
-      await onAssign(courierId);
-      onClose();
-    } finally {
-      setLoading(false);
-    }
+  const handleSelect = (courierId: string | null) => {
+    onClose();
+    onAssign(courierId).catch(() => {});
   };
 
   const handleOpenPanel = () => {
@@ -81,9 +74,8 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
         <div className="max-h-64 overflow-y-auto p-3 space-y-1">
           {/* Sin asignar option */}
           <button
-            disabled={loading}
             onClick={() => handleSelect(null)}
-            className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:bg-neutral-black-10 transition-colors text-left disabled:opacity-50"
+            className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:bg-neutral-black-10 transition-colors text-left"
           >
             <div className="w-9 h-9 rounded-full bg-neutral-black-10 flex items-center justify-center shrink-0">
               <UserX size={16} className="text-neutral-black-40" />
@@ -100,10 +92,9 @@ export const AssignCourierModal: React.FC<AssignCourierModalProps> = ({
             couriers.map((courier) => (
               <button
                 key={courier.id}
-                disabled={loading}
                 onClick={() => handleSelect(courier.id)}
                 className={cn(
-                  'w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:bg-neutral-black-10 transition-colors text-left disabled:opacity-50',
+                  'w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:bg-neutral-black-10 transition-colors text-left',
                   currentCourierId === courier.id && 'bg-neutral-black-10',
                 )}
               >
