@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Bike } from 'lucide-react';
 import { WorkerOrder, WorkerKitchen } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
@@ -12,7 +12,7 @@ import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderComment } from '@/components/ui/OrderComment';
 import { OrderNumberChip, OrderClientChip, OrderTimeChip, getClientOriginKey, cardOriginColorMap } from '@/components/ui/OrderClientChips';
 import { OrderNumberMenu } from './OrderNumberMenu';
-import { AssignCourierModal } from './AssignCourierModal';
+import { AssignCourierPopover } from './AssignCourierPopover';
 import { AssignKitchenModal } from './AssignKitchenModal';
 import { formatTime } from '@/lib/dates';
 import { cn } from '@/lib/utils';
@@ -52,6 +52,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   const [showOrderMenu, setShowOrderMenu] = useState(false);
   const [showCourierModal, setShowCourierModal] = useState(false);
   const [showKitchenModal, setShowKitchenModal] = useState(false);
+  const courierButtonRef = useRef<HTMLButtonElement>(null);
 
   const transition = (() => {
     if (order.status === 'delivered') {
@@ -143,8 +144,9 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
         {/* Footer: domiciliario + acción */}
         <div className={cn(SECTION, 'flex items-center gap-2')}>
           <button
+            ref={courierButtonRef}
             type="button"
-            onClick={() => setShowCourierModal(true)}
+            onClick={() => setShowCourierModal((prev) => !prev)}
             className="flex items-center gap-2 text-xs text-neutral-black-50 hover:text-primary-red border border-neutral-black-20 rounded-xl px-3 py-2 transition-colors shrink-0"
           >
             {order.courier?.photoURL ? (
@@ -184,7 +186,8 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
       )}
 
       {showCourierModal && (
-        <AssignCourierModal
+        <AssignCourierPopover
+          anchorRef={courierButtonRef}
           currentCourierId={order.courierId}
           onAssign={(id) => onAssignCourier(order.id, id)}
           onClose={() => setShowCourierModal(false)}
