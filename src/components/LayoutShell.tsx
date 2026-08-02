@@ -5,6 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { GoogleSignInBanner } from "@/components/auth/GoogleSignInBanner";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
+import { ClientSocketProvider } from "@/contexts/ClientSocketContext";
 
 const DESIGN_PREFIX = "/design";
 const COURIER_PREFIXES = ["/domiciliario", "/cocina", "/recepcion", "/admin"];
@@ -23,7 +24,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   const isCourier = isCourierRoute(pathname);
   const showPublicChrome = !isDesign && !isCourier;
 
-  return (
+  const content = (
     <>
       {showPublicChrome && <Navbar />}
       {isDesign || isCourier ? (
@@ -37,5 +38,11 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
       {showPublicChrome && <GoogleSignInBanner />}
       {showPublicChrome && <InstallBanner />}
     </>
+  );
+
+  return showPublicChrome ? (
+    <ClientSocketProvider>{content}</ClientSocketProvider>
+  ) : (
+    content
   );
 }

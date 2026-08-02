@@ -9,6 +9,7 @@ import { WorkerOrder } from '@/types/worker';
 import { useAuth } from '@/contexts/AuthContext';
 import { normalizeSocketOrder, normalizeSocketOrders } from '@/utils/normalizeSocketOrder';
 import { playOrderNotification, playKitchenNotification } from '@/utils/notificationSound';
+import { getSocketUrl, SOCKET_OPTIONS } from '@/utils/socketConfig';
 
 interface SocketContextType {
   orders: WorkerOrder[];
@@ -25,37 +26,6 @@ export const useSocket = () => {
     throw new Error('useSocket debe usarse dentro de SocketProvider');
   }
   return context;
-};
-
-function getSocketUrl(): string {
-  const base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8087/').replace(/\/$/, '');
-
-  if (typeof window === 'undefined') return base;
-
-  const currentHost = window.location.hostname;
-  if (currentHost === 'localhost' || currentHost === '127.0.0.1') return base;
-
-  try {
-    const url = new URL(base);
-    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
-      url.hostname = currentHost;
-      return url.toString().replace(/\/$/, '');
-    }
-  } catch {
-    return base;
-  }
-
-  return base;
-}
-
-const SOCKET_OPTIONS = {
-  transports: ['websocket', 'polling'] as ('websocket' | 'polling')[],
-  upgrade: true,
-  timeout: 5000,
-  reconnection: true,
-  reconnectionAttempts: Infinity,
-  reconnectionDelay: 1000,
-  reconnectionDelayMax: 10000,
 };
 
 interface SocketProviderProps {

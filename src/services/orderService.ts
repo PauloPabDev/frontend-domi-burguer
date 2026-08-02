@@ -6,9 +6,17 @@ export class OrderService {
     return getApiUrl();
   }
 
-  static async getUserOrders(token: string): Promise<{ body: Order[] }> {
+  static async getUserOrders(
+    token: string,
+    pagination: { page?: number; limit?: number } = {}
+  ): Promise<{ body: Order[] }> {
     try {
-      const response = await fetch(`${this.API_URL}api/v2/orders/me`, {
+      const params = new URLSearchParams();
+      if (pagination.page) params.set('page', String(pagination.page));
+      if (pagination.limit) params.set('limit', String(pagination.limit));
+      const query = params.toString();
+
+      const response = await fetch(`${this.API_URL}api/v2/orders/me${query ? `?${query}` : ''}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

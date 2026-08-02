@@ -1,3 +1,5 @@
+import { Location } from './locations';
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -13,6 +15,7 @@ export interface Order {
   comment?: string;
   estimatedDeliveryTime?: string;
   locationId?: string;
+  location?: Location;
   dailyOrderNumber?: number;
 }
 

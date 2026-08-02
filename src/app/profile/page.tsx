@@ -10,7 +10,7 @@ import { PointsSection } from "./PointsSection";
 import { AddressesSection } from "./AddressesSection";
 import { PhoneSection } from "./PhoneSection";
 import { CodesSection } from "./CodesSection";
-import { ComingSoonSection } from "./ComingSoonSection";
+import { OrdersSection } from "./OrdersSection";
 import { WorkSection } from "./WorkSection";
 
 export default function ProfilePage() {
@@ -39,8 +39,7 @@ export default function ProfilePage() {
                     <WorkSection />
                     <AddressesSection />
                     <PhoneSection />
-                    {/* <OrdersSection /> */}
-                    <ComingSoonSection title="MIS PEDIDOS" />
+                    <OrdersSection />
                     <CodesSection />
                     <PointsSection />
 
