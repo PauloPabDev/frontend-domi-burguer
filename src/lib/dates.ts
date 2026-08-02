@@ -9,4 +9,13 @@ const formatTime = (d: string | FirestoreTimestamp) =>
 const formatDateTime = (d: string | FirestoreTimestamp) =>
     toDate(d).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
-export { formatTime, formatDateTime };
+const formatFullDateTime = (d: string | FirestoreTimestamp) =>
+    toDate(d).toLocaleString('es-CO', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+
+export { formatTime, formatDateTime, formatFullDateTime };

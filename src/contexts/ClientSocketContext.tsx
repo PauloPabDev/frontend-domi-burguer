@@ -2,9 +2,21 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { addToast } from '@heroui/toast';
 import { ConnectionStatus } from '@/types/courier';
+import { RawSocketOrder } from '@/types/rawSocketOrder';
+import { STATUS_CONFIG } from '@/types/worker';
 import { useAuth } from '@/contexts/AuthContext';
 import { getSocketUrl, SOCKET_OPTIONS } from '@/utils/socketConfig';
+import { normalizeSocketOrders } from '@/utils/normalizeSocketOrder';
+
+const TOAST_COLOR_BY_STATUS: Partial<Record<RawSocketOrder['status'], 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger'>> = {
+  fresh: 'primary',
+  preparing: 'primary',
+  ready_for_pickup: 'secondary',
+  dispatched: 'success',
+  pending_payment: 'warning',
+};
 
 interface ClientSocketContextType {
   socket: Socket | null;
@@ -65,6 +77,19 @@ export const ClientSocketProvider: React.FC<{ children: React.ReactNode }> = ({ 
     instance.io.on('reconnect', () => {
       setConnectionStatus('CONNECTED');
       emitLogin();
+    });
+
+    instance.on('order/init', (raws: RawSocketOrder[]) => {
+      const orders = normalizeSocketOrders(raws);
+      orders.forEach((order) => {
+        const config = STATUS_CONFIG[order.status];
+        addToast({
+          title: `Pedido #${order.dailyOrderNumber}`,
+          description: config?.label ?? order.status,
+          color: TOAST_COLOR_BY_STATUS[order.status] ?? 'default',
+          timeout: 5000,
+        });
+      });
     });
 
     return () => {
