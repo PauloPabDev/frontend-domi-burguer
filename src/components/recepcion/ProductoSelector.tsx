@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import { Plus, Settings2 } from 'lucide-react';
 import { QuantitySelector } from '@/components/ui/quantitySelector';
 import { Product } from '@/types/products';
@@ -50,6 +51,15 @@ export function ProductoSelector({
               onClick={() => onAdd(product)}
               className="group flex items-center gap-3 p-3 rounded-xl border border-neutral-black-20 bg-neutral-black-5 hover:border-primary-red/40 hover:bg-primary-red/5 transition-colors text-left"
             >
+              <div className="relative w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-white">
+                <Image
+                  src={product.image1}
+                  alt={product.name}
+                  fill
+                  className="object-contain p-0.5"
+                  sizes="40px"
+                />
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-neutral-black-80 leading-snug">
                   {product.name}

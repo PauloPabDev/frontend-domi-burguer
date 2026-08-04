@@ -112,7 +112,7 @@ export function NuevaOrdenForm() {
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-5 lg:gap-6 items-start">
 
-        <div className="w-full md:w-[300px] lg:w-[360px] xl:w-[400px] 2xl:w-[440px] shrink-0 flex flex-col gap-4 md:sticky md:top-[112px]">
+        <div className="w-full md:flex-1 flex flex-col gap-4 md:sticky md:top-[112px]">
           <FormCard>
             <ClienteSearch
               phone={form.phone}
@@ -169,7 +169,7 @@ export function NuevaOrdenForm() {
           )}
         </div>
 
-        <div className="flex-1 flex flex-col gap-4 min-w-0">
+        <div className="w-full flex-1 flex flex-col gap-4 min-w-0">
           <FormCard>
             <ProductoSelector
               allProducts={form.allProducts}
