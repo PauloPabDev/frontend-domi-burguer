@@ -2,16 +2,15 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "type": "npm",
-            "script": "dev",
+            "type": "shell",
+            "command": "pnpm dev",
             "group": "build",
             "problemMatcher": [],
-            "label": "npm: dev",
+            "label": "pnpm: dev",
             "detail": "Ejecuta el script 'dev' definido en package.json para iniciar el servidor de desarrollo.",
             "runOptions": {
                 "runOn": "folderOpen"
             }
-            
         }
     ]
 }
