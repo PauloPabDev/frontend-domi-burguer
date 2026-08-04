@@ -22,6 +22,7 @@ function useFormCart() {
   const { clearCart } = useCartStore();
   const { clearAll: clearAppliedCode } = useAppliedCodeStore();
   const router = useRouter();
+  const { user } = useAuth();
   const { submitOrder } = useOrderSubmit(
     (result) => {
       // Guardar última orden en localStorage ANTES de limpiar
@@ -46,13 +47,15 @@ function useFormCart() {
 
       // Redirigir a la página de confirmación
       track('order_success', {
-        order_id: result.id,
+        order_id: result.body.id,
         total: getTotal(),
         subtotal: getSubtotal(),
         payment_method: formData.paymentMethod,
         item_count: items.length,
       });
-      router.push("/thankyou");
+      // Solo enlazamos al pedido real (/orders/[id]) cuando quedó asociado a
+      // un usuario autenticado, que es lo único que esa página puede mostrar.
+      router.push(user ? `/thankyou?orderId=${result.body.id}` : "/thankyou");
     },
     (apiError) => {
       console.error("Error submitting order:", apiError);
@@ -65,7 +68,6 @@ function useFormCart() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   );
-  const { user } = useAuth();
 
   const paymentMethods: PaymentMethod[] = [
     {

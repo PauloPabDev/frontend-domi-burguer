@@ -3,8 +3,10 @@ import { OrderPayload } from "@/types/OrderPayload";
 import { getApiUrl } from "@/utils/apiUrl";
 
 interface OrderResult {
-  id: number;
-  [key: string]: unknown;
+  body: {
+    id: string;
+    [key: string]: unknown;
+  };
 }
 
 export const useOrderSubmit = (
@@ -20,7 +22,7 @@ export const useOrderSubmit = (
 
   const API_URL = getApiUrl();
 
-  
+
   // const saveLastOrder = (): void => {
   //   const lastOrder: LastOrder = {
   //     name: formData.name,
@@ -38,7 +40,7 @@ export const useOrderSubmit = (
   //   localStorage.setItem("lastOrder", JSON.stringify(lastOrder));
   // };
 
-  const submitOrder = async ({token, orderPayload} : {token?: string, orderPayload?: OrderPayload}): Promise<OrderResult> => {
+  const submitOrder = async ({ token, orderPayload }: { token?: string, orderPayload?: OrderPayload }): Promise<OrderResult> => {
     setIsSubmitting(true);
     setError(null);
 
@@ -50,7 +52,7 @@ export const useOrderSubmit = (
           "Content-Type": "application/json",
         },
       };
-      
+
       let url = `${API_URL}api/v2/orders/public`
       const body = orderPayload
       if (token) {

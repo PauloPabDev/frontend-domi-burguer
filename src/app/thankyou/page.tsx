@@ -1,9 +1,31 @@
 "use client";
 
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { FrenchFriesIcon, HamburgerIcon } from "@/components/ui/icons";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+
+function MyOrderLink() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("orderId");
+  // Si el pedido quedó asociado a un usuario autenticado, llevamos al detalle
+  // real del pedido; si no, caemos al resumen genérico basado en localStorage.
+  const myOrderHref = orderId ? `/orders/${orderId}` : "/info-order";
+
+  return (
+    <Link href={myOrderHref}>
+      <Button
+        variant="ghost"
+        className="bg-accent-yellow-40 hover:bg-accent-yellow-60 active:bg-accent-yellow-60 rounded-[30px] flex items-center gap-2 text-[16px] w-[165px] h-[48px]"
+      >
+        <FrenchFriesIcon className="w-6 h-6" />
+        MI PEDIDO
+      </Button>
+    </Link>
+  );
+}
 
 export default function Thankyou() {
   return (
@@ -53,15 +75,20 @@ export default function Thankyou() {
                 EXPLORAR
               </Button>
             </Link>
-            <Link href={"/info-order"}>
-              <Button
-                variant="ghost"
-                className="bg-accent-yellow-40 hover:bg-accent-yellow-60 active:bg-accent-yellow-60 rounded-[30px] flex items-center gap-2 text-[16px] w-[165px] h-[48px]"
-              >
-                <FrenchFriesIcon className="w-6 h-6" />
-                MI PEDIDO
-              </Button>
-            </Link>
+            <Suspense
+              fallback={
+                <Button
+                  variant="ghost"
+                  disabled
+                  className="bg-accent-yellow-40 rounded-[30px] flex items-center gap-2 text-[16px] w-[165px] h-[48px]"
+                >
+                  <FrenchFriesIcon className="w-6 h-6" />
+                  MI PEDIDO
+                </Button>
+              }
+            >
+              <MyOrderLink />
+            </Suspense>
           </div>
         </div>
       </section>
