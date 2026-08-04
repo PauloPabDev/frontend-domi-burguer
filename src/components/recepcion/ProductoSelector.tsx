@@ -39,8 +39,8 @@ export function ProductoSelector({
     <div className="flex flex-col gap-5">
       <h3 className="font-bold text-sm text-neutral-black-80">Productos</h3>
 
-      {/* ── Catálogo: grid en tablet+, columna en móvil ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      {/* ── Catálogo: columnas auto-ajustables al ancho disponible ── */}
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-2">
         {allProducts.map((product) => {
           const inOrder = countByProduct(product.id);
           return (

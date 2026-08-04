@@ -116,7 +116,7 @@ export function ResumenPedido({
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-neutral-black-5 transition-colors"
+        className="w-full flex items-center justify-between px-4 sm:px-5 py-4 hover:bg-neutral-black-5 transition-colors"
       >
         <h3 className="font-bold text-sm text-neutral-black-80">Resumen del pedido</h3>
         <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export function ResumenPedido({
       </button>
 
       {expanded && (
-        <div className="px-5 pb-5 flex flex-col gap-3 border-t border-neutral-black-10">
+        <div className="px-4 sm:px-5 pb-5 flex flex-col gap-3 border-t border-neutral-black-10">
           <div className="flex flex-col gap-2 pt-3">
             {orderItems.map((item) => (
               <OrderItemRow key={item.itemId} item={item} />

@@ -33,7 +33,7 @@ function SubmitOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl p-10 max-w-sm w-full mx-4 flex flex-col items-center gap-5">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-10 max-w-sm w-full mx-4 flex flex-col items-center gap-5">
         {isSubmitting && (
           <>
             <div className="w-20 h-20 rounded-full bg-primary-red/10 flex items-center justify-center">
@@ -108,11 +108,11 @@ export function NuevaOrdenForm() {
   const totalUnidades = form.orderItems.reduce((s, i) => s + i.quantity, 0);
 
   return (
-    <div className="w-full px-4 lg:px-8 py-6 flex flex-col gap-5">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col gap-5">
 
-      <div className="flex flex-col lg:flex-row gap-5 items-start">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-5 lg:gap-6 items-start">
 
-        <div className="w-full lg:w-[400px] xl:w-[440px] shrink-0 flex flex-col gap-4 lg:sticky lg:top-6">
+        <div className="w-full md:w-[300px] lg:w-[360px] xl:w-[400px] 2xl:w-[440px] shrink-0 flex flex-col gap-4 md:sticky md:top-[112px]">
           <FormCard>
             <ClienteSearch
               phone={form.phone}
@@ -201,14 +201,16 @@ export function NuevaOrdenForm() {
             onResetDeliveryPrice={form.resetDeliveryPrice}
           />
 
-          <Button
-            type="button"
-            onClick={form.handleSubmit}
-            disabled={form.isSubmitting || !form.client || !form.selectedLocationId || form.orderItems.length === 0}
-            className="w-full h-12 text-sm font-bold"
-          >
-            {`Crear Orden${totalUnidades > 0 ? ` · ${fmt(form.total)}` : ''}`}
-          </Button>
+          <div className="sticky bottom-3 lg:static z-10">
+            <Button
+              type="button"
+              onClick={form.handleSubmit}
+              disabled={form.isSubmitting || !form.client || !form.selectedLocationId || form.orderItems.length === 0}
+              className="w-full h-12 text-sm font-bold shadow-lg lg:shadow-none"
+            >
+              {`Crear Orden${totalUnidades > 0 ? ` · ${fmt(form.total)}` : ''}`}
+            </Button>
+          </div>
         </div>
       </div>
 
