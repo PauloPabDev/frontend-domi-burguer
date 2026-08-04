@@ -5,13 +5,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useOrderDetail } from "@/hooks/useOrderDetail";
+import { Button } from "@/components/ui/button";
 import { OrderComment } from "@/components/ui/OrderComment";
 import { OrderDetailHeader } from "./OrderDetailHeader";
-import { OrderSummaryCard } from "./OrderSummaryCard";
-import { OrderProductsSection } from "./OrderProductsSection";
-import { OrderDeliverySection } from "./OrderDeliverySection";
-import { OrderPaymentSummary } from "./OrderPaymentSummary";
-import { OrderPaymentMethodSection } from "./OrderPaymentMethodSection";
+import { OrderStatusBanner } from "./OrderStatusBanner";
+import { OrderDeliveryCard } from "./OrderDeliveryCard";
+import { OrderSummaryPanel } from "./OrderSummaryPanel";
+import { OrderWhatsAppHelp } from "./OrderWhatsAppHelp";
 
 interface OrderDetailPageProps {
     params: Promise<{ id: string }>;
@@ -32,8 +32,8 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
         return (
             <div className="min-h-screen flex items-center justify-center mt-[130px]">
                 <div className="text-center">
-                    <Loader2 className="animate-spin h-8 w-8 mx-auto mb-3 text-[#e73533]" />
-                    <p className="text-neutral-500 text-sm">Cargando detalles del pedido...</p>
+                    <Loader2 className="animate-spin h-8 w-8 mx-auto mb-3 text-primary-red" />
+                    <p className="body-font text-neutral-black-50">Cargando detalles del pedido...</p>
                 </div>
             </div>
         );
@@ -42,31 +42,46 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
     if (error || !order) {
         return (
             <div className="min-h-screen flex items-center justify-center mt-[130px] px-4">
-                <div className="w-full max-w-md text-center">
-                    <p className="text-red-600 font-semibold mb-2">Error</p>
-                    <p className="text-neutral-500 text-sm mb-6">{error ?? "Pedido no encontrado"}</p>
-                    <button
-                        onClick={() => router.push("/orders")}
-                        className="px-6 py-2 rounded-full bg-[#e73533] text-white text-sm font-bold"
-                    >
+                <div className="w-full max-w-md text-center flex flex-col items-center gap-4">
+                    <p className="text-primary-red font-bold">Error</p>
+                    <p className="body-font text-neutral-black-50">{error ?? "Pedido no encontrado"}</p>
+                    <Button variant="primary" onClick={() => router.push("/orders")}>
                         Volver a Mis Pedidos
-                    </button>
+                    </Button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-white mt-[130px]">
-            <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
-                <OrderDetailHeader onBack={() => router.back()} />
-                <OrderSummaryCard order={order} />
-                <OrderProductsSection items={order.orderItems} />
-                {order.deliveryAddress && <OrderDeliverySection address={order.deliveryAddress} />}
-                <OrderPaymentSummary order={order} />
-                <OrderPaymentMethodSection paymentMethod={order.paymentMethod} />
-                {order.comment && <OrderComment comment={order.comment} />}
-                <div className="pb-8" />
+        <div className="flex flex-col xl:flex-row w-full xl:justify-around items-center xl:items-start gap-5 mt-[130px] mb-[100px] px-4">
+            <div className="flex h-full w-full pb-10 max-w-[500px]">
+                <div className="flex flex-col h-full gap-6 w-full mt-5">
+                    <OrderDetailHeader
+                        orderNumber={order.orderNumber}
+                        createdAt={order.createdAt}
+                        onBack={() => router.back()}
+                    />
+
+                    <OrderStatusBanner status={order.status} />
+
+                    <div className="flex flex-col gap-4 w-full">
+                        {order.deliveryAddress && <OrderDeliveryCard address={order.deliveryAddress} />}
+
+                        {order.comment && (
+                            <div className="flex flex-col gap-2">
+                                <p className="body-font font-bold">Comentario:</p>
+                                <OrderComment comment={order.comment} />
+                            </div>
+                        )}
+
+                        <OrderWhatsAppHelp orderNumber={order.orderNumber} />
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex flex-col items-start gap-8 max-w-[500px] w-full">
+                <OrderSummaryPanel order={order} />
             </div>
         </div>
     );
