@@ -225,6 +225,17 @@ h4 {
   height: 0;
 }
 
+/* Oculta la scrollbar mientras conserva el scroll (usado en navs que
+   pueden desbordar en pantallas muy angostas). */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 .pac-container {
   z-index: 99999 !important;
   pointer-events: auto !important;

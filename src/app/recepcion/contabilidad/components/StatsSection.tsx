@@ -1,13 +1,16 @@
 import {
-  AlertTriangle, ArrowDownCircle, ArrowUpCircle, Bike, ChefHat, CreditCard,
-  DollarSign, Package, ShoppingBag, TrendingUp, Wallet,
+  AlertTriangle, Bike, DollarSign, Package, ShoppingBag, TrendingUp,
 } from 'lucide-react';
-import { PAYMENT_LABELS, WorkerOrder } from '@/types/worker';
-import { cn } from '@/lib/utils';
-import type { ContabilidadStats, CourierStat } from '../calculateStats';
+import { WorkerOrder } from '@/types/worker';
+import type { ContabilidadStats } from '../calculateStats';
 import { formatCOP } from '../utils';
 import { StatCard } from './StatCard';
-import { AccordionSection } from './AccordionSection';
+import { PaymentMethodSection } from './PaymentMethodSection';
+import { ProductsSoldSection } from './ProductsSoldSection';
+import { CourierDeliverySection } from './CourierDeliverySection';
+// import { CourierCashCollectedSection } from './CourierCashCollectedSection';
+// import { CourierPaymentSection } from './CourierPaymentSection';
+// import { KitchenSalesSection } from './KitchenSalesSection';
 
 interface StatsSectionProps {
   stats: ContabilidadStats;
@@ -22,7 +25,7 @@ export function StatsSection({ stats, orders }: StatsSectionProps) {
   );
   const paymentEntries = Object.entries(stats.salesByPaymentMethod);
   const courierEntries = Object.entries(stats.salesByCourier);
-  const kitchenEntries = Object.entries(stats.salesByKitchen);
+  // const kitchenEntries = Object.entries(stats.salesByKitchen); // usado por <KitchenSalesSection>, deshabilitada abajo
 
   return (
     <div className="space-y-3">
@@ -95,287 +98,27 @@ export function StatsSection({ stats, orders }: StatsSectionProps) {
         </div>
       )}
 
-      {/* Ventas por método de pago */}
-      {paymentEntries.length > 0 && (
-        <AccordionSection icon={CreditCard} title="Ventas por método de pago" badge={paymentEntries.length} defaultOpen>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-neutral-black-3 text-neutral-black-50 text-xs">
-                <th className="px-4 py-2 text-left font-semibold">Método</th>
-                <th className="px-4 py-2 text-center font-semibold">Pedidos</th>
-                <th className="px-4 py-2 text-right font-semibold">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paymentEntries.map(([method, data]) => (
-                <tr key={method} className="border-t border-neutral-black-10">
-                  <td className="px-4 py-2.5 font-medium capitalize">{PAYMENT_LABELS[method] ?? method}</td>
-                  <td className="px-4 py-2.5 text-center text-neutral-black-50">{data.count}</td>
-                  <td className="px-4 py-2.5 text-right font-semibold text-emerald-700">{formatCOP(data.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-neutral-black-20">
-                <td className="px-4 py-2.5 font-bold" colSpan={2}>Total</td>
-                <td className="px-4 py-2.5 text-right font-bold text-emerald-700">{formatCOP(stats.totalSales)}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </AccordionSection>
-      )}
+      <PaymentMethodSection paymentEntries={paymentEntries} totalSales={stats.totalSales} />
 
-      {/* Productos vendidos */}
-      {productsSortedByQty.length > 0 && (
-        <AccordionSection icon={Package} title="Productos vendidos" badge={productsSortedByQty.length}>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-neutral-black-3 text-neutral-black-50 text-xs">
-                <th className="px-4 py-2 text-left font-semibold">Producto</th>
-                <th className="px-4 py-2 text-center font-semibold">Cant.</th>
-                <th className="px-4 py-2 text-right font-semibold">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productsSortedByQty.map(([id, data]) => (
-                <tr key={id} className="border-t border-neutral-black-10">
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-2">
-                      {data.image && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={data.image} alt={data.name} className="w-7 h-7 rounded-full object-cover shrink-0" />
-                      )}
-                      <span className={cn('font-medium', id.startsWith('comp:') && 'text-neutral-black-50 text-xs')}>
-                        {data.name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2.5 text-center text-neutral-black-50">{data.quantity}</td>
-                  <td className="px-4 py-2.5 text-right font-semibold">
-                    {data.total > 0 ? formatCOP(data.total) : '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </AccordionSection>
-      )}
+      <ProductsSoldSection productsSortedByQty={productsSortedByQty} />
 
-      {/* Domicilios por domiciliario */}
-      {courierEntries.length > 0 && (
-        <AccordionSection
-          icon={Bike}
-          title="Domicilios por domiciliario"
-          badge={`${stats.deliveryCount} domicilios · ${formatCOP(stats.totalDeliveryCost)}`}
-        >
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-neutral-black-3 text-neutral-black-50 text-xs">
-                <th className="px-4 py-2 text-left font-semibold">Domiciliario</th>
-                <th className="px-4 py-2 text-center font-semibold">Pedidos</th>
-                <th className="px-4 py-2 text-right font-semibold">Cobrado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {courierEntries.map(([id, data]) => (
-                <tr key={id} className="border-t border-neutral-black-10">
-                  <td className="px-4 py-2.5">
-                    <CourierCell name={data.name} photoURL={data.photoURL} />
-                  </td>
-                  <td className="px-4 py-2.5 text-center text-neutral-black-50">{data.orderCount}</td>
-                  <td className="px-4 py-2.5 text-right font-semibold">{formatCOP(data.totalDelivery)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </AccordionSection>
-      )}
+      <CourierDeliverySection
+        courierEntries={courierEntries}
+        deliveryCount={stats.deliveryCount}
+        totalDeliveryCost={stats.totalDeliveryCost}
+      />
 
-      {/* Recaudado por domiciliario */}
-      {courierEntries.length > 0 && courierEntries.some(([, d]) => d.cashOrderCount > 0) && (
-        <AccordionSection icon={Wallet} title="Recaudado por domiciliario" badge={courierEntries.length} defaultOpen>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-neutral-black-3 text-neutral-black-50 text-xs">
-                <th className="px-4 py-2 text-left font-semibold">Domiciliario</th>
-                <th className="px-4 py-2 text-center font-semibold">Pedidos efectivo</th>
-                <th className="px-4 py-2 text-right font-semibold">Efectivo recaudado</th>
-                <th className="px-4 py-2 text-right font-semibold">Domicilios</th>
-                <th className="px-4 py-2 text-right font-semibold">Neto a entregar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {courierEntries.map(([id, data]) => (
-                <tr key={id} className="border-t border-neutral-black-10">
-                  <td className="px-4 py-2.5">
-                    <CourierCell name={data.name} photoURL={data.photoURL} />
-                  </td>
-                  <td className="px-4 py-2.5 text-center text-neutral-black-50">{data.cashOrderCount}</td>
-                  <td className="px-4 py-2.5 text-right font-semibold text-neutral-black-80">
-                    {data.cashCollected > 0 ? formatCOP(data.cashCollected) : '—'}
-                  </td>
-                  <td className="px-4 py-2.5 text-right text-neutral-black-50">
-                    {data.totalDelivery > 0 ? formatCOP(data.totalDelivery) : '—'}
-                  </td>
-                  <td className="px-4 py-2.5 text-right font-bold text-emerald-700">
-                    {data.netToHandOver > 0 ? formatCOP(data.netToHandOver) : '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-neutral-black-20">
-                <td className="px-4 py-2.5 font-bold" colSpan={2}>Total</td>
-                <td className="px-4 py-2.5 text-right font-bold">
-                  {formatCOP(courierEntries.reduce((s, [, d]) => s + d.cashCollected, 0))}
-                </td>
-                <td className="px-4 py-2.5 text-right font-bold text-neutral-black-50">
-                  {formatCOP(stats.totalDeliveryCost)}
-                </td>
-                <td className="px-4 py-2.5 text-right font-bold text-emerald-700">
-                  {formatCOP(courierEntries.reduce((s, [, d]) => s + d.netToHandOver, 0))}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </AccordionSection>
-      )}
+      {/* <CourierCashCollectedSection courierEntries={courierEntries} totalDeliveryCost={stats.totalDeliveryCost} /> */}
 
       {/* Pago a domiciliarios */}
-      {courierEntries.length > 0 && (
+      {/* {courierEntries.length > 0 && (
         <CourierPaymentSection courierEntries={courierEntries} />
-      )}
+      )} */}
 
       {/* Ventas por cocina */}
-      {kitchenEntries.length > 1 && (
-        <AccordionSection icon={ChefHat} title="Ventas por cocina" badge={kitchenEntries.length}>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-neutral-black-3 text-neutral-black-50 text-xs">
-                <th className="px-4 py-2 text-left font-semibold">Cocina</th>
-                <th className="px-4 py-2 text-center font-semibold">Pedidos</th>
-                <th className="px-4 py-2 text-right font-semibold">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {kitchenEntries.map(([id, data]) => (
-                <tr key={id} className="border-t border-neutral-black-10">
-                  <td className="px-4 py-2.5 font-medium">{data.name}</td>
-                  <td className="px-4 py-2.5 text-center text-neutral-black-50">{data.orderCount}</td>
-                  <td className="px-4 py-2.5 text-right font-semibold text-emerald-700">{formatCOP(data.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </AccordionSection>
-      )}
-    </div>
-  );
-}
-
-function CourierPaymentSection({ courierEntries }: { courierEntries: [string, CourierStat][] }) {
-  const totalToPayCouriers = courierEntries.reduce((sum, [, d]) => sum + Math.max(0, -d.netToHandOver), 0);
-  const totalCourierOwes = courierEntries.reduce((sum, [, d]) => sum + Math.max(0, d.netToHandOver), 0);
-
-  return (
-    <AccordionSection
-      icon={ArrowDownCircle}
-      title="Pago a domiciliarios"
-      badge={formatCOP(totalToPayCouriers)}
-      defaultOpen
-    >
-      {/* Resumen de totales */}
-      <div className="grid grid-cols-2 gap-3 p-4 bg-neutral-black-3 border-b border-neutral-black-10">
-        <div className="rounded-xl bg-white border border-neutral-black-10 px-3 py-2.5">
-          <p className="text-xs text-neutral-black-50 mb-0.5">Restaurante paga</p>
-          <p className="font-bold text-lg text-emerald-700">{formatCOP(totalToPayCouriers)}</p>
-          <p className="text-xs text-neutral-black-40">Domicilios no recaudados en efectivo</p>
-        </div>
-        <div className="rounded-xl bg-white border border-neutral-black-10 px-3 py-2.5">
-          <p className="text-xs text-neutral-black-50 mb-0.5">Domiciliarios entregan</p>
-          <p className="font-bold text-lg text-neutral-black-80">{formatCOP(totalCourierOwes)}</p>
-          <p className="text-xs text-neutral-black-40">Saldo de efectivo recaudado</p>
-        </div>
-      </div>
-
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="bg-neutral-black-3 text-neutral-black-50 text-xs">
-            <th className="px-4 py-2 text-left font-semibold">Domiciliario</th>
-            <th className="px-4 py-2 text-center font-semibold">Dom. digitales</th>
-            <th className="px-4 py-2 text-right font-semibold">A pagar</th>
-            <th className="px-4 py-2 text-right font-semibold">Saldo efectivo</th>
-            <th className="px-4 py-2 text-right font-semibold">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {courierEntries.map(([id, data]) => {
-            const toPay = Math.max(0, -data.netToHandOver);
-            const owes = Math.max(0, data.netToHandOver);
-            return (
-              <tr key={id} className="border-t border-neutral-black-10">
-                <td className="px-4 py-2.5">
-                  <CourierCell name={data.name} photoURL={data.photoURL} />
-                </td>
-                <td className="px-4 py-2.5 text-center text-neutral-black-50">
-                  {data.digitalOrderCount > 0 ? (
-                    <span>{data.digitalOrderCount} · {formatCOP(data.digitalDeliveryOwed)}</span>
-                  ) : (
-                    <span className="text-neutral-black-30">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-2.5 text-right font-semibold text-emerald-700">
-                  {toPay > 0 ? formatCOP(toPay) : <span className="text-neutral-black-30">—</span>}
-                </td>
-                <td className="px-4 py-2.5 text-right text-neutral-black-50">
-                  {owes > 0 ? formatCOP(owes) : <span className="text-neutral-black-30">—</span>}
-                </td>
-                <td className="px-4 py-2.5 text-right">
-                  {toPay > 0 && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-full px-2 py-0.5">
-                      <ArrowDownCircle size={11} />
-                      Pagar
-                    </span>
-                  )}
-                  {owes > 0 && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-sky-700 bg-sky-50 rounded-full px-2 py-0.5">
-                      <ArrowUpCircle size={11} />
-                      Recibir
-                    </span>
-                  )}
-                  {toPay === 0 && owes === 0 && (
-                    <span className="text-xs text-neutral-black-30">Saldado</span>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-        <tfoot>
-          <tr className="border-t-2 border-neutral-black-20 bg-neutral-black-3">
-            <td className="px-4 py-2.5 font-bold" colSpan={2}>Total</td>
-            <td className="px-4 py-2.5 text-right font-bold text-emerald-700">{formatCOP(totalToPayCouriers)}</td>
-            <td className="px-4 py-2.5 text-right font-bold text-neutral-black-80">{formatCOP(totalCourierOwes)}</td>
-            <td />
-          </tr>
-        </tfoot>
-      </table>
-    </AccordionSection>
-  );
-}
-
-function CourierCell({ name, photoURL }: { name: string; photoURL?: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      {photoURL ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={photoURL} alt={name} className="w-7 h-7 rounded-full object-cover shrink-0" />
-      ) : (
-        <div className="w-7 h-7 rounded-full bg-neutral-black-10 flex items-center justify-center shrink-0">
-          <Bike size={13} className="text-neutral-black-50" />
-        </div>
-      )}
-      <span className="font-medium">{name}</span>
+      {/* {kitchenEntries.length > 1 && (
+        <KitchenSalesSection kitchenEntries={kitchenEntries} />
+      )} */}
     </div>
   );
 }

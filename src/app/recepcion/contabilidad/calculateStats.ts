@@ -86,11 +86,11 @@ export const calculateStats = (orders: WorkerOrder[]): ContabilidadStats => {
         productsSold[key].total += (comp.price ?? 0) * cqty;
       });
     });
-
-    if (order.deliveryPrice && order.deliveryPrice > 0) {
+    console.log("Order delivery price:", order.delivery.price, "Total price:", order.totalPrice);
+    if (order.delivery.price && order.delivery.price > 0) {
       deliveryCount++;
       totalDeliverySales += order.totalPrice ?? 0;
-      totalDeliveryCost += order.deliveryPrice;
+      totalDeliveryCost += order.delivery.price;
     }
 
     if (order.assignedCourierUserId) {
@@ -109,12 +109,12 @@ export const calculateStats = (orders: WorkerOrder[]): ContabilidadStats => {
       }
       const stat = salesByCourier[order.assignedCourierUserId];
       stat.orderCount++;
-      stat.totalDelivery += order.deliveryPrice ?? 0;
+      stat.totalDelivery += order.delivery.price ?? 0;
       if ((order.paymentMethod ?? '') === 'cash') {
         stat.cashCollected += order.totalPrice ?? 0;
         stat.cashOrderCount++;
-      } else if (order.deliveryPrice && order.deliveryPrice > 0) {
-        stat.digitalDeliveryOwed += order.deliveryPrice;
+      } else if (order.delivery.price && order.delivery.price > 0) {
+        stat.digitalDeliveryOwed += order.delivery.price;
         stat.digitalOrderCount++;
       }
       stat.netToHandOver = stat.cashCollected - stat.totalDelivery;
