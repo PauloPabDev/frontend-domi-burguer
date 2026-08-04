@@ -52,7 +52,7 @@ export class AdminService {
     const response = await fetch(`${this.API_URL}api/v2/users/assignedKitchens/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ assignedKitchens: kitchenIds }),
+      body: JSON.stringify({ kitchensIds: kitchenIds }),
     });
     if (!response.ok) throw new Error('Error al actualizar cocinas');
     return response.json();

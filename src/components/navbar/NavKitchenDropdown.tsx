@@ -13,6 +13,8 @@ interface NavKitchenDropdownProps {
   onKitchenChange?: (id: string | null) => void;
   /** 'pill' → botón estilo floating nav | 'inline' → botón compacto para sticky header */
   variant?: 'pill' | 'inline';
+  /** En variant 'pill': por debajo de lg oculta el nombre de la cocina, dejando solo el ícono (el nombre sigue disponible en la lista desplegable). */
+  compact?: boolean;
 }
 
 export const NavKitchenDropdown: React.FC<NavKitchenDropdownProps> = ({
@@ -20,6 +22,7 @@ export const NavKitchenDropdown: React.FC<NavKitchenDropdownProps> = ({
   selectedKitchen,
   onKitchenChange,
   variant = 'pill',
+  compact = false,
 }) => {
   const { changeKitchen } = useSocket();
   const [isOpen, setIsOpen] = useState(false);
@@ -52,9 +55,14 @@ export const NavKitchenDropdown: React.FC<NavKitchenDropdownProps> = ({
           variant="light-outline"
           size="md"
           leftIcon={<ChefHat className="w-4 h-4 text-primary-red" />}
-          className="rounded-full h-10 lg:h-12 px-4"
+          className={cn('rounded-full h-10 lg:h-12 shrink-0', compact ? 'px-2.5 lg:px-4' : 'px-4')}
         >
-          <span className="max-w-[90px] truncate text-xs md:text-sm">
+          <span
+            className={cn(
+              'max-w-[90px] truncate text-xs md:text-sm',
+              compact && 'hidden lg:inline',
+            )}
+          >
             {selectedKitchen?.name ?? 'Cocina'}
           </span>
           <ChevronDown size={13} className="shrink-0" />

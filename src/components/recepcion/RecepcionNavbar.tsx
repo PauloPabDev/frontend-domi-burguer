@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, ElementType } from 'react';
 import { ClipboardList, Map, PlusCircle, Bike, MoreHorizontal, BarChart3, IdCard } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
@@ -19,6 +19,15 @@ interface RecepcionNavbarProps {
   kitchens?: WorkerKitchen[];
   selectedKitchen?: WorkerKitchen | null;
   onKitchenChange?: (id: string | null) => void;
+}
+
+interface NavItem {
+  key: string;
+  label: string;
+  Icon: ElementType;
+  href?: string;
+  onClick?: () => void;
+  badge?: number;
 }
 
 export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
@@ -48,17 +57,43 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [moreOpen]);
 
+  // Todos los botones de la derecha: en pantallas grandes van en línea, en
+  // pantallas chicas su contenido se colapsa dentro del dropdown "más".
+  const navItems: NavItem[] = [
+    {
+      key: 'motos',
+      label: 'MOTOS',
+      Icon: Bike,
+      onClick: openPanel,
+      badge: activeCouriers.length > 0 ? activeCouriers.length : undefined,
+    },
+    { key: 'contabilidad', label: 'CONTABILIDAD', Icon: BarChart3, href: '/recepcion/contabilidad' },
+    { key: 'mapa', label: 'MAPA', Icon: Map, href: '/recepcion/mapa' },
+    { key: 'cliente', label: 'CLIENTE', Icon: IdCard, href: '/recepcion/cliente' },
+    { key: 'crear', label: 'CREAR', Icon: PlusCircle, href: '/recepcion/nueva-orden' },
+    {
+      key: 'pedidos',
+      label: 'PEDIDOS',
+      Icon: ClipboardList,
+      href: '/recepcion',
+      badge: activeOrders.length > 0 ? activeOrders.length : undefined,
+    },
+  ];
+
+  const pendingCount = activeCouriers.length + activeOrders.length;
+
   return (
     <NavPillShell navShadow={navShadow} innerClassName="lg:max-w-none">
-      {/* Left: Avatar + Kitchen selector */}
-      <div className="flex items-center gap-2">
-        <NavWorkerAvatar />
+      {/* Left: Avatar + Kitchen selector — se reducen a solo ícono por debajo de lg */}
+      <div className="flex items-center gap-1.5 lg:gap-2 min-w-0">
+        <NavWorkerAvatar compact />
         {kitchens.length > 0 && (
           <NavKitchenDropdown
             kitchens={kitchens}
             selectedKitchen={selectedKitchen}
             onKitchenChange={onKitchenChange}
             variant="pill"
+            compact
           />
         )}
       </div>
@@ -67,62 +102,46 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
       <NavPillLogo href="/recepcion" />
 
       {/* Right: Nav buttons */}
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-end">
 
-        {/* Desktop: botones secundarios visibles en línea */}
+        {/* Desktop: todos los botones visibles en línea */}
         <div className="hidden lg:flex items-center gap-2">
-          <Button
-            variant="light-outline"
-            size="md"
-            leftIcon={<Bike className="w-5 h-5" />}
-            badge={activeCouriers.length > 0 ? activeCouriers.length : undefined}
-            onClick={openPanel}
-            className="h-12 pl-5 pr-3 text-base"
-          >
-            MOTOS
-          </Button>
-
-          <Link href="/recepcion/contabilidad" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
-            <Button
-              variant={pathname === '/recepcion/contabilidad' ? 'primary' : 'light-outline'}
-              size="md"
-              leftIcon={<BarChart3 className="w-5 h-5" />}
-              className="h-12 pl-5 pr-3 text-base"
-            >
-              CONTABILIDAD
-            </Button>
-          </Link>
-
-          <Link href="/recepcion/mapa" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
-            <Button
-              variant={pathname === '/recepcion/mapa' ? 'primary' : 'light-outline'}
-              size="md"
-              leftIcon={<Map className="w-5 h-5" />}
-              className="h-12 pl-5 pr-3 text-base"
-            >
-              MAPA
-            </Button>
-          </Link>
-
-          <Link href="/recepcion/cliente" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
-            <Button
-              variant={pathname === '/recepcion/cliente' ? 'primary' : 'light-outline'}
-              size="md"
-              leftIcon={<IdCard className="w-5 h-5" />}
-              className="h-12 pl-5 pr-3 text-base"
-            >
-              CLIENTE
-            </Button>
-          </Link>
+          {navItems.map(({ key, label, Icon, href, onClick, badge }) =>
+            href ? (
+              <Link key={key} href={href} tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
+                <Button
+                  variant={pathname === href ? 'primary' : 'light-outline'}
+                  size="md"
+                  leftIcon={<Icon className="w-5 h-5" />}
+                  badge={badge}
+                  className="h-12 pl-5 pr-3 text-base"
+                >
+                  {label}
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                key={key}
+                variant="light-outline"
+                size="md"
+                leftIcon={<Icon className="w-5 h-5" />}
+                badge={badge}
+                onClick={onClick}
+                className="h-12 pl-5 pr-3 text-base"
+              >
+                {label}
+              </Button>
+            ),
+          )}
         </div>
 
-        {/* Mobile/Tablet: dropdown "más" con los botones secundarios */}
+        {/* Mobile/Tablet: dropdown "más" con el contenido de todos los botones */}
         <div ref={moreRef} className="relative lg:hidden">
           <Button
             variant="light-outline"
             size="md"
-            leftIcon={<MoreHorizontal className="w-4 h-4 md:w-5 md:h-5" />}
-            badge={activeCouriers.length > 0 ? activeCouriers.length : undefined}
+            leftIcon={<MoreHorizontal className="w-5 h-5" />}
+            badge={pendingCount > 0 ? pendingCount : undefined}
             onClick={() => setMoreOpen((v) => !v)}
             className={cn(
               'h-10 px-3 text-sm',
@@ -132,76 +151,42 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
 
           {moreOpen && (
             <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-neutral-black-20 shadow-lg rounded-2xl py-1.5 z-50">
-              <button
-                onClick={() => { openPanel(); setMoreOpen(false); }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-neutral-black-80 hover:bg-neutral-black-10 rounded-xl transition-colors"
-              >
-                <Bike className="w-4 h-4 shrink-0" />
-                MOTOS
-                {activeCouriers.length > 0 && (
-                  <span className="ml-auto flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full text-sm font-bold bg-accent-yellow-10 text-neutral-black-80">
-                    {activeCouriers.length}
+              {navItems.map(({ key, label, Icon, href, onClick, badge }) => {
+                const isActive = href ? pathname === href : false;
+                const content = (
+                  <span
+                    className={cn(
+                      'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition-colors',
+                      isActive ? 'text-primary-red' : 'text-neutral-black-80',
+                    )}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    {label}
+                    {badge !== undefined && (
+                      <span className="ml-auto flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full text-sm font-bold bg-accent-yellow-10 text-neutral-black-80">
+                        {badge}
+                      </span>
+                    )}
                   </span>
-                )}
-              </button>
+                );
 
-              <Link href="/recepcion/contabilidad" onClick={() => setMoreOpen(false)}>
-                <span className={cn(
-                  'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold hover:bg-neutral-black-10 rounded-xl transition-colors',
-                  pathname === '/recepcion/contabilidad' ? 'text-primary-red' : 'text-neutral-black-80',
-                )}>
-                  <BarChart3 className="w-4 h-4 shrink-0" />
-                  CONTABILIDAD
-                </span>
-              </Link>
-
-              <Link href="/recepcion/mapa" onClick={() => setMoreOpen(false)}>
-                <span className={cn(
-                  'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold hover:bg-neutral-black-10 rounded-xl transition-colors',
-                  pathname === '/recepcion/mapa' ? 'text-primary-red' : 'text-neutral-black-80',
-                )}>
-                  <Map className="w-4 h-4 shrink-0" />
-                  MAPA
-                </span>
-              </Link>
-
-              <Link href="/recepcion/cliente" onClick={() => setMoreOpen(false)}>
-                <span className={cn(
-                  'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold hover:bg-neutral-black-10 rounded-xl transition-colors',
-                  pathname === '/recepcion/cliente' ? 'text-primary-red' : 'text-neutral-black-80',
-                )}>
-                  <IdCard className="w-4 h-4 shrink-0" />
-                  CLIENTE
-                </span>
-              </Link>
+                return href ? (
+                  <Link key={key} href={href} onClick={() => setMoreOpen(false)} className="block hover:bg-neutral-black-10 rounded-xl">
+                    {content}
+                  </Link>
+                ) : (
+                  <button
+                    key={key}
+                    onClick={() => { onClick?.(); setMoreOpen(false); }}
+                    className="w-full text-left hover:bg-neutral-black-10 rounded-xl transition-colors"
+                  >
+                    {content}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
-
-        {/* CREAR — siempre visible */}
-        <Link href="/recepcion/nueva-orden" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
-          <Button
-            variant={pathname === '/recepcion/nueva-orden' ? 'primary' : 'light-outline'}
-            size="md"
-            leftIcon={<PlusCircle className="w-4 h-4 md:w-5 md:h-5" />}
-            className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
-          >
-            <span className="hidden sm:inline">CREAR</span>
-          </Button>
-        </Link>
-
-        {/* PEDIDOS — siempre visible */}
-        <Link href="/recepcion" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
-          <Button
-            variant={pathname === '/recepcion' ? 'primary' : 'light-outline'}
-            size="md"
-            leftIcon={<ClipboardList className="w-4 h-4 md:w-5 md:h-5" />}
-            badge={activeOrders.length > 0 ? activeOrders.length : undefined}
-            className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
-          >
-            <span className="hidden sm:inline">PEDIDOS</span>
-          </Button>
-        </Link>
       </div>
     </NavPillShell>
   );
