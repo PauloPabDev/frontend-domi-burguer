@@ -15,7 +15,7 @@ import { MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
 
-const MAP_STATUSES: OrderStatus[] = ['fresh', 'preparing', 'ready_for_pickup', 'dispatched'];
+const MAP_STATUSES: OrderStatus[] = ['fresh', 'preparing', 'ready_for_pickup', 'dispatched', 'delivered',];
 
 export default function RecepcionMapaPage() {
   const { user } = useAuth();

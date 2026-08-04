@@ -1,10 +1,11 @@
 import {
-  AlertTriangle, Bike, DollarSign, Package, ShoppingBag, TrendingUp,
+  AlertTriangle, DollarSign, Package, ShoppingBag, TrendingUp,
 } from 'lucide-react';
 import { WorkerOrder } from '@/types/worker';
 import type { ContabilidadStats } from '../calculateStats';
 import { formatCOP } from '../utils';
 import { StatCard } from './StatCard';
+import { CourierSummaryCard } from './CourierSummaryCard';
 import { PaymentMethodSection } from './PaymentMethodSection';
 import { ProductsSoldSection } from './ProductsSoldSection';
 import { CourierDeliverySection } from './CourierDeliverySection';
@@ -25,6 +26,8 @@ export function StatsSection({ stats, orders }: StatsSectionProps) {
   );
   const paymentEntries = Object.entries(stats.salesByPaymentMethod);
   const courierEntries = Object.entries(stats.salesByCourier);
+  const totalAssignedOrdersAll = courierEntries.reduce((sum, [, data]) => sum + data.totalAssignedOrders, 0);
+  const totalAssignedDeliveryAll = courierEntries.reduce((sum, [, data]) => sum + data.totalAssignedDelivery, 0);
   // const kitchenEntries = Object.entries(stats.salesByKitchen); // usado por <KitchenSalesSection>, deshabilitada abajo
 
   return (
@@ -63,24 +66,28 @@ export function StatsSection({ stats, orders }: StatsSectionProps) {
         />
       </div>
 
-      {/* Domicilios: total + desglose por domiciliario */}
-      {stats.deliveryCount > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard
-            icon={Bike}
+      {/* Domicilios: total + desglose por domiciliario (facturado vs. total asignado, sin eliminados) */}
+      {courierEntries.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <CourierSummaryCard
             title="Total domicilios"
-            value={formatCOP(stats.totalDeliveryCost)}
-            sub={`${stats.deliveryCount} domicilios · ${courierEntries.length} domiciliario(s)`}
+            subtitle={`${courierEntries.length} domiciliario(s)`}
+            invoicedValue={stats.totalDeliveryCost}
+            invoicedCount={stats.deliveryCount}
+            totalValue={totalAssignedDeliveryAll}
+            totalCount={totalAssignedOrdersAll}
             iconBg="bg-blue-100"
             iconColor="text-blue-600"
           />
           {courierEntries.map(([id, data]) => (
-            <StatCard
+            <CourierSummaryCard
               key={id}
-              icon={Bike}
               title={data.name}
-              value={formatCOP(data.totalDelivery)}
-              sub={`${data.orderCount} domicilio${data.orderCount !== 1 ? 's' : ''}`}
+              photoURL={data.photoURL}
+              invoicedValue={data.totalDelivery}
+              invoicedCount={data.orderCount}
+              totalValue={data.totalAssignedDelivery}
+              totalCount={data.totalAssignedOrders}
               iconBg="bg-blue-50"
               iconColor="text-blue-500"
             />

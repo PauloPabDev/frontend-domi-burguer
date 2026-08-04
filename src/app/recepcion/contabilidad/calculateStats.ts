@@ -17,6 +17,10 @@ export interface CourierStat {
   netToHandOver: number;
   digitalDeliveryOwed: number;
   digitalOrderCount: number;
+  /** Todos los pedidos asignados al domiciliario, facturados o no (excluye cancelados/eliminados). */
+  totalAssignedOrders: number;
+  /** Suma del costo de domicilio de todos los pedidos asignados, facturados o no. */
+  totalAssignedDelivery: number;
 }
 
 export interface KitchenStat {
@@ -46,7 +50,8 @@ export interface ContabilidadStats {
 }
 
 export const calculateStats = (orders: WorkerOrder[]): ContabilidadStats => {
-  const invoiced = orders.filter((o) => o.status === 'invoiced');
+  const active = orders.filter((o) => o.status !== 'cancelled');
+  const invoiced = active.filter((o) => o.status === 'invoiced');
   let totalSales = 0;
   let totalProductsSold = 0;
   let deliveryCount = 0;
@@ -57,6 +62,35 @@ export const calculateStats = (orders: WorkerOrder[]): ContabilidadStats => {
   const productsSold: Record<string, ProductStat> = {};
   const salesByCourier: Record<string, CourierStat> = {};
   const salesByKitchen: Record<string, KitchenStat> = {};
+
+  const ensureCourierStat = (order: WorkerOrder) => {
+    const courierId = order.assignedCourierUserId;
+    if (!courierId) return null;
+    if (!salesByCourier[courierId]) {
+      salesByCourier[courierId] = {
+        name: order.courier?.name || 'Desconocido',
+        photoURL: order.courier?.photoURL,
+        orderCount: 0,
+        totalDelivery: 0,
+        cashCollected: 0,
+        cashOrderCount: 0,
+        netToHandOver: 0,
+        digitalDeliveryOwed: 0,
+        digitalOrderCount: 0,
+        totalAssignedOrders: 0,
+        totalAssignedDelivery: 0,
+      };
+    }
+    return salesByCourier[courierId];
+  };
+
+  // Resumen rápido: todos los domicilios asignados, facturados o no (solo se excluyen los cancelados/eliminados).
+  active.forEach((order) => {
+    const stat = ensureCourierStat(order);
+    if (!stat) return;
+    stat.totalAssignedOrders++;
+    stat.totalAssignedDelivery += order.delivery?.price ?? 0;
+  });
 
   invoiced.forEach((order) => {
     totalSales += order.totalPrice ?? 0;
@@ -94,20 +128,7 @@ export const calculateStats = (orders: WorkerOrder[]): ContabilidadStats => {
     }
 
     if (order.assignedCourierUserId) {
-      if (!salesByCourier[order.assignedCourierUserId]) {
-        salesByCourier[order.assignedCourierUserId] = {
-          name: order.courier?.name || 'Desconocido',
-          photoURL: order.courier?.photoURL,
-          orderCount: 0,
-          totalDelivery: 0,
-          cashCollected: 0,
-          cashOrderCount: 0,
-          netToHandOver: 0,
-          digitalDeliveryOwed: 0,
-          digitalOrderCount: 0,
-        };
-      }
-      const stat = salesByCourier[order.assignedCourierUserId];
+      const stat = ensureCourierStat(order)!;
       stat.orderCount++;
       stat.totalDelivery += order.delivery.price ?? 0;
       if ((order.paymentMethod ?? '') === 'cash') {
