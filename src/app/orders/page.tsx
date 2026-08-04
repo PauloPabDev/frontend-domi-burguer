@@ -1,16 +1,19 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useOrders } from "@/hooks/useOrders";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Package } from "lucide-react";
+import { Loader2, Package, ChevronRight } from "lucide-react";
 import { Order, OrderItem } from "@/types/orders";
-import { OrderService } from "@/services/orderService";
 import { useRouter } from "next/navigation";
 import { useCartStore, CartItem } from "@/store/cartStore";
 import { generateCartItemId } from "@/lib/utils";
+import { formatDateTime } from "@/lib/dates";
+import { formatCOP } from "@/components/ui/OrderItemsList";
 import Image from "next/image";
+import Link from "next/link";
+import { OrderStatusBanner } from "./[id]/OrderStatusBanner";
+import { OrderSummaryPanel } from "./[id]/OrderSummaryPanel";
 
 export default function OrdersPage() {
     const { orders, loading, error } = useOrders();
@@ -52,26 +55,26 @@ export default function OrdersPage() {
 
     if (!user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 mt-[130px]">
-                <Card className="w-full max-w-md p-8 text-center">
-                    <h1 className="text-2xl font-bold mb-4">Inicia sesión</h1>
-                    <p className="text-gray-600 mb-6">
+            <div className="min-h-screen flex items-center justify-center mt-[130px] px-4">
+                <div className="w-full max-w-md text-center flex flex-col items-center gap-4">
+                    <h1>Inicia sesión</h1>
+                    <p className="body-font text-neutral-black-50">
                         Debes iniciar sesión para ver tus pedidos
                     </p>
-                    <Button onClick={() => router.push('/login')} className="w-full">
-                        Iniciar Sesión
+                    <Button variant="primary" onClick={() => router.push('/login')} fullWidth>
+                        Iniciar sesión
                     </Button>
-                </Card>
+                </div>
             </div>
         );
     }
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 mt-[130px]">
+            <div className="min-h-screen flex items-center justify-center mt-[130px]">
                 <div className="text-center">
-                    <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4" />
-                    <p className="text-gray-600">Cargando tus pedidos...</p>
+                    <Loader2 className="animate-spin h-8 w-8 mx-auto mb-3 text-primary-red" />
+                    <p className="body-font text-neutral-black-50">Cargando tus pedidos...</p>
                 </div>
             </div>
         );
@@ -79,52 +82,48 @@ export default function OrdersPage() {
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 mt-[130px]">
-                <Card className="w-full max-w-md p-8 text-center">
-                    <h1 className="text-2xl font-bold mb-4 text-red-600">Error</h1>
-                    <p className="text-gray-600 mb-6">{error}</p>
-                    <Button onClick={() => window.location.reload()} className="w-full">
+            <div className="min-h-screen flex items-center justify-center mt-[130px] px-4">
+                <div className="w-full max-w-md text-center flex flex-col items-center gap-4">
+                    <h1 className="text-primary-red">Error</h1>
+                    <p className="body-font text-neutral-black-50">{error}</p>
+                    <Button variant="primary" onClick={() => window.location.reload()} fullWidth>
                         Reintentar
                     </Button>
-                </Card>
+                </div>
             </div>
         );
     }
 
     if (orders.length === 0) {
         return (
-            <div className="min-h-screen bg-gray-50 mt-[130px]">
-                <div className="max-w-4xl mx-auto px-4 py-8">
-                    <h1 className="text-xl font-bold mb-8 uppercase">Mis Pedidos</h1>
-                    <Card className="p-12 text-center">
-                        <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                        <h2 className="text-xl font-semibold mb-2">No tienes pedidos aún</h2>
-                        <p className="text-gray-600 mb-6">
-                            Cuando realices tu primer pedido, aparecerá aquí
-                        </p>
-                        <Button onClick={() => router.push('/')} className="w-full max-w-xs">
-                            Hacer un Pedido
-                        </Button>
-                    </Card>
+            <div className="min-h-screen mt-[130px] px-4">
+                <div className="max-w-md mx-auto py-16 text-center flex flex-col items-center gap-4">
+                    <Package className="w-16 h-16 text-neutral-black-30" />
+                    <h1>Aún no tienes pedidos</h1>
+                    <p className="body-font text-neutral-black-50">
+                        Cuando hagas tu primer pedido, aparecerá aquí con todo el detalle.
+                    </p>
+                    <Button variant="primary" onClick={() => router.push('/')} className="w-full max-w-xs">
+                        Hacer un pedido
+                    </Button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-white mt-[130px]">
-            <div className="max-w-4xl mx-auto px-4 py-8">
-                <h1 className="text-xl font-bold mb-6 uppercase">Mis Pedidos</h1>
+        <div className="min-h-screen mt-[130px] mb-[100px] px-4">
+            <div className="max-w-[560px] mx-auto flex flex-col gap-12 py-8">
+                <h1>MIS PEDIDOS</h1>
 
-                <div className="divide-y divide-gray-200">
-                    {orders.map((order) => (
-                        <OrderCard
-                            key={order.id}
-                            order={order}
-                            onReorder={() => handleReorder(order)}
-                        />
-                    ))}
-                </div>
+                {orders.map((order, index) => (
+                    <div key={order.id} className="flex flex-col gap-12">
+                        {index > 0 && (
+                            <div className="border-t border-dashed border-neutral-black-20" />
+                        )}
+                        <OrderTicket order={order} onReorder={() => handleReorder(order)} />
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -135,16 +134,16 @@ interface ProductImagesProps {
 }
 
 function ProductImages({ items }: ProductImagesProps) {
-    const maxVisible = 2;
+    const maxVisible = 3;
     const visibleItems = items.slice(0, maxVisible);
     const remainingCount = items.length - maxVisible;
 
     return (
-        <div className="flex items-center -space-x-3">
+        <div className="flex items-center -space-x-3 shrink-0">
             {visibleItems.map((item, index) => (
                 <div
                     key={item.id}
-                    className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 border-2 border-white shadow-sm"
+                    className="relative w-14 h-14 rounded-[12px] overflow-hidden bg-accent-yellow-40 border-2 border-white shadow-sm"
                     style={{ zIndex: maxVisible - index }}
                 >
                     {item.image1 ? (
@@ -156,7 +155,7 @@ function ProductImages({ items }: ProductImagesProps) {
                             sizes="56px"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <div className="w-full h-full flex items-center justify-center text-neutral-black-50">
                             <Package className="w-6 h-6" />
                         </div>
                     )}
@@ -164,10 +163,10 @@ function ProductImages({ items }: ProductImagesProps) {
             ))}
             {remainingCount > 0 && (
                 <div
-                    className="relative w-14 h-14 rounded-lg bg-gray-100 border-2 border-white shadow-sm flex items-center justify-center"
+                    className="relative w-14 h-14 rounded-[12px] bg-neutral-black-10 border-2 border-white shadow-sm flex items-center justify-center"
                     style={{ zIndex: 0 }}
                 >
-                    <span className="text-sm font-semibold text-gray-600">
+                    <span className="text-sm font-bold text-neutral-black-80">
                         +{remainingCount}
                     </span>
                 </div>
@@ -176,45 +175,44 @@ function ProductImages({ items }: ProductImagesProps) {
     );
 }
 
-interface OrderCardProps {
+interface OrderTicketProps {
     order: Order;
     onReorder: () => void;
 }
 
-function OrderCard({ order, onReorder }: OrderCardProps) {
-    const statusInfo = OrderService.getOrderStatusInfo(order.status);
+function OrderTicket({ order, onReorder }: OrderTicketProps) {
+    const canReorder = order.status === 'delivered' || order.status === 'invoiced';
 
     return (
-        <div className="flex items-center justify-between py-4 gap-4">
-            <div className="flex items-center gap-4">
-                <ProductImages items={order.orderItems} />
-
-                <div className="flex flex-col">
-                    <span className="font-semibold text-sm uppercase">
-                        Pedido N° {order.orderNumber}
-                    </span>
-                    <span className="font-bold text-base">
-                        ${(order.totalPrice ?? 0).toLocaleString('es-CO')}
-                    </span>
+        <div className="flex flex-col gap-4 w-full">
+            <Link
+                href={`/orders/${order.id}`}
+                className="flex items-center justify-between gap-4 w-full group"
+            >
+                <div className="flex items-center gap-3 min-w-0">
+                    <ProductImages items={order.orderItems} />
+                    <div className="flex flex-col min-w-0">
+                        <h4 className="truncate">Pedido N° {order.orderNumber}</h4>
+                        <span className="body-font text-neutral-black-50 text-xs md:text-sm">
+                            {formatDateTime(order.createdAt)}
+                        </span>
+                    </div>
                 </div>
-            </div>
+                <div className="flex items-center gap-1 shrink-0">
+                    <h4>{formatCOP(order.totalPrice ?? 0)}</h4>
+                    <ChevronRight className="w-4 h-4 text-neutral-black-50 transition-transform group-hover:translate-x-0.5" />
+                </div>
+            </Link>
 
-            <div className="flex items-center">
-                {statusInfo.isButton ? (
-                    <button
-                        onClick={onReorder}
-                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase ${statusInfo.bgColor} ${statusInfo.color} border ${statusInfo.borderColor} transition-opacity hover:opacity-90`}
-                    >
-                        {statusInfo.label}
-                    </button>
-                ) : (
-                    <span
-                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase ${statusInfo.bgColor} ${statusInfo.color} border ${statusInfo.borderColor}`}
-                    >
-                        {statusInfo.label}
-                    </span>
-                )}
-            </div>
+            <OrderStatusBanner status={order.status} />
+
+            <OrderSummaryPanel order={order} />
+
+            {canReorder && (
+                <Button variant="primary" onClick={onReorder} fullWidth>
+                    Comprar de nuevo
+                </Button>
+            )}
         </div>
     );
 }
