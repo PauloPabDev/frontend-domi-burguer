@@ -102,6 +102,18 @@ export class WorkerOrderService {
     return response.json();
   }
 
+  static async markPaymentPending(
+    token: string,
+    orderId: string
+  ): Promise<{ body: WorkerOrder }> {
+    const response = await fetch(`${this.API_URL}api/v2/orders/payment/${orderId}?status=pending`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Error al marcar el pago como pendiente');
+    return response.json();
+  }
+
   static async getOrdersByClientId(
     token: string,
     clientId: string,

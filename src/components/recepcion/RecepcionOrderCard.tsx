@@ -37,6 +37,7 @@ interface RecepcionOrderCardProps {
   onDelete: (orderId: string) => Promise<void>;
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid?: (orderId: string) => Promise<void>;
+  onMarkPending?: (orderId: string) => Promise<void>;
 }
 
 export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
@@ -48,6 +49,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   onDelete,
   onPaymentMethodChange,
   onMarkPaid,
+  onMarkPending,
 }) => {
   const [showOrderMenu, setShowOrderMenu] = useState(false);
   const [showCourierModal, setShowCourierModal] = useState(false);
@@ -182,6 +184,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           onClose={() => setShowOrderMenu(false)}
           onOpenKitchenModal={() => setShowKitchenModal(true)}
           onDelete={() => onDelete(order.id)}
+          onMarkPending={onMarkPending ? () => onMarkPending(order.id) : undefined}
         />
       )}
 

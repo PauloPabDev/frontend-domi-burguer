@@ -16,6 +16,7 @@ interface OrderKanbanColumnProps {
   onDelete: (orderId: string) => Promise<void>;
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid?: (orderId: string) => Promise<void>;
+  onMarkPending?: (orderId: string) => Promise<void>;
 }
 
 function blend(a: number, b: number, t: number) {
@@ -32,6 +33,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   onDelete,
   onPaymentMethodChange,
   onMarkPaid,
+  onMarkPending,
 }) => {
   const cfg = STATUS_CONFIG[status];
   const isEmpty = orders.length === 0;
@@ -101,6 +103,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
               onDelete={onDelete}
               onPaymentMethodChange={onPaymentMethodChange}
               onMarkPaid={onMarkPaid}
+              onMarkPending={onMarkPending}
             />
           ))}
         </div>

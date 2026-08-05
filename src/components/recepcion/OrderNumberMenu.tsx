@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChefHat, Copy, Check, Trash2, Loader2, X } from 'lucide-react';
+import { ChefHat, Copy, Check, Trash2, Clock, Loader2, X } from 'lucide-react';
 import { WorkerOrder } from '@/types/worker';
 import { OrderStatusTimeline } from '@/components/ui/OrderStatusTimeline';
 import { cn } from '@/lib/utils';
@@ -12,17 +12,30 @@ export interface OrderNumberMenuProps {
   onClose: () => void;
   onOpenKitchenModal: () => void;
   onDelete: () => Promise<void>;
+  onMarkPending?: () => Promise<void>;
 }
 
-export function OrderNumberMenu({ order, onClose, onOpenKitchenModal, onDelete }: OrderNumberMenuProps) {
+export function OrderNumberMenu({ order, onClose, onOpenKitchenModal, onDelete, onMarkPending }: OrderNumberMenuProps) {
   const [copied, setCopied] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [markingPending, setMarkingPending] = useState(false);
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(order.id);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleMarkPending = async () => {
+    if (!onMarkPending || markingPending) return;
+    setMarkingPending(true);
+    try {
+      await onMarkPending();
+      onClose();
+    } finally {
+      setMarkingPending(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -87,6 +100,22 @@ export function OrderNumberMenu({ order, onClose, onOpenKitchenModal, onDelete }
             </span>
             Cambiar cocina
           </button>
+
+          {onMarkPending && order.payment?.status !== 'pending' && (
+            <button
+              type="button"
+              onClick={handleMarkPending}
+              disabled={markingPending}
+              className="flex items-center gap-3 px-4 py-3.5 text-sm font-medium text-neutral-black-80 hover:bg-neutral-50 transition-colors text-left disabled:opacity-60"
+            >
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-50 shrink-0">
+                {markingPending
+                  ? <Loader2 size={15} className="text-amber-600 animate-spin" />
+                  : <Clock size={15} className="text-amber-600" />}
+              </span>
+              Marcar pago pendiente
+            </button>
+          )}
 
           {confirming && (
             <button

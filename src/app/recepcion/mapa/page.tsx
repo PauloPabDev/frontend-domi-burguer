@@ -104,6 +104,12 @@ export default function RecepcionMapaPage() {
     await WorkerOrderService.markPaid(token, orderId);
   };
 
+  const handleMarkPending = async (orderId: string) => {
+    if (!user) return;
+    const token = await user.getIdToken();
+    await WorkerOrderService.markPaymentPending(token, orderId);
+  };
+
   const handleDeleteOrder = async (orderId: string) => {
     if (!user) return;
     const token = await user.getIdToken();
@@ -199,6 +205,7 @@ export default function RecepcionMapaPage() {
                   onDelete={handleDeleteOrder}
                   onPaymentMethodChange={handlePaymentMethodChange}
                   onMarkPaid={handleMarkPaid}
+                  onMarkPending={handleMarkPending}
                 />
               </div>
             ))}

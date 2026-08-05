@@ -96,6 +96,18 @@ export default function RecepcionPage() {
     }
   };
 
+  const handleMarkPending = async (orderId: string) => {
+    if (!user) return;
+    try {
+      const token = await user.getIdToken();
+      await WorkerOrderService.markPaymentPending(token, orderId);
+      notify.success('Pago marcado como pendiente', 'El pago fue revertido a pendiente.');
+    } catch (e) {
+      notify.error('Error al marcar el pago como pendiente', e instanceof Error ? e.message : undefined);
+      throw e;
+    }
+  };
+
   const handleDeleteOrder = async (orderId: string) => {
     if (!user) return;
     try {
@@ -125,6 +137,7 @@ export default function RecepcionPage() {
               onDelete={handleDeleteOrder}
               onPaymentMethodChange={handlePaymentMethodChange}
               onMarkPaid={handleMarkPaid}
+              onMarkPending={handleMarkPending}
             />
           ))}
         </div>
