@@ -56,7 +56,7 @@ export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsLi
             </ColoredPill>
 
             {/* Col 3: precio */}
-            <span className="text-sm font-medium text-neutral-black-50 shrink-0">
+            <span className="text-sm font-medium text-neutral-black-100 shrink-0">
               {formatCOP(item.price * item.quantity)}
             </span>
           </div>
@@ -75,10 +75,10 @@ export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsLi
                       {c.quantity}
                     </span>
                     {/* Col 2: nombre complemento */}
-                    <span className="text-base font-bold text-neutral-black-50 truncate ">{c.name} {c.codes ? '(' + c.codes.join(', ') + ')' : ''}</span>
+                    <span className="text-base font-bold text-neutral-black-100 truncate ">{c.name} {c.codes ? '(' + c.codes.join(', ') + ')' : ''}</span>
                   </ColoredPill>
                   {/* Col 3: precio complemento */}
-                  <span className="text-xs text-neutral-black-50 shrink-0">
+                  <span className="text-xs text-neutral-black-100 shrink-0">
                     {formatCOP(c.price * (c.quantity || 1))}
                   </span>
                 </div>
@@ -91,7 +91,7 @@ export function OrderItemsList({ items, className, deliveryPrice }: OrderItemsLi
       {deliveryPrice !== undefined && (
         <li className="flex items-center gap-2 pt-2 border-t border-neutral-black-20">
           <span className="flex-1 text-sm font-semibold text-neutral-black-80">Domicilio</span>
-          <span className="text-xs text-neutral-black-50 shrink-0">{formatCOP(deliveryPrice)}</span>
+          <span className="text-xs text-neutral-black-100 shrink-0">{formatCOP(deliveryPrice)}</span>
         </li>
       )}
     </ul>

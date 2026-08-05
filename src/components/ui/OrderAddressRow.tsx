@@ -123,10 +123,10 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
             </p>
             {location?.propertyType && (
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-neutral-black-50">
+                <span className="text-neutral-black-100">
                   {PROPERTY_ICONS[location.propertyType]}
                 </span>
-                <span className="text-xs text-neutral-black-50">
+                <span className="text-xs text-neutral-black-100">
                   {PROPERTY_LABELS[location.propertyType]}
                 </span>
               </div>
@@ -137,7 +137,7 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
             onClick={handleClose}
             className="p-1.5 rounded-full hover:bg-neutral-black-10 transition-colors shrink-0 ml-3"
           >
-            <X size={16} className="text-neutral-black-50" />
+            <X size={16} className="text-neutral-black-100" />
           </button>
         </div>
 
@@ -149,12 +149,12 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
               <MapPin size={15} className="text-primary-red" />
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-neutral-black-50 uppercase tracking-wide mb-1">
+              <p className="text-xs font-semibold text-neutral-black-100 uppercase tracking-wide mb-1">
                 Dirección
               </p>
               <p className="text-sm text-neutral-black-80 leading-snug">{displayAddress}</p>
               {displayFloor && (
-                <p className="text-xs text-neutral-black-50 mt-1">
+                <p className="text-xs text-neutral-black-100 mt-1">
                   Piso / Apto: <span className="font-medium">{displayFloor}</span>
                 </p>
               )}
@@ -168,7 +168,7 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
                 <MessageSquare size={15} className="text-amber-500" />
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-neutral-black-50 uppercase tracking-wide mb-1">
+                <p className="text-xs font-semibold text-neutral-black-100 uppercase tracking-wide mb-1">
                   Comentarios
                 </p>
                 <p className="text-sm text-neutral-black-80 leading-snug">{location.comment}</p>
@@ -187,7 +187,7 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-black-10 shrink-0">
               {copied
                 ? <Check size={15} className="text-green-600" />
-                : <Copy size={15} className="text-neutral-black-50" />}
+                : <Copy size={15} className="text-neutral-black-100" />}
             </span>
             {copied ? 'Dirección copiada' : 'Copiar dirección'}
           </button>
@@ -220,11 +220,11 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
             className="flex items-center gap-3 px-5 py-3.5 text-left opacity-50 cursor-not-allowed"
           >
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-black-10 shrink-0">
-              <Clock size={15} className="text-neutral-black-50" />
+              <Clock size={15} className="text-neutral-black-100" />
             </span>
             <div>
               <p className="text-sm font-medium text-neutral-black-80">Historial de dirección</p>
-              <p className="text-xs text-neutral-black-50">Próximamente</p>
+              <p className="text-xs text-neutral-black-100">Próximamente</p>
             </div>
           </button>
 
@@ -234,11 +234,11 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
             className="flex items-center gap-3 px-5 py-3.5 text-left opacity-50 cursor-not-allowed"
           >
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-black-10 shrink-0">
-              <Camera size={15} className="text-neutral-black-50" />
+              <Camera size={15} className="text-neutral-black-100" />
             </span>
             <div>
               <p className="text-sm font-medium text-neutral-black-80">Fotos del lugar</p>
-              <p className="text-xs text-neutral-black-50">Próximamente</p>
+              <p className="text-xs text-neutral-black-100">Próximamente</p>
             </div>
           </button>
         </div>
@@ -282,7 +282,7 @@ export function OrderAddressRow({
     return (
       <>
         <div className={cn('flex items-center gap-1.5', className)}>
-          <MapPin size={11} className="text-neutral-black-50 shrink-0" />
+          <MapPin size={11} className="text-neutral-black-100 shrink-0" />
           <p className="text-sm font-bold text-neutral-black-80 line-clamp-1 flex-1 min-w-0">{displayAddress}</p>
           <button
             type="button"
@@ -290,7 +290,7 @@ export function OrderAddressRow({
             title="Más opciones"
             className="flex items-center justify-center w-5 h-5 rounded-md hover:bg-neutral-black-10 transition-colors shrink-0"
           >
-            <MoreHorizontal size={12} className="text-neutral-black-40" />
+            <MoreHorizontal size={12} className="text-neutral-black-100" />
           </button>
         </div>
 
@@ -343,7 +343,7 @@ export function OrderAddressRow({
             title="Más opciones"
             className="flex items-center justify-center w-9 h-9 rounded-lg hover:bg-neutral-black-10 transition-colors"
           >
-            <MoreHorizontal size={22} className="text-neutral-black-50" />
+            <MoreHorizontal size={22} className="text-neutral-black-100" />
           </button>
           {hasCoords && (
             <button

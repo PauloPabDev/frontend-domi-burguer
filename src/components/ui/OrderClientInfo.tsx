@@ -37,14 +37,14 @@ export function OrderClientInfo({
           {phone && (
             <a
               href={`tel:${phone}`}
-              className="flex items-center gap-1 text-xs text-neutral-black-50 hover:text-primary-red"
+              className="flex items-center gap-1 text-xs text-neutral-black-100 hover:text-primary-red"
               onClick={onPhoneClick}
             >
               <Phone size={phoneIconSize} />
               {phone}
             </a>
           )}
-          {time && <span className="text-[10px] text-neutral-black-50">{time}</span>}
+          {time && <span className="text-[10px] text-neutral-black-100">{time}</span>}
         </div>
       )}
     </div>

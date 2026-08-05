@@ -67,7 +67,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
       <div className={SECTION}>
         <OrderItemsList items={order.orderItems} deliveryPrice={order.deliveryPrice} />
         {order.comment && (
-          <p className="mt-2 text-xs text-neutral-black-50 italic border-l-2 border-neutral-black-20 pl-2">
+          <p className="mt-2 text-xs text-neutral-black-100 italic border-l-2 border-neutral-black-20 pl-2">
             {order.comment}
           </p>
         )}

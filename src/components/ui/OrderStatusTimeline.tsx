@@ -40,7 +40,7 @@ export function OrderStatusTimeline({ status, timeLapseStatus = [] }: OrderStatu
 
   return (
     <div className="px-4 py-3 border-b border-neutral-100">
-      <p className="text-[10px] font-semibold text-neutral-black-50 uppercase tracking-wide mb-3">
+      <p className="text-[10px] font-semibold text-neutral-black-100 uppercase tracking-wide mb-3">
         Línea de tiempo
       </p>
       <div>
@@ -67,7 +67,7 @@ export function OrderStatusTimeline({ status, timeLapseStatus = [] }: OrderStatu
                 <div className="flex items-baseline justify-between w-full gap-2">
                   <p className={cn(
                     'text-xs leading-tight',
-                    state === 'done' && 'font-medium text-neutral-black-50',
+                    state === 'done' && 'font-medium text-neutral-black-100',
                     state === 'current' && `font-bold ${cfg.color}`,
                     state === 'pending' && 'font-normal text-neutral-300',
                   )}>
@@ -76,7 +76,7 @@ export function OrderStatusTimeline({ status, timeLapseStatus = [] }: OrderStatu
                   {time && (
                     <span className={cn(
                       'text-[10px] tabular-nums shrink-0',
-                      state === 'current' ? cfg.color : 'text-neutral-black-40',
+                      state === 'current' ? cfg.color : 'text-neutral-black-100',
                     )}>
                       {formatTime(time)}
                     </span>
@@ -92,7 +92,7 @@ export function OrderStatusTimeline({ status, timeLapseStatus = [] }: OrderStatu
                   <div className="flex-1 flex items-center gap-2">
                     <hr className="flex-1 border-neutral-100" />
                     {diff !== null && (
-                      <span className="text-[9px] font-medium text-neutral-black-30 shrink-0">
+                      <span className="text-[9px] font-medium text-neutral-black-100 shrink-0">
                         {diff === 0 ? '< 1 min' : `${diff} min`}
                       </span>
                     )}

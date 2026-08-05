@@ -149,7 +149,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
             ref={courierButtonRef}
             type="button"
             onClick={() => setShowCourierModal((prev) => !prev)}
-            className="flex items-center gap-2 text-xs text-neutral-black-50 hover:text-primary-red border border-neutral-black-20 rounded-xl px-3 py-2 transition-colors shrink-0"
+            className="flex items-center gap-2 text-xs text-neutral-black-100 hover:text-primary-red border border-neutral-black-20 rounded-xl px-3 py-2 transition-colors shrink-0"
           >
             {order.courier?.photoURL ? (
               <img

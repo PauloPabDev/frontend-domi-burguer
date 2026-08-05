@@ -52,14 +52,14 @@ function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientA
           />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-neutral-black-80 truncate">{name ?? 'Cliente'}</p>
-            {phone && <p className="text-xs text-neutral-black-50">{phone}</p>}
+            {phone && <p className="text-xs text-neutral-black-100">{phone}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
             className="shrink-0 p-1 rounded-full hover:bg-neutral-100 transition-colors"
           >
-            <X size={16} className="text-neutral-black-50" />
+            <X size={16} className="text-neutral-black-100" />
           </button>
         </div>
 
@@ -230,7 +230,7 @@ interface OrderTimeChipProps {
 
 export function OrderTimeChip({ time, className }: OrderTimeChipProps) {
   return (
-    <span className={cn('text-xs font-semibold text-neutral-black-50 shrink-0', className)}>
+    <span className={cn('text-xs font-semibold text-neutral-black-100 shrink-0', className)}>
       {time}
     </span>
   );

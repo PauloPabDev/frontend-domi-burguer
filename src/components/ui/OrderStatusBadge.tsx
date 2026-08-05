@@ -9,7 +9,7 @@ interface OrderStatusBadgeProps {
 
 const FALLBACK_CONFIG = {
   label: 'Desconocido',
-  color: 'text-neutral-black-50',
+  color: 'text-neutral-black-100',
   bg: 'bg-neutral-black-10',
   dotColor: 'bg-neutral-black-50',
   hex: '#808080',

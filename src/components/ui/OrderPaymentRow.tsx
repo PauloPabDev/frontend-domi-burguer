@@ -106,7 +106,7 @@ export function OrderPaymentRow({
     <div className={cn('relative', withBorderTop && 'border-t border-neutral-black-10 pt-2', className)}>
       {isLoading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/70 backdrop-blur-[1px]">
-          <Loader2 size={18} className="text-neutral-black-50 animate-spin" />
+          <Loader2 size={18} className="text-neutral-black-100 animate-spin" />
         </div>
       )}
       <div className="flex items-center justify-between">
@@ -125,12 +125,12 @@ export function OrderPaymentRow({
           {currentLogo ? (
             <Image src={currentLogo.src} alt={currentLogo.alt} width={22} height={22} className="object-contain rounded-sm shrink-0" />
           ) : (
-            <CreditCard size={18} className="text-neutral-black-50 shrink-0" />
+            <CreditCard size={18} className="text-neutral-black-100 shrink-0" />
           )}
           <span
             className={cn(
               'text-base font-bold',
-              muted ? 'text-neutral-black-50' : 'text-neutral-black-80',
+              muted ? 'text-neutral-black-100' : 'text-neutral-black-80',
             )}
           >
             {PAYMENT_LABELS[paymentMethod] ?? paymentMethod}
@@ -150,7 +150,7 @@ export function OrderPaymentRow({
 
       {cashChange && !paid && (
         <div className="flex items-center justify-between mt-1.5">
-          <span className="text-sm text-neutral-black-50">Con {formatCOP(cashChange.bill)}</span>
+          <span className="text-sm text-neutral-black-100">Con {formatCOP(cashChange.bill)}</span>
           <span className="text-sm font-semibold text-amber-600">Devolver {formatCOP(cashChange.change)}</span>
         </div>
       )}
@@ -160,7 +160,7 @@ export function OrderPaymentRow({
         <button
           type="button"
           onClick={() => setConfirmingPaid(true)}
-          className="w-full mt-2 py-1 rounded-lg border border-neutral-black-10 text-xs text-neutral-black-40 hover:border-neutral-black-20 hover:text-neutral-black-60 transition-colors"
+          className="w-full mt-2 py-1 rounded-lg border border-neutral-black-10 text-xs text-neutral-black-100 hover:border-neutral-black-20 hover:text-neutral-black-60 transition-colors"
         >
           Confirmar pago
         </button>
@@ -173,7 +173,7 @@ export function OrderPaymentRow({
             type="button"
             onClick={() => setConfirmingPaid(false)}
             disabled={loadingPaid}
-            className="flex-1 py-1.5 rounded-lg bg-neutral-black-5 text-neutral-black-50 text-xs font-semibold hover:bg-neutral-black-10 transition-colors disabled:opacity-50"
+            className="flex-1 py-1.5 rounded-lg bg-neutral-black-5 text-neutral-black-100 text-xs font-semibold hover:bg-neutral-black-10 transition-colors disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -206,7 +206,7 @@ export function OrderPaymentRow({
                   'flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium transition-all flex-1 justify-center disabled:opacity-50',
                   isActive
                     ? PAYMENT_ACTIVE_COLORS[method] ?? 'bg-neutral-black-80 text-white'
-                    : cn('bg-neutral-black-5 text-neutral-black-50', PAYMENT_HOVER_COLORS[method]),
+                    : cn('bg-neutral-black-5 text-neutral-black-100', PAYMENT_HOVER_COLORS[method]),
                 )}
               >
                 {isLoading ? (

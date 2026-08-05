@@ -59,7 +59,7 @@ export function OrderActionButtons({
           onClick={(e) => { stop(e); setConfirmingState(false); }}
           disabled={loading}
           className={cn(
-            'text-xs font-medium text-neutral-black-50 hover:text-neutral-black-80 border border-neutral-black-20 rounded-xl transition-colors disabled:opacity-40',
+            'text-xs font-medium text-neutral-black-100 hover:text-neutral-black-80 border border-neutral-black-20 rounded-xl transition-colors disabled:opacity-40',
             fullWidth ? 'flex-1 py-2.5' : 'px-3 py-1.5',
           )}
         >

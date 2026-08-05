@@ -39,11 +39,11 @@ export function HistoryOrderCard({ order }: HistoryOrderCardProps) {
       {/* Dirección + producto */}
       <div className="px-4 pb-3 pt-3 border-t border-neutral-black-10 space-y-1.5">
         <div className="flex items-center gap-1.5">
-          <MapPin size={12} className="text-neutral-black-50 shrink-0" />
-          <p className="text-xs text-neutral-black-50 line-clamp-1">{address}</p>
+          <MapPin size={12} className="text-neutral-black-100 shrink-0" />
+          <p className="text-xs text-neutral-black-100 line-clamp-1">{address}</p>
         </div>
         <div className="flex items-center gap-1.5">
-          <Package size={12} className="text-neutral-black-50 shrink-0" />
+          <Package size={12} className="text-neutral-black-100 shrink-0" />
           <p className="text-xs text-neutral-black-70 line-clamp-1">{productSummary}</p>
         </div>
       </div>
@@ -51,17 +51,17 @@ export function HistoryOrderCard({ order }: HistoryOrderCardProps) {
       {/* Footer: ganancias + total + acción */}
       <div className="flex items-center gap-3 px-4 py-3 border-t border-neutral-black-10 bg-neutral-black-3">
         <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="text-[10px] text-neutral-black-50 uppercase tracking-wide">Domicilio</span>
+          <span className="text-[10px] text-neutral-black-100 uppercase tracking-wide">Domicilio</span>
           <span className="text-sm font-bold text-primary-red">{formatCOP(order.delivery.price || 0)}</span>
         </div>
         <div className="w-px h-8 bg-neutral-black-20 shrink-0" />
         <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-          <span className="text-[10px] text-neutral-black-50 uppercase tracking-wide">Total pedido</span>
+          <span className="text-[10px] text-neutral-black-100 uppercase tracking-wide">Total pedido</span>
           <span className="text-sm font-bold text-neutral-black-80">{formatCOP(order.totalPrice)}</span>
         </div>
         <div className="w-px h-8 bg-neutral-black-20 shrink-0" />
         <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="text-[10px] text-neutral-black-50 uppercase tracking-wide">Pago</span>
+          <span className="text-[10px] text-neutral-black-100 uppercase tracking-wide">Pago</span>
           <span className="text-sm font-bold text-neutral-black-80">{PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}</span>
         </div>
         {/* <Link

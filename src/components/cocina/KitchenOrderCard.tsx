@@ -51,7 +51,7 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onSta
 
       {/* Productos */}
       <div className={SECTION}>
-        <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide mb-3">Productos</p>
+        <p className="text-[10px] font-bold text-neutral-black-100 uppercase tracking-wide mb-3">Productos</p>
         <OrderItemsList items={order.orderItems} />
       </div>
 
@@ -60,7 +60,7 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onSta
         <button
           type="button"
           onClick={() => setAddressOpen((v) => !v)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-neutral-black-50 hover:text-neutral-black-80 transition-colors"
+          className="flex items-center gap-1.5 text-xs font-semibold text-neutral-black-100 hover:text-neutral-black-80 transition-colors"
         >
           <MapPin size={13} />
           Ver dirección
