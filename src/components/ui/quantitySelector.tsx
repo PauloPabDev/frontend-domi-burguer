@@ -23,7 +23,6 @@ export interface QuantitySelectorProps
   value: number;
   onIncrease: () => void;
   onDecrease: () => void;
-  disabled?: boolean;
 }
 
 export function QuantitySelector({
@@ -31,7 +30,6 @@ export function QuantitySelector({
   onIncrease,
   onDecrease,
   size,
-  disabled = false,
 }: QuantitySelectorProps) {
   return (
     <div
@@ -45,7 +43,6 @@ export function QuantitySelector({
         variant="yellow"
         size={size === "sm" ? "icon-sm" : "icon"}
         onClick={onDecrease}
-        disabled={disabled}
         className={cn(size === "sm" && "w-[24px] h-[24px]", size === "lg" && "w-[38px] h-[38px]")}
       >
         <Minus
@@ -69,7 +66,6 @@ export function QuantitySelector({
         variant="yellow"
         size={size === "sm" ? "icon-sm" : "icon"}
         onClick={onIncrease}
-        disabled={disabled}
         className={cn(size === "sm" && "w-[24px] h-[24px]", size === "lg" && "w-[38px] h-[38px]")}
       >
         <Plus className={cn(size === "sm" ? "w-4 h-4" : "w-5 h-5")} />

@@ -247,6 +247,34 @@ export const useCartActions = () => {
   // ─── Handlers del carrito ─────────────────────────────────────────────────────
 
   const handleIncrease = (id: string, quantity: number) => {
+    const item = items.find((i) => i.id === id);
+    const hasPromoComplement = item?.complements.some((c) => !!c.rewardCode);
+
+    if (item && hasPromoComplement) {
+      // La unidad que lleva el complemento gratis del código de referido se
+      // mantiene fija en 1 (relación 1:1 con el código). Una unidad adicional
+      // se agrega como un ítem aparte del mismo producto, sin el complemento,
+      // en vez de aumentar la cantidad de este.
+      const complementsWithoutReward = item.complements.filter((c) => !c.rewardCode);
+      const newItemId = generateCartItemId(item.productId, complementsWithoutReward);
+      const newPrice = calculateTotalPrice(item.basePrice, complementsWithoutReward);
+
+      addItem({
+        ...item,
+        id: newItemId,
+        quantity: 1,
+        complements: complementsWithoutReward,
+        price: newPrice,
+      });
+
+      track('cart_item_quantity_increased', {
+        item_id: newItemId,
+        new_quantity: 1,
+        split_from_promo_item: id,
+      });
+      return;
+    }
+
     updateQuantity(id, quantity + 1);
     track('cart_item_quantity_increased', { item_id: id, new_quantity: quantity + 1 });
   };
