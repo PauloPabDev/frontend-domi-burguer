@@ -131,7 +131,21 @@ export const CustomizationModalCart = ({
   };
 
   const handleConfirm = () => {
-    const newComplements = convertToComplements();
+    const rebuiltComplements = convertToComplements();
+
+    // Los complementos de recompensa de un código de referido (rewardCode) no
+    // se editan desde este modal. convertToComplements() los reconstruye a
+    // partir del catálogo y pierde esa marca, lo que hacía que el ítem
+    // recalculara un id igual al de otra línea del mismo producto y se
+    // fusionara con ella. Se preservan tal cual venían en el carrito.
+    const rewardComplements = cartItem.complements.filter((c) => !!c.rewardCode);
+    const rewardIds = new Set(rewardComplements.map((c) => c.id));
+
+    const newComplements = [
+      ...rebuiltComplements.filter((c) => !rewardIds.has(c.id)),
+      ...rewardComplements,
+    ];
+
     updateItemComplements(cartItem.id, newComplements);
     onClose();
   };
