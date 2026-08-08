@@ -6,13 +6,17 @@ interface CartItemFooterProps {
     price: number;
     quantity: number;
     rewardCode?: string;
+    hasPromoComplement?: boolean;
     onDecrease: (id: string, quantity: number) => void;
     onIncrease: (id: string, quantity: number) => void;
     onRemoveReward?: () => void;
 }
 
-export const CartItemFooter = ({ id, price, quantity, rewardCode, onDecrease, onIncrease, onRemoveReward }: CartItemFooterProps) => {
+export const CartItemFooter = ({ id, price, quantity, rewardCode, hasPromoComplement, onDecrease, onIncrease, onRemoveReward }: CartItemFooterProps) => {
     const isReward = !!rewardCode;
+    // Producto que quedó separado por llevar el complemento gratis de un código
+    // de referido: su cantidad se fija en 1 y no debe poder modificarse.
+    const isQuantityLocked = !isReward && !!hasPromoComplement;
 
     return (
         <div className="flex h-8 items-center justify-between w-full gap-2 rounded-[50px]">
@@ -41,6 +45,7 @@ export const CartItemFooter = ({ id, price, quantity, rewardCode, onDecrease, on
                         value={quantity}
                         onDecrease={() => onDecrease(id, quantity)}
                         onIncrease={() => onIncrease(id, quantity)}
+                        disabled={isQuantityLocked}
                     />
                 </div>
             )}

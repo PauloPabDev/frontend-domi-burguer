@@ -24,6 +24,10 @@ export const CartItemCard = ({
     onIncrease,
     onRemoveReward,
 }: CartItemCardProps) => {
+    // Ítem separado automáticamente para llevar el complemento gratis de un
+    // código de referido: su cantidad quedó fija en 1 y no debe ser editable.
+    const hasPromoComplement = item.complements.some((c) => !!c.rewardCode);
+
     return (
         <Card className="flex w-full xl:h-28 items-start gap-4 pl-2 pr-3 xl:pr-4 py-2 bg-[#FFFFFF] rounded-[12px] overflow-hidden border-0">
             <CardContent className="p-0 flex w-full gap-4 items-center justify-start">
@@ -51,6 +55,7 @@ export const CartItemCard = ({
                         price={item.price}
                         quantity={item.quantity}
                         rewardCode={item.rewardCode}
+                        hasPromoComplement={hasPromoComplement}
                         onDecrease={onDecrease}
                         onIncrease={onIncrease}
                         onRemoveReward={item.rewardCode
