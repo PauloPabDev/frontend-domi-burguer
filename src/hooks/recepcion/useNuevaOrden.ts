@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ClientService, ApiClient } from '@/services/clientService';
 import { LocationService } from '@/services/locationService';
+import { ProductService } from '@/services/productService';
 import { WorkerOrderService, DeliveryInfo, KitchenInfo } from '@/services/workerOrderService';
 import { Location } from '@/types/locations';
 import { Product, Complement } from '@/types/products';
@@ -66,6 +67,12 @@ export function useNuevaOrden() {
   const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
   const [showComplementModal, setShowComplementModal] = useState(false);
 
+  // Complementos: se traen UNA sola vez de la API al iniciar el contexto y se
+  // guardan en memoria. El buscador del modal de complementos filtra sobre esta
+  // copia en el cliente — no se vuelve a llamar la API por cada búsqueda.
+  const [allComplements, setAllComplements] = useState<Complement[]>([]);
+  const [complementsLoading, setComplementsLoading] = useState(false);
+
   // Form
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [comment, setComment] = useState('');
@@ -90,6 +97,41 @@ export function useNuevaOrden() {
       }
     };
     fetchKitchens();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // Fetch de todos los complementos (type=complement) una sola vez cuando hay
+  // usuario, igual que kitchens arriba. Se guardan en memoria para todo el
+  // formulario; el buscador del modal filtra localmente por nombre sobre esta lista.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const fetchComplements = async () => {
+      setComplementsLoading(true);
+      try {
+        const token = await user.getIdToken();
+        const { body } = await ProductService.getComplements(token);
+        if (cancelled) return;
+        setAllComplements(
+          body
+            .filter((p) => p.status !== 'inactive')
+            .map((p) => ({
+              id: p.id,
+              name: p.name,
+              price: p.price || null,
+              quantity: 0,
+              minusComplement: false,
+              colorPrimary: p.colorPrimary,
+              secret: p.secret,
+            }))
+        );
+      } catch {
+        // silently ignore; el modal simplemente mostrará la lista vacía
+      } finally {
+        if (!cancelled) setComplementsLoading(false);
+      }
+    };
+    fetchComplements();
     return () => { cancelled = true; };
   }, [user]);
 
@@ -357,6 +399,8 @@ export function useNuevaOrden() {
     orderItems, addProduct, removeProduct, changeQuantity,
     editingItem, showComplementModal, setShowComplementModal,
     openComplementEditor, addProductAndEdit, confirmComplements,
+    // Complementos (buscador contra API)
+    allComplements, complementsLoading,
     // Form
     paymentMethod, setPaymentMethod,
     comment, setComment,

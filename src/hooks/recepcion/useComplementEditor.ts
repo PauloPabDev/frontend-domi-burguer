@@ -2,12 +2,11 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { Complement } from '@/types/products';
-import {
-  handleAddableComplement,
-  handleSpecialComplement,
-  handleRemovableComplement,
-} from '@/hooks/home/useMenu';
 
+// Editor de complementos para recepción. A diferencia del flujo del cliente
+// (ver useMenu.ts), aquí cada complemento viene de la API y se agrega/retira
+// como un extra plano con cantidad — sin roles (addable/special/removable)
+// ni relaciones additionId/minusId.
 export function useComplementEditor(
   confirmComplements: (complements: Complement[]) => void
 ) {
@@ -23,50 +22,17 @@ export function useComplementEditor(
   }, []);
 
   const handleChange = useCallback((ingredient: Complement, action: 'plus' | 'minus') => {
-    const newQuantity = action === 'plus' ? ingredient.quantity + 1 : ingredient.quantity - 1;
     const current = pendingRef.current;
+    const existing = current.find((c) => c.id === ingredient.id);
+    const newQuantity = (existing?.quantity ?? 0) + (action === 'plus' ? 1 : -1);
 
-    let result: { complementsToAdd: Complement[]; complementsToRemove: (number | string)[] };
-
-    if (ingredient.type === 'special') {
-      result = handleSpecialComplement(ingredient, action, current, newQuantity);
-    } else if (ingredient.type === 'addable') {
-      result = handleAddableComplement(ingredient, action, current, 0, newQuantity);
+    let updated: Complement[];
+    if (newQuantity <= 0) {
+      updated = current.filter((c) => c.id !== ingredient.id);
+    } else if (existing) {
+      updated = current.map((c) => (c.id === ingredient.id ? { ...c, quantity: newQuantity } : c));
     } else {
-      result = handleRemovableComplement(ingredient, action, current, newQuantity);
-    }
-
-    let updated = [...current];
-
-    result.complementsToAdd.forEach((comp) => {
-      const existing = updated.find((c) => c.id === comp.id);
-      if (existing) {
-        updated = updated.map((c) => c.id === comp.id ? { ...c, quantity: c.quantity + 1 } : c);
-      } else {
-        updated.push(comp);
-      }
-    });
-
-    result.complementsToRemove.forEach((id) => {
-      updated = updated.filter((c) => c.id !== id);
-    });
-
-    // handleAddableComplement/handleSpecialComplement return empty arrays when the entry
-    // already exists above its threshold — update directly so the modal display stays in sync.
-    if (
-      (ingredient.type === 'addable' || ingredient.type === 'special') &&
-      result.complementsToAdd.length === 0 &&
-      result.complementsToRemove.length === 0
-    ) {
-      const targetId = ingredient.additionId ?? ingredient.id;
-      const entry = updated.find((c) => c.id === targetId);
-      if (entry) {
-        updated = action === 'plus'
-          ? updated.map((c) => c.id === targetId ? { ...c, quantity: c.quantity + 1 } : c)
-          : updated
-              .map((c) => c.id === targetId ? { ...c, quantity: Math.max(0, c.quantity - 1) } : c)
-              .filter((c) => c.id !== targetId || c.quantity > 0);
-      }
+      updated = [...current, { ...ingredient, quantity: newQuantity, minusComplement: false }];
     }
 
     pendingRef.current = updated;

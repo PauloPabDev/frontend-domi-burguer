@@ -69,8 +69,11 @@ function SubmitOverlay({
   );
 }
 
-const CustomizationModalSection = dynamic(
-  () => import('@/components/home/customizeOrderModal').then((m) => m.CustomizationModalSection),
+// Modal de complementos propio de recepción (buscador contra la API) — no
+// comparte componente con el modal del cliente (customizeOrderModal.tsx),
+// que sigue usando la data estática por secciones sin tocarse.
+const ComplementesModal = dynamic(
+  () => import('./ComplementesModal').then((m) => m.ComplementesModal),
   { ssr: false }
 );
 
@@ -215,13 +218,13 @@ export function NuevaOrdenForm() {
       </div>
 
       {form.showComplementModal && form.editingItem && (
-        <CustomizationModalSection
+        <ComplementesModal
           isOpen={form.showComplementModal}
           onClose={complementEditor.handleConfirm}
           onCancel={complementEditor.handleCancel}
           productName={form.editingItem.product.name}
-          productId={form.editingItem.product.id}
-          customizationType={form.editingItem.product.customizationType}
+          allComplements={form.allComplements}
+          complementsLoading={form.complementsLoading}
           handleChangeComplement={complementEditor.handleChange}
           complements={complementEditor.pendingComplements}
         />

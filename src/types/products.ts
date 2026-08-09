@@ -11,6 +11,8 @@ export interface Complement {
   minusId?: number;
   minusComplement: boolean;
   rewardCode?: string; // Para complementar con rewards de códigos
+  colorPrimary?: string; // Color primario del producto en la API (recepción)
+  secret?: boolean; // Si el producto es secreto en la API (recepción)
 }
 
 export type CustomizationType = 'burger' | 'papas' | 'none';

@@ -15,6 +15,24 @@ export class ProductService {
     return response.json();
   }
 
+  // Trae todos los productos type=complement (filtro exacto que ya soporta la API).
+  // Pensado para traerse una sola vez y guardarse en memoria; el buscador de
+  // complementos filtra localmente sobre esta lista, sin volver a llamar la API.
+  static async getComplements(token: string): Promise<{ body: Product[] }> {
+    const params = new URLSearchParams({
+      page: '1',
+      limit: '500',
+      key: 'type',
+      value: 'complement',
+      option: '==',
+    });
+    const response = await fetch(`${this.API_URL}api/v2/products?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Error fetching complements');
+    return response.json();
+  }
+
   static async update(
     token: string,
     id: string,
