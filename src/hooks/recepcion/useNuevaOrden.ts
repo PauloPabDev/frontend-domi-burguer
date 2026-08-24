@@ -247,6 +247,20 @@ export function useNuevaOrden() {
     handleSelectLocation(location.id);
   }, [handleSelectLocation]);
 
+  // Se llama después de que el modal de detalle de ubicación confirma el
+  // borrado en el servidor (LocationService.deleteLocation). Quita la
+  // ubicación de la lista y, si era la seleccionada, limpia la selección
+  // y el delivery calculado para que el usuario elija otra dirección.
+  const handleLocationDeleted = useCallback((id: string) => {
+    setLocations((prev) => prev.filter((loc) => loc.id !== id));
+    if (selectedLocationId === id) {
+      setSelectedLocationId(null);
+      setDelivery(null);
+      setKitchen(null);
+      originalDeliveryPriceRef.current = null;
+    }
+  }, [selectedLocationId]);
+
   const overrideDeliveryPrice = useCallback((price: number) => {
     setDelivery((prev) => prev ? { ...prev, price, modified: true } : prev);
   }, []);
@@ -389,7 +403,7 @@ export function useNuevaOrden() {
     // Locations
     locations, locationsLoading, selectedLocationId,
     showCreateLocationModal, setShowCreateLocationModal,
-    handleSelectLocation, handleLocationCreated,
+    handleSelectLocation, handleLocationCreated, handleLocationDeleted,
     // Delivery
     delivery, kitchen, deliveryLoading, deliveryError,
     overrideDeliveryPrice, resetDeliveryPrice,

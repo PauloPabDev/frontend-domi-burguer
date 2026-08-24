@@ -18,6 +18,7 @@ interface UbicacionesClienteProps {
   onSelectLocation: (id: string) => void;
   onCreateLocation: () => void;
   onRetryDelivery?: () => void;
+  onDeleteLocation?: (id: string) => void;
 }
 
 const LOCATIONS_VISIBLE = 3;
@@ -33,6 +34,7 @@ export function UbicacionesCliente({
   onSelectLocation,
   onCreateLocation,
   onRetryDelivery,
+  onDeleteLocation,
 }: UbicacionesClienteProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -88,6 +90,7 @@ export function UbicacionesCliente({
               location={location}
               isSelected={selectedLocationId === location.id}
               onSelect={onSelectLocation}
+              onDeleted={onDeleteLocation}
             />
           ))}
           {hasMore && (

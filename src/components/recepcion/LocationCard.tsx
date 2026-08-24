@@ -6,11 +6,17 @@ import { MapPin, X, Pencil, Trash2, MessageSquare, Image as ImageIcon } from 'lu
 import { Location, PropertyType } from '@/types/locations';
 import { cn } from '@/lib/utils';
 import { MapComponent } from '@/components/map/map';
+import { ConfirmModal } from '@/components/ui/modal';
+import { LocationService } from '@/services/locationService';
+import { useAuth } from '@/contexts/AuthContext';
+import { notify } from '@/utils/notify';
 
 interface LocationCardProps {
   location: Location;
   isSelected: boolean;
   onSelect: (id: string) => void;
+  /** Si se provee, habilita la eliminación de la ubicación desde el modal de detalle. */
+  onDeleted?: (id: string) => void;
 }
 
 const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
@@ -44,17 +50,43 @@ function NotAvailableRow({ icon, label }: { icon: React.ReactNode; label: string
 function LocationDetailModal({
   location,
   onClose,
+  onDeleted,
 }: {
   location: Location;
   onClose: () => void;
+  onDeleted?: (id: string) => void;
 }) {
+  const { user } = useAuth();
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
+  const handleDelete = async () => {
+    if (!user) {
+      notify.error('No autenticado', 'Inicia sesión de nuevo para eliminar la ubicación.');
+      return;
+    }
+    setDeleting(true);
+    try {
+      const token = await user.getIdToken();
+      await LocationService.deleteLocation(token, location.id);
+      notify.success('Ubicación eliminada', 'La dirección fue eliminada correctamente.');
+      onDeleted?.(location.id);
+      onClose();
+    } catch {
+      notify.error('Error', 'No se pudo eliminar la ubicación. Intenta de nuevo.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return createPortal(
+    <>
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={onClose}
@@ -118,8 +150,8 @@ function LocationDetailModal({
           </button>
           <button
             type="button"
-            disabled
-            className="flex items-center justify-center gap-2 py-2.5 rounded-lg border border-neutral-100 text-sm text-neutral-300 cursor-not-allowed"
+            onClick={() => setShowConfirmDelete(true)}
+            className="flex items-center justify-center gap-2 py-2.5 rounded-lg border border-red-100 text-sm text-red-500 hover:bg-red-50 transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
             Eliminar
@@ -132,12 +164,25 @@ function LocationDetailModal({
           <NotAvailableRow icon={<ImageIcon className="w-4 h-4" />} label="Fotos" />
         </div>
       </div>
-    </div>,
+    </div>
+
+    <ConfirmModal
+      open={showConfirmDelete}
+      onOpenChange={setShowConfirmDelete}
+      title="¿Eliminar esta dirección?"
+      message={`Esta acción no se puede deshacer. Se eliminará "${location.name}" (${location.address}).`}
+      cancelText="Cancelar"
+      confirmText="Sí, eliminar"
+      destructive
+      loading={deleting}
+      onConfirm={handleDelete}
+    />
+    </>,
     document.body
   );
 }
 
-export function LocationCard({ location, isSelected, onSelect }: LocationCardProps) {
+export function LocationCard({ location, isSelected, onSelect, onDeleted }: LocationCardProps) {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -186,6 +231,7 @@ export function LocationCard({ location, isSelected, onSelect }: LocationCardPro
         <LocationDetailModal
           location={location}
           onClose={() => setShowModal(false)}
+          onDeleted={onDeleted}
         />
       )}
     </>

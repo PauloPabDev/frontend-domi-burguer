@@ -144,6 +144,7 @@ export function NuevaOrdenForm() {
               onRetryDelivery={form.selectedLocationId
                 ? () => form.handleSelectLocation(form.selectedLocationId!)
                 : undefined}
+              onDeleteLocation={form.handleLocationDeleted}
             />
           </FormCard>
 
