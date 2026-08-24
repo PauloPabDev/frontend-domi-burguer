@@ -26,9 +26,10 @@ export const useUsers = () => {
       const token = await user.getIdToken();
       let key: string | undefined;
       let value: string | undefined;
-      if (s) { key = 'email'; value = s; }
-      else if (r) { key = 'role'; value = r; }
-      const { body, total: t } = await AdminService.getUsers(token, p, LIMIT, key, value);
+      let option: string | undefined;
+      if (s) { key = 'email'; value = s; option = '=='; }
+      else if (r) { key = 'roles'; value = r; option = 'array-contains'; }
+      const { body, total: t } = await AdminService.getUsers(token, p, LIMIT, key, value, option);
       const list = body ?? [];
       setUsers(list);
       setTotal(t ?? 0);

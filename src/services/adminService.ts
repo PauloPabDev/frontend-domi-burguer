@@ -11,10 +11,15 @@ export class AdminService {
     page = 1,
     limit = 20,
     key?: string,
-    value?: string
+    value?: string,
+    option?: string
   ): Promise<{ body: WorkerUser[]; total?: number }> {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) });
-    if (key && value) { params.set('key', key); params.set('value', value); }
+    if (key && value && option) {
+      params.set('key', key);
+      params.set('value', value);
+      params.set('option', option);
+    }
     const response = await fetch(`${this.API_URL}api/v2/users?${params}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
