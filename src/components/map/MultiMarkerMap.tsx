@@ -16,6 +16,10 @@ export interface MapMarker {
   isUnassigned?: boolean;
   courierAvatarUrl?: string;
   courierName?: string;
+  /** 'courier' renderiza un pin de ubicación en vivo (Traccar) en vez del pin de pedido */
+  type?: 'order' | 'courier';
+  /** Solo para type: 'courier' — atenúa el pin cuando el dispositivo no está online */
+  isOffline?: boolean;
 }
 
 interface AvatarPinProps {
@@ -144,6 +148,73 @@ function AvatarPin({ color, label, isSelected, isUnassigned, courierAvatarUrl, c
   );
 }
 
+interface CourierPinProps {
+  label: string;
+  isSelected: boolean;
+  isOffline?: boolean;
+  onClick: () => void;
+}
+
+function CourierPin({ label, isSelected, isOffline, onClick }: CourierPinProps) {
+  const size = isSelected ? 40 : 32;
+  const color = isOffline ? "#9CA3AF" : "#34C759"; // gris si offline, verde (color de rol domiciliario) si online
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        cursor: "pointer",
+        filter: isSelected
+          ? "drop-shadow(0 4px 10px rgba(0,0,0,0.45))"
+          : "drop-shadow(0 2px 5px rgba(0,0,0,0.3))",
+        transition: "all 0.15s ease",
+        zIndex: isSelected ? 999 : 2,
+        position: "relative",
+        transform: "translate(-50%, -50%)",
+        opacity: isOffline ? 0.6 : 1,
+      }}
+      title={label}
+    >
+      <div
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          border: `2px solid white`,
+          backgroundColor: color,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: isSelected ? 18 : 14,
+          boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
+        }}
+      >
+        🛵
+      </div>
+      {isSelected && (
+        <span
+          style={{
+            marginTop: 2,
+            fontSize: 11,
+            fontWeight: 600,
+            color: "#111827",
+            backgroundColor: "white",
+            padding: "1px 6px",
+            borderRadius: 6,
+            whiteSpace: "nowrap",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
+          }}
+        >
+          {label}
+        </span>
+      )}
+    </div>
+  );
+}
+
 interface MultiMarkerMapProps {
   markers: MapMarker[];
   selectedMarkerId?: string;
@@ -219,15 +290,24 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
             getPixelPositionOffset={() => ({ x: 0, y: 0 })}
           >
-            <AvatarPin
-              color={color}
-              label={marker.label || ""}
-              isSelected={isSelected}
-              isUnassigned={marker.isUnassigned}
-              courierAvatarUrl={marker.courierAvatarUrl}
-              courierName={marker.courierName}
-              onClick={() => handleMarkerClick(marker.id)}
-            />
+            {marker.type === "courier" ? (
+              <CourierPin
+                label={marker.label || ""}
+                isSelected={isSelected}
+                isOffline={marker.isOffline}
+                onClick={() => handleMarkerClick(marker.id)}
+              />
+            ) : (
+              <AvatarPin
+                color={color}
+                label={marker.label || ""}
+                isSelected={isSelected}
+                isUnassigned={marker.isUnassigned}
+                courierAvatarUrl={marker.courierAvatarUrl}
+                courierName={marker.courierName}
+                onClick={() => handleMarkerClick(marker.id)}
+              />
+            )}
           </OverlayView>
         );
       })}

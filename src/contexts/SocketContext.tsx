@@ -6,6 +6,7 @@ import { addToast } from '@heroui/toast';
 import { ConnectionStatus } from '@/types/courier';
 import { RawSocketOrder } from '@/types/rawSocketOrder';
 import { WorkerOrder } from '@/types/worker';
+import { CourierLocation } from '@/types/courierLocation';
 import { useAuth } from '@/contexts/AuthContext';
 import { normalizeSocketOrder, normalizeSocketOrders } from '@/utils/normalizeSocketOrder';
 import { playOrderNotification, playKitchenNotification } from '@/utils/notificationSound';
@@ -16,6 +17,8 @@ interface SocketContextType {
   connectionStatus: ConnectionStatus;
   reconnect: () => void;
   changeKitchen: (kitchenId: string | null) => void;
+  /** Ubicación en vivo de domiciliarios (Traccar). Solo se llena para recepción/admin. */
+  courierLocations: CourierLocation[];
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -46,6 +49,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
   const [orders, setOrders] = useState<WorkerOrder[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('IDLE');
+  const [courierLocations, setCourierLocations] = useState<CourierLocation[]>([]);
   const orderIdsRef = useRef<Set<string>>(new Set());
   const courierAssignedIdsRef = useRef<Set<string>>(new Set());
 
@@ -110,6 +114,19 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       orderIdsRef.current = new Set(normalized.map((o) => o.id));
       courierAssignedIdsRef.current = new Set(normalized.filter((o) => o.courierId).map((o) => o.id));
       setOrders(sortOrders(normalized));
+    });
+
+    // Ubicación en vivo de domiciliarios (Traccar) — solo llega para recepción/admin
+    socketRef.current.on('courierLocation/init', (snapshot: CourierLocation[]) => {
+      setCourierLocations(snapshot);
+    });
+
+    socketRef.current.on('courierLocation/update', (changed: CourierLocation[]) => {
+      setCourierLocations((prev) => {
+        const map = new Map(prev.map((c) => [c.id, c]));
+        changed.forEach((c) => map.set(c.id, c));
+        return Array.from(map.values());
+      });
     });
 
     const notifyNewKitchenOrder = (order: WorkerOrder) => {
@@ -269,7 +286,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   }, []);
 
   return (
-    <SocketContext.Provider value={{ orders, connectionStatus, reconnect, changeKitchen }}>
+    <SocketContext.Provider value={{ orders, connectionStatus, reconnect, changeKitchen, courierLocations }}>
       {children}
     </SocketContext.Provider>
   );
