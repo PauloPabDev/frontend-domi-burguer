@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { GoogleMap, OverlayView, useLoadScript } from "@react-google-maps/api";
 import { silverMapStyle } from "@/utils/mapStyles";
 
@@ -243,12 +243,31 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
     libraries,
   });
 
+  const mapRef = useRef<google.maps.Map | null>(null);
+  // Centro inicial: se calcula una sola vez, al montar. De ahí en adelante el
+  // mapa es "no controlado" — nunca se recentra como efecto secundario de que
+  // lleguen nuevas ubicaciones de domiciliarios (eso era lo que causaba el
+  // parpadeo: cada actualización pasaba un objeto center/zoom nuevo a
+  // GoogleMap, forzando un setCenter/setZoom constante).
+  const initialCenterRef = useRef(center || markers[0]?.position || DEFAULT_CENTER);
+
   const handleMarkerClick = useCallback(
     (markerId: string) => {
       onMarkerClick?.(markerId);
     },
     [onMarkerClick]
   );
+
+  // Solo movemos el mapa cuando el padre da un centro explícito (p. ej. al
+  // seleccionar un pedido). Si no hay centro — como al hacer clic en un
+  // domiciliario, que no tiene una posición "objetivo" de selección — el mapa
+  // se queda quieto donde el usuario lo dejó.
+  useEffect(() => {
+    if (!center || !mapRef.current) return;
+    mapRef.current.panTo(center);
+    mapRef.current.setZoom(selectedZoom);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [center?.lat, center?.lng]);
 
   if (!isLoaded) {
     return (
@@ -261,15 +280,14 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
     );
   }
 
-  const mapCenter = center || (markers.length > 0 ? markers[0].position : DEFAULT_CENTER);
-  const zoom = selectedMarkerId ? selectedZoom : defaultZoom;
-
   return (
     <GoogleMap
       mapContainerStyle={{ width: "100%", height: "100%", minHeight }}
       mapContainerClassName={className}
-      center={mapCenter}
-      zoom={zoom}
+      onLoad={(map) => { mapRef.current = map; }}
+      onUnmount={() => { mapRef.current = null; }}
+      center={initialCenterRef.current}
+      zoom={defaultZoom}
       options={{
         disableDefaultUI: false,
         zoomControl: true,
