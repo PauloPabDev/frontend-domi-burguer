@@ -1,7 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { ChefHat } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { ChefHat, BookOpen } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,9 @@ export const KitchenNavbar: React.FC<KitchenNavbarProps> = ({
 }) => {
   const { orders, connectionStatus } = useSocket();
   const navShadow = useNavShadow(connectionStatus);
+  const pathname = usePathname();
   const activeOrders = orders.filter((o) => o.status === 'fresh' || o.status === 'preparing');
+  const isOnDocumentos = pathname.startsWith('/cocina/documentos');
 
   return (
     <NavPillShell navShadow={navShadow}>
@@ -43,8 +46,18 @@ export const KitchenNavbar: React.FC<KitchenNavbarProps> = ({
       {/* Center: Logo */}
       <NavPillLogo href="/cocina" />
 
-      {/* Right: Orders badge */}
+      {/* Right: Documentos + Orders badge */}
       <div className="flex items-center justify-end gap-2">
+        <Link href="/cocina/documentos" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
+          <Button
+            variant={isOnDocumentos ? 'primary' : 'light-outline'}
+            size="md"
+            leftIcon={<BookOpen className="w-4 h-4 md:w-5 md:h-5" />}
+            className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
+          >
+            <span className="hidden sm:inline">DOCUMENTOS</span>
+          </Button>
+        </Link>
         <Link href="/cocina" tabIndex={-1} className="focus:outline-0! focus:ring-0! rounded-full">
           <Button
             variant="primary"

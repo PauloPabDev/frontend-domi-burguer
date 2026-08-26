@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, MapPin } from 'lucide-react';
+import { ClipboardList, MapPin, BookOpen } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { Button } from '@/components/ui/button';
 import { useNavShadow } from '@/components/navbar/useNavShadow';
@@ -16,6 +16,7 @@ export const CourierNavbar: React.FC = () => {
   const navShadow = useNavShadow(connectionStatus);
 
   const isOnHistorial = pathname === '/domiciliario/historial';
+  const isOnDocumentos = pathname.startsWith('/domiciliario/documentos');
 
   return (
     <NavPillShell navShadow={navShadow}>
@@ -27,7 +28,7 @@ export const CourierNavbar: React.FC = () => {
       {/* Center: Logo */}
       <NavPillLogo href="/domiciliario" />
 
-      {/* Right: Historial + Orders */}
+      {/* Right: Historial + Documentos + Orders */}
       <div className="flex items-center justify-end gap-2">
         <Link
           href="/domiciliario/historial"
@@ -41,6 +42,21 @@ export const CourierNavbar: React.FC = () => {
             className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
           >
             <span className="hidden sm:inline">HISTORIAL</span>
+          </Button>
+        </Link>
+
+        <Link
+          href="/domiciliario/documentos"
+          tabIndex={-1}
+          className="focus:outline-0! focus:ring-0! rounded-full"
+        >
+          <Button
+            variant={isOnDocumentos ? 'primary' : 'light-outline'}
+            size="md"
+            leftIcon={<BookOpen className="w-4 h-4 md:w-5 md:h-5" />}
+            className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
+          >
+            <span className="hidden sm:inline">DOCUMENTOS</span>
           </Button>
         </Link>
 

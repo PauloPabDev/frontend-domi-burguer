@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ElementType } from 'react';
-import { ClipboardList, Map, PlusCircle, Bike, BarChart3, IdCard } from 'lucide-react';
+import { ClipboardList, Map, PlusCircle, Bike, BarChart3, IdCard, BookOpen } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
 import { Button } from '@/components/ui/button';
@@ -71,6 +71,7 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
     { key: 'cliente', label: 'Cliente', Icon: IdCard, href: '/recepcion/cliente' },
     { key: 'mapa', label: 'Mapa', Icon: Map, href: '/recepcion/mapa' },
     { key: 'contabilidad', label: 'Contabilidad', Icon: BarChart3, href: '/recepcion/contabilidad' },
+    { key: 'documentos', label: 'Documentos', Icon: BookOpen, href: '/recepcion/documentos' },
     {
       key: 'motos',
       label: 'Motos',
@@ -95,9 +96,9 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
   const secondaryNavItems = navItems.slice(half);
   const toDropdownItem = (item: NavItem) => ({ ...item, isActive: isItemActive(item) });
 
-  // En pantallas grandes, Cliente y Motos (domicilios) se agrupan en el
-  // select por ser accesos secundarios; el resto queda suelto.
-  const LARGE_SELECT_KEYS = new Set(['cliente', 'motos']);
+  // En pantallas grandes, Cliente, Documentos y Motos (domicilios) se
+  // agrupan en el select por ser accesos secundarios; el resto queda suelto.
+  const LARGE_SELECT_KEYS = new Set(['cliente', 'documentos', 'motos']);
   const largeDirectItems = navItems.filter((item) => !LARGE_SELECT_KEYS.has(item.key));
   const largeSelectItems = navItems.filter((item) => LARGE_SELECT_KEYS.has(item.key));
 
