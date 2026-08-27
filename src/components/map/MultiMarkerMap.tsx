@@ -150,12 +150,14 @@ function AvatarPin({ color, label, isSelected, isUnassigned, courierAvatarUrl, c
 
 interface CourierPinProps {
   label: string;
+  /** Foto del domiciliario en la app (resuelta cruzando Traccar <-> WorkerUser por email) */
+  avatarUrl?: string;
   isSelected: boolean;
   isOffline?: boolean;
   onClick: () => void;
 }
 
-function CourierPin({ label, isSelected, isOffline, onClick }: CourierPinProps) {
+function CourierPin({ label, avatarUrl, isSelected, isOffline, onClick }: CourierPinProps) {
   const size = isSelected ? 40 : 32;
   const color = isOffline ? "#9CA3AF" : "#34C759"; // gris si offline, verde (color de rol domiciliario) si online
 
@@ -183,16 +185,30 @@ function CourierPin({ label, isSelected, isOffline, onClick }: CourierPinProps) 
           width: size,
           height: size,
           borderRadius: "50%",
-          border: `2px solid white`,
-          backgroundColor: color,
+          // Con foto: fondo blanco y el borde indica en vivo/offline. Sin foto: círculo de color como antes.
+          border: `2px solid ${avatarUrl ? color : "white"}`,
+          backgroundColor: avatarUrl ? "white" : color,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontSize: isSelected ? 18 : 14,
           boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
+          overflow: "hidden",
         }}
       >
-        🛵
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={label}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : label ? (
+          <span style={{ color: "white", fontWeight: "bold", userSelect: "none", lineHeight: 1 }}>
+            {label.charAt(0).toUpperCase()}
+          </span>
+        ) : (
+          "🛵"
+        )}
       </div>
       {isSelected && (
         <span
@@ -311,6 +327,7 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
             {marker.type === "courier" ? (
               <CourierPin
                 label={marker.label || ""}
+                avatarUrl={marker.avatarUrl}
                 isSelected={isSelected}
                 isOffline={marker.isOffline}
                 onClick={() => handleMarkerClick(marker.id)}

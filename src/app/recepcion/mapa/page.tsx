@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
+import { useCourierDevicePhotos } from '@/hooks/reception/useCourierDevicePhotos';
 import { MultiMarkerMap, MapMarker } from '@/components/map/MultiMarkerMap';
 import { RecepcionOrderCard } from '@/components/recepcion/RecepcionOrderCard';
 import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
@@ -23,7 +24,9 @@ export default function RecepcionMapaPage() {
   const { kitchens } = useKitchenSelector();
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
 
-  const { filterCourierIds } = useCourierPanel();
+  const { filterCourierIds, allCouriers } = useCourierPanel();
+  // Cruza cada domiciliario de Traccar (id_arceliuz) con su usuario real de la app
+  const courierByDeviceId = useCourierDevicePhotos(courierLocations, allCouriers);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeStatuses, setActiveStatuses] = useState<Set<OrderStatus>>(new Set(MAP_STATUSES));
   const [showCouriers, setShowCouriers] = useState(true);
@@ -73,13 +76,17 @@ export default function RecepcionMapaPage() {
   }));
 
   const courierMarkers: MapMarker[] = showCouriers
-    ? courierLocations.map((c) => ({
-        id: `courier-${c.id}`,
-        position: { lat: c.lat, lng: c.lng },
-        label: c.name,
-        type: 'courier' as const,
-        isOffline: c.status !== 'online',
-      }))
+    ? courierLocations.map((c) => {
+        const appCourier = courierByDeviceId.get(c.id);
+        return {
+          id: `courier-${c.id}`,
+          position: { lat: c.lat, lng: c.lng },
+          label: appCourier?.name ?? c.name,
+          type: 'courier' as const,
+          isOffline: c.status !== 'online',
+          avatarUrl: appCourier?.photoURL,
+        };
+      })
     : [];
 
   const markers: MapMarker[] = [...orderMarkers, ...courierMarkers];
