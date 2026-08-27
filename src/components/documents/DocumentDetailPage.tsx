@@ -39,17 +39,20 @@ export function DocumentDetailPage({ basePath, documentId }: DocumentDetailPageP
 
   return (
     <div className="h-full overflow-y-auto py-4 pb-8 space-y-4">
-      <div className="flex items-center gap-3">
-        <Link href={basePath} className="p-2 rounded-full hover:bg-neutral-black-10 transition-colors shrink-0">
-          <ArrowLeft size={18} className="text-neutral-black-80" />
-        </Link>
-        <h1 className="font-bold text-neutral-black-80 line-clamp-2">
-          {document.icon && <span className="mr-2">{document.icon}</span>}
-          {document.title || "Documento"}
-        </h1>
-      </div>
+      <div className="max-w-prose mx-auto">
 
-      <DocumentMarkdown content={document.text} className="px-1" />
+        <div className="flex items-center gap-3 mb-5">
+          <Link href={basePath} className="p-2 rounded-full hover:bg-neutral-black-10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-neutral-black-80" />
+          </Link>
+          <h1 className="font-bold text-neutral-black-80 line-clamp-2">
+            {document.icon && <span className="mr-2">{document.icon}</span>}
+            {document.title || "Documento"}
+          </h1>
+        </div>
+
+        <DocumentMarkdown content={document.text} className="px-1" />
+      </div>
     </div>
   );
 }
