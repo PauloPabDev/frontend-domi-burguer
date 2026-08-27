@@ -20,6 +20,8 @@ export interface MapMarker {
   type?: 'order' | 'courier';
   /** Solo para type: 'courier' — atenúa el pin cuando el dispositivo no está online */
   isOffline?: boolean;
+  /** Contenido a mostrar flotando sobre el pin mientras esté seleccionado (p. ej. detalle del domiciliario) */
+  popover?: React.ReactNode;
 }
 
 interface AvatarPinProps {
@@ -40,7 +42,11 @@ function AvatarPin({ color, label, isSelected, isUnassigned, courierAvatarUrl, c
 
   return (
     <div
-      onClick={onClick}
+      onClick={(e) => {
+        // Evita que el click llegue al mapa (que lo interpretaría como "click afuera" y cerraría el popover)
+        e.stopPropagation();
+        onClick();
+      }}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -163,7 +169,11 @@ function CourierPin({ label, avatarUrl, isSelected, isOffline, onClick }: Courie
 
   return (
     <div
-      onClick={onClick}
+      onClick={(e) => {
+        // Evita que el click llegue al mapa (que lo interpretaría como "click afuera" y cerraría el popover)
+        e.stopPropagation();
+        onClick();
+      }}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -236,6 +246,8 @@ interface MultiMarkerMapProps {
   selectedMarkerId?: string;
   center?: { lat: number; lng: number };
   onMarkerClick?: (markerId: string) => void;
+  /** Click en el mapa fuera de cualquier pin — se usa para cerrar el popover abierto */
+  onBackgroundClick?: () => void;
   minHeight?: string;
   className?: string;
   defaultZoom?: number;
@@ -249,6 +261,7 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
   selectedMarkerId,
   center,
   onMarkerClick,
+  onBackgroundClick,
   minHeight = "200px",
   className = "",
   defaultZoom = 13,
@@ -302,6 +315,7 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
       mapContainerClassName={className}
       onLoad={(map) => { mapRef.current = map; }}
       onUnmount={() => { mapRef.current = null; }}
+      onClick={() => onBackgroundClick?.()}
       center={initialCenterRef.current}
       zoom={defaultZoom}
       options={{
@@ -318,32 +332,44 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
         const color = marker.color || "#FF5733";
 
         return (
-          <OverlayView
-            key={marker.id}
-            position={marker.position}
-            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            getPixelPositionOffset={() => ({ x: 0, y: 0 })}
-          >
-            {marker.type === "courier" ? (
-              <CourierPin
-                label={marker.label || ""}
-                avatarUrl={marker.avatarUrl}
-                isSelected={isSelected}
-                isOffline={marker.isOffline}
-                onClick={() => handleMarkerClick(marker.id)}
-              />
-            ) : (
-              <AvatarPin
-                color={color}
-                label={marker.label || ""}
-                isSelected={isSelected}
-                isUnassigned={marker.isUnassigned}
-                courierAvatarUrl={marker.courierAvatarUrl}
-                courierName={marker.courierName}
-                onClick={() => handleMarkerClick(marker.id)}
-              />
+          <React.Fragment key={marker.id}>
+            <OverlayView
+              position={marker.position}
+              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+              getPixelPositionOffset={() => ({ x: 0, y: 0 })}
+            >
+              {marker.type === "courier" ? (
+                <CourierPin
+                  label={marker.label || ""}
+                  avatarUrl={marker.avatarUrl}
+                  isSelected={isSelected}
+                  isOffline={marker.isOffline}
+                  onClick={() => handleMarkerClick(marker.id)}
+                />
+              ) : (
+                <AvatarPin
+                  color={color}
+                  label={marker.label || ""}
+                  isSelected={isSelected}
+                  isUnassigned={marker.isUnassigned}
+                  courierAvatarUrl={marker.courierAvatarUrl}
+                  courierName={marker.courierName}
+                  onClick={() => handleMarkerClick(marker.id)}
+                />
+              )}
+            </OverlayView>
+
+            {/* Detalle flotante sobre el pin — solo mientras esté seleccionado */}
+            {isSelected && marker.popover && (
+              <OverlayView
+                position={marker.position}
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                getPixelPositionOffset={() => ({ x: 0, y: marker.type === "courier" ? -32 : -60 })}
+              >
+                <div style={{ transform: "translate(-50%, -100%)" }}>{marker.popover}</div>
+              </OverlayView>
             )}
-          </OverlayView>
+          </React.Fragment>
         );
       })}
     </GoogleMap>

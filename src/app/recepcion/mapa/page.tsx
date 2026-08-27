@@ -9,6 +9,7 @@ import { useCourierDevicePhotos } from '@/hooks/reception/useCourierDevicePhotos
 import { MultiMarkerMap, MapMarker } from '@/components/map/MultiMarkerMap';
 import { RecepcionOrderCard } from '@/components/recepcion/RecepcionOrderCard';
 import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
+import { CourierDetailPopover } from '@/components/recepcion/CourierDetailPopover';
 import { WorkerOrderService } from '@/services/workerOrderService';
 import { OrderStatus } from '@/types/orders';
 import { STATUS_CONFIG } from '@/types/worker';
@@ -78,13 +79,30 @@ export default function RecepcionMapaPage() {
   const courierMarkers: MapMarker[] = showCouriers
     ? courierLocations.map((c) => {
         const appCourier = courierByDeviceId.get(c.id);
+        const markerId = `courier-${c.id}`;
+        // Pedidos que tiene accionados ahora mismo: asignados a él, sin entregar ni cancelar
+        const activeOrders = appCourier
+          ? enrichedOrders.filter(
+              (o) => o.courierId === appCourier.id && o.status !== 'delivered' && o.status !== 'cancelled',
+            )
+          : [];
+
         return {
-          id: `courier-${c.id}`,
+          id: markerId,
           position: { lat: c.lat, lng: c.lng },
           label: appCourier?.name ?? c.name,
           type: 'courier' as const,
           isOffline: c.status !== 'online',
           avatarUrl: appCourier?.photoURL,
+          popover: (
+            <CourierDetailPopover
+              deviceId={c.id}
+              courierLocation={c}
+              appCourier={appCourier}
+              activeOrders={activeOrders}
+              onClose={() => setSelectedId(null)}
+            />
+          ),
         };
       })
     : [];
@@ -144,7 +162,8 @@ export default function RecepcionMapaPage() {
           markers={markers}
           selectedMarkerId={selectedId ?? undefined}
           center={selectedCenter}
-          onMarkerClick={(id) => setSelectedId(id)}
+          onMarkerClick={(id) => setSelectedId((prev) => (prev === id ? null : id))}
+          onBackgroundClick={() => setSelectedId(null)}
           minHeight="100%"
           defaultZoom={13}
           selectedZoom={16}
