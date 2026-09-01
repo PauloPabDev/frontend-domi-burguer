@@ -30,6 +30,9 @@ export const PhoneLogin = ({ onClose, onSuccess, redirectTo = "/profile" }: Phon
     const [sending, setSending] = useState(false);
     const [verifying, setVerifying] = useState(false);
 
+    // Errores de validación local (no vienen de Firebase, ej: número/código incompletos)
+    const [localError, setLocalError] = useState<{ message: string; hint?: string } | null>(null);
+
     // Temporizador
     const [timeLeft, setTimeLeft] = useState(0);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -96,14 +99,19 @@ export const PhoneLogin = ({ onClose, onSuccess, redirectTo = "/profile" }: Phon
 
     // Enviar código de verificación
     const handleSendCode = async () => {
+        const normalized = normalizePhone(phone);
+        if (normalized.length < 12) {
+            setLocalError({
+                message: "Ingresa un número de teléfono válido.",
+                hint: "Revisa que hayas escrito el número completo, sin espacios ni letras (ej: 300 123 4567).",
+            });
+            return;
+        }
+
         try {
             clearError();
+            setLocalError(null);
             setSending(true);
-
-            const normalized = normalizePhone(phone);
-            if (normalized.length < 12) {
-                throw new Error("Ingresa un número de teléfono válido.");
-            }
 
             const result = await phoneSignIn.sendVerificationCode(
                 normalized,
@@ -124,13 +132,18 @@ export const PhoneLogin = ({ onClose, onSuccess, redirectTo = "/profile" }: Phon
     const handleVerifyCode = async () => {
         if (!confirmationResult) return;
 
+        if (code.length !== 6) {
+            setLocalError({
+                message: "El código debe tener 6 dígitos.",
+                hint: "Revisa el SMS que recibiste y escribe los 6 dígitos del código.",
+            });
+            return;
+        }
+
         try {
             clearError();
+            setLocalError(null);
             setVerifying(true);
-
-            if (code.length !== 6) {
-                throw new Error("El código debe tener 6 dígitos.");
-            }
 
             await phoneSignIn.verifyCode(confirmationResult, code);
 
@@ -158,7 +171,16 @@ export const PhoneLogin = ({ onClose, onSuccess, redirectTo = "/profile" }: Phon
     return (
         <div className="flex flex-col w-full gap-4">
             {/* Mensaje de error */}
-            {error && <div className="text-red-600 text-sm">{error.message}</div>}
+            {(localError || error) && (
+                <div className="text-red-600 text-sm">
+                    <p className="font-medium">{localError?.message || error?.message}</p>
+                    {(localError?.hint || error?.hint) && (
+                        <p className="mt-1 text-xs text-red-500">
+                            {localError?.hint || error?.hint}
+                        </p>
+                    )}
+                </div>
+            )}
 
             {/* Campo de teléfono */}
             <div

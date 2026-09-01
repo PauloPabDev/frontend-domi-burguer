@@ -88,6 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const genericError: AuthError = {
                 code: 'auth/unknown',
                 message: 'Ha ocurrido un error inesperado',
+                hint: 'Inténtalo nuevamente. Si el problema persiste, contáctanos para ayudarte.',
             };
             setError(genericError);
             throw genericError;
@@ -188,7 +189,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             try {
                 clearError();
                 if (!user) {
-                    throw { code: 'auth/no-user', message: 'No hay usuario autenticado.' };
+                    throw {
+                        code: 'auth/no-user',
+                        message: 'No hay usuario autenticado.',
+                        hint: 'Inicia sesión y vuelve a intentar vincular tu teléfono.',
+                    };
                 }
                 const result = await AuthService.linkPhoneToAccount(user, '', verificationId, verificationCode);
                 // Recargar el usuario para obtener el phoneNumber actualizado

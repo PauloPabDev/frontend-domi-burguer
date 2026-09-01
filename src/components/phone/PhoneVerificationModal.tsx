@@ -17,6 +17,7 @@ import { track } from "@/utils/analytics";
 import { ConfirmModal } from "@/components/ui/modal/presets/ConfirmModal";
 import { modalErrorVariants } from "@/components/ui/modal/variants";
 import { cn } from "@/lib/utils";
+import { getAuthErrorMessage } from "@/utils/authErrors";
 
 interface PhoneVerificationModalProps {
   open: boolean;
@@ -41,7 +42,7 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
   const [verifying, setVerifying] = useState(false);
   const [unlinking, setUnlinking] = useState(false);
 
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<{ message: string; hint?: string } | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
 
@@ -211,7 +212,20 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
 
   const handleSendCode = async () => {
     if (!user) {
-      setErrorMsg("Debes iniciar sesión para verificar tu teléfono.");
+      setErrorMsg({
+        message: "Debes iniciar sesión para verificar tu teléfono.",
+        hint: "Inicia sesión y vuelve a intentarlo.",
+      });
+      return;
+    }
+
+    const normalized = normalizePhone(phone);
+    // Validación básica: debe tener al menos código de país (+X) y algunos dígitos
+    if (!normalized || normalized.length < 8) {
+      setErrorMsg({
+        message: "Ingresa un número de teléfono válido.",
+        hint: "Revisa que hayas escrito el número completo, sin espacios ni letras, incluyendo el indicativo del país (ej: +57 300 123 4567).",
+      });
       return;
     }
 
@@ -219,12 +233,6 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
       setErrorMsg(null);
       setSuccessMsg(null);
       setSending(true);
-
-      const normalized = normalizePhone(phone);
-      // Validación básica: debe tener al menos código de país (+X) y algunos dígitos
-      if (!normalized || normalized.length < 8) {
-        throw new Error("Ingresa un número de teléfono válido.");
-      }
 
       const recaptchaVerifier = getOrCreateRecaptcha();
       const provider = new PhoneAuthProvider(auth);
@@ -236,13 +244,8 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
       setStep("code");
       setSuccessMsg("Código enviado por SMS. Escríbelo abajo para confirmar.");
     } catch (e: unknown) {
-      if (e instanceof Error) {
-        setErrorMsg(e.message);
-      } else if (typeof e === "object" && e !== null && "message" in e) {
-        setErrorMsg(String((e as { message?: string }).message));
-      } else {
-        setErrorMsg("Error enviando el código SMS.");
-      }
+      const { message, hint } = getAuthErrorMessage(e);
+      setErrorMsg({ message, hint });
     } finally {
       setSending(false);
     }
@@ -250,12 +253,26 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
 
   const handleVerifyAndLink = async () => {
     if (!user) {
-      setErrorMsg("Debes iniciar sesión para verificar tu teléfono.");
+      setErrorMsg({
+        message: "Debes iniciar sesión para verificar tu teléfono.",
+        hint: "Inicia sesión y vuelve a intentarlo.",
+      });
       return;
     }
 
     if (!verificationId) {
-      setErrorMsg("Primero envía el código SMS.");
+      setErrorMsg({
+        message: "Primero envía el código SMS.",
+        hint: "Presiona \"Enviar código\" antes de escribir el código de verificación.",
+      });
+      return;
+    }
+
+    if (!code || code.length < 6) {
+      setErrorMsg({
+        message: "El código debe tener 6 dígitos.",
+        hint: "Revisa el SMS que recibiste y escribe los 6 dígitos del código.",
+      });
       return;
     }
 
@@ -263,10 +280,6 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
       setErrorMsg(null);
       setSuccessMsg(null);
       setVerifying(true);
-
-      if (!code || code.length < 6) {
-        throw new Error("El código debe tener 6 dígitos.");
-      }
 
       if (mode === "change" && user.phoneNumber) {
         try {
@@ -294,29 +307,8 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
         onOpenChange(false);
       }, 1500);
     } catch (e: unknown) {
-      if (
-        typeof e === "object" &&
-        e !== null &&
-        "code" in e &&
-        (e as { code?: string }).code === "auth/credential-already-in-use"
-      ) {
-        setErrorMsg(
-          "Ese número ya está en uso por otra cuenta. Usa otro número de teléfono."
-        );
-      } else if (
-        typeof e === "object" &&
-        e !== null &&
-        "code" in e &&
-        (e as { code?: string }).code === "auth/invalid-verification-code"
-      ) {
-        setErrorMsg("El código de verificación no es válido.");
-      } else if (e instanceof Error) {
-        setErrorMsg(e.message);
-      } else if (typeof e === "object" && e !== null && "message" in e) {
-        setErrorMsg(String((e as { message?: string }).message));
-      } else {
-        setErrorMsg("Error verificando el código.");
-      }
+      const { message, hint } = getAuthErrorMessage(e);
+      setErrorMsg({ message, hint });
     } finally {
       setVerifying(false);
     }
@@ -344,11 +336,8 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
       setShowUnlinkConfirm(false);
       setSuccessMsg("Teléfono desvinculado. Ahora puedes agregar uno nuevo.");
     } catch (e: unknown) {
-      if (e instanceof Error) {
-        setErrorMsg(e.message);
-      } else {
-        setErrorMsg("Error al desvincular el teléfono.");
-      }
+      const { message, hint } = getAuthErrorMessage(e);
+      setErrorMsg({ message, hint });
     } finally {
       setUnlinking(false);
     }
@@ -374,8 +363,13 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
       <div className="flex flex-col w-full gap-5">
         {/* Mensajes de error/éxito */}
         {(errorMsg || error) && (
-          <div className={cn(modalErrorVariants({ type: "error" }))}>
-            {errorMsg || error?.message}
+          <div className={cn(modalErrorVariants({ type: "error" }), "text-left")}>
+            <p className="font-medium">{errorMsg?.message || error?.message}</p>
+            {(errorMsg?.hint || error?.hint) && (
+              <p className="mt-1 text-xs opacity-80">
+                {errorMsg?.hint || error?.hint}
+              </p>
+            )}
           </div>
         )}
 

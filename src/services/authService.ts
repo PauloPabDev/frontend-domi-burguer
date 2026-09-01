@@ -16,6 +16,7 @@ import {
 } from 'firebase/auth';
 
 import { auth } from '@/lib/firebase';
+import { AUTH_ERROR_MESSAGES, DEFAULT_AUTH_ERROR_MESSAGE } from '@/utils/constants/authErrorMessages';
 
 /**
  * Interfaz de error de autenticación
@@ -23,6 +24,8 @@ import { auth } from '@/lib/firebase';
 export interface AuthError {
   code: string;
   message: string;
+  /** Instrucciones de cómo solucionar el error, para mostrar al usuario. */
+  hint?: string;
 }
 
 /**
@@ -157,31 +160,20 @@ export class AuthService {
   }
 
   /**
-   * Formatear errores de Firebase Auth para hacerlos más amigables
+   * Formatear errores de Firebase Auth para hacerlos más amigables.
+   * Usa el mapa centralizado de mensajes en español (con instrucciones de
+   * cómo solucionarlos) en vez de mostrar el texto crudo de Firebase.
    */
   private static formatError(error: unknown): AuthError {
     // Convertir error desconocido a un tipo que podamos manejar
     const firebaseError = error as FirebaseAuthError;
-    const errorCode = firebaseError.code || 'unknown';
-    
-    // Mapeo de códigos de error a mensajes más amigables
-    const errorMessages: Record<string, string> = {
-      'auth/user-not-found': 'No existe una cuenta con este correo electrónico.',
-      'auth/wrong-password': 'Contraseña incorrecta.',
-      'auth/email-already-in-use': 'Este correo electrónico ya está en uso.',
-      'auth/weak-password': 'La contraseña es demasiado débil.',
-      'auth/invalid-email': 'El correo electrónico no es válido.',
-      'auth/invalid-verification-code': 'El código de verificación no es válido.',
-      'auth/code-expired': 'El código de verificación ha expirado.',
-      'auth/invalid-phone-number': 'El número de teléfono no es válido.',
-      'auth/too-many-requests': 'Demasiados intentos fallidos. Inténtelo más tarde.',
-      'auth/popup-closed-by-user': 'La ventana de autenticación se cerró.',
-      'auth/cancelled-popup-request': 'La operación de autenticación fue cancelada.',
-    };
+    const errorCode = firebaseError.code || 'auth/unknown';
+    const detail = AUTH_ERROR_MESSAGES[errorCode];
 
     return {
       code: errorCode,
-      message: errorMessages[errorCode] || firebaseError.message || 'Ha ocurrido un error de autenticación.'
+      message: detail?.message || firebaseError.message || DEFAULT_AUTH_ERROR_MESSAGE.message,
+      hint: detail?.hint || DEFAULT_AUTH_ERROR_MESSAGE.hint,
     };
   }
 }
