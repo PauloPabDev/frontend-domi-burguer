@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Package, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Users, Package, BookOpen, ClipboardList } from 'lucide-react';
 import { ElementType } from 'react';
 import { Button } from '@/components/ui/button';
 import { NavWorkerAvatar } from '@/components/navbar/NavWorkerAvatar';
@@ -18,6 +18,7 @@ interface NavLink {
 
 const NAV_LINKS: NavLink[] = [
   { href: '/admin', label: 'DASHBOARD', Icon: LayoutDashboard, matchStart: false },
+  { href: '/admin/ordenes', label: 'ÓRDENES', Icon: ClipboardList, matchStart: true },
   { href: '/admin/usuarios', label: 'USUARIOS', Icon: Users, matchStart: true },
   { href: '/admin/productos', label: 'PRODUCTOS', Icon: Package, matchStart: true },
   { href: '/admin/documentos', label: 'DOCUMENTOS', Icon: BookOpen, matchStart: true },

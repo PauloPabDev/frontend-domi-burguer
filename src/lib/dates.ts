@@ -18,4 +18,24 @@ const formatFullDateTime = (d: string | FirestoreTimestamp) =>
         minute: '2-digit',
     });
 
-export { formatTime, formatDateTime, formatFullDateTime };
+/** Medianoche del día dado (o de hoy), para filtros de rango de fecha. */
+const getStartOfDay = (date = new Date()) => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d;
+};
+
+/** Último instante del día dado (o de hoy), para filtros de rango de fecha. */
+const getEndOfDay = (date = new Date()) => {
+    const d = new Date(date);
+    d.setHours(23, 59, 59, 999);
+    return d;
+};
+
+/** Formatea una fecha para el valor de un input `datetime-local`, respetando la zona horaria local. */
+const formatLocalDateTime = (date: Date) => {
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+};
+
+export { formatTime, formatDateTime, formatFullDateTime, getStartOfDay, getEndOfDay, formatLocalDateTime };

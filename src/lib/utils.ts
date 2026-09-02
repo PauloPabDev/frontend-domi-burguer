@@ -6,6 +6,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Normaliza texto para comparaciones/búsquedas insensibles a mayúsculas y acentos. */
+export const normalize = (s?: string) =>
+  (s ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
 export const generateCartItemId = (
   productId: number,
   complements: Complement[]

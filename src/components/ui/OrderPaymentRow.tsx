@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
-import { CreditCard, Loader2 } from 'lucide-react';
+import { Clock, CreditCard, Loader2 } from 'lucide-react';
 import bancolombiaLogo from "@/media/img/bancolombia.png";
 import nequiLogo from "@/media/img/nequi.png";
 import efectivoLogo from "@/media/img/efectivo.jpeg";
@@ -49,6 +49,8 @@ interface OrderPaymentRowProps {
   recepcionMode?: boolean;
   onPaymentMethodChange?: (method: string) => Promise<void>;
   onMarkPaid?: () => Promise<void>;
+  /** Revertir un pago ya confirmado a "pendiente". Reservado para overrides de admin. */
+  onMarkPending?: () => Promise<void>;
 }
 
 export function OrderPaymentRow({
@@ -61,11 +63,13 @@ export function OrderPaymentRow({
   recepcionMode = false,
   onPaymentMethodChange,
   onMarkPaid,
+  onMarkPending,
 }: OrderPaymentRowProps) {
   const [showPicker, setShowPicker] = useState(true);
   const [confirmingPaid, setConfirmingPaid] = useState(false);
   const [loadingMethod, setLoadingMethod] = useState<string | null>(null);
   const [loadingPaid, setLoadingPaid] = useState(false);
+  const [loadingPending, setLoadingPending] = useState(false);
 
   const currentLogo = PAYMENT_LOGOS[paymentMethod];
   const cashChange =
@@ -100,7 +104,17 @@ export function OrderPaymentRow({
     }
   };
 
-  const isLoading = !!loadingMethod || loadingPaid;
+  const handleMarkPending = async () => {
+    if (!onMarkPending || loadingPending) return;
+    setLoadingPending(true);
+    try {
+      await onMarkPending();
+    } finally {
+      setLoadingPending(false);
+    }
+  };
+
+  const isLoading = !!loadingMethod || loadingPaid || loadingPending;
 
   return (
     <div className={cn('relative', withBorderTop && 'border-t border-neutral-black-10 pt-2', className)}>
@@ -163,6 +177,19 @@ export function OrderPaymentRow({
           className="w-full mt-2 py-1 rounded-lg border border-neutral-black-10 text-xs text-neutral-black-100 hover:border-neutral-black-20 hover:text-neutral-black-60 transition-colors"
         >
           Confirmar pago
+        </button>
+      )}
+
+      {/* Revertir pago ya confirmado — override de admin */}
+      {paid && onMarkPending && (
+        <button
+          type="button"
+          onClick={handleMarkPending}
+          disabled={loadingPending}
+          className="w-full mt-2 flex items-center justify-center gap-1.5 py-1 rounded-lg border border-amber-200 bg-amber-50 text-xs text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-60"
+        >
+          {loadingPending ? <Loader2 size={12} className="animate-spin" /> : <Clock size={12} />}
+          Marcar pago como pendiente
         </button>
       )}
 

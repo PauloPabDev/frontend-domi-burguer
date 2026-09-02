@@ -1,9 +1,16 @@
 "use client";
 
 import Link from 'next/link';
-import { Users, ChefHat, ShieldCheck, Package, Activity } from 'lucide-react';
+import { Users, ChefHat, ShieldCheck, Package, Activity, ClipboardList } from 'lucide-react';
 
 const CARDS = [
+  {
+    href: '/admin/ordenes',
+    Icon: ClipboardList,
+    title: 'Órdenes',
+    description: 'Ver y gestionar pedidos de cada cocina, cambiar estados y pagos',
+    color: 'bg-red-50 text-primary-red',
+  },
   {
     href: '/admin/usuarios',
     Icon: Users,

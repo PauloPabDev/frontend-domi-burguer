@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
 import { OrderKanbanColumn } from '@/components/recepcion/OrderKanbanColumn';
@@ -22,10 +23,14 @@ const KANBAN_STATUSES: OrderStatus[] = [
 
 export default function RecepcionPage() {
   const { user } = useAuth();
+  const { userProfile } = useUserProfile();
   const { orders } = useSocket();
   const { kitchens } = useKitchenSelector();
   const { filterCourierIds } = useCourierPanel();
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
+  // Revertir un pago ya confirmado es una corrección exclusiva de admin;
+  // recepción conserva el cobro normal (marcar como pagado) sin restricción.
+  const isAdmin = userProfile?.roles?.includes('admin') ?? false;
 
   const filteredOrders =
     filterCourierIds.size === 0
@@ -137,7 +142,7 @@ export default function RecepcionPage() {
               onDelete={handleDeleteOrder}
               onPaymentMethodChange={handlePaymentMethodChange}
               onMarkPaid={handleMarkPaid}
-              onMarkPending={handleMarkPending}
+              onMarkPending={isAdmin ? handleMarkPending : undefined}
             />
           ))}
         </div>

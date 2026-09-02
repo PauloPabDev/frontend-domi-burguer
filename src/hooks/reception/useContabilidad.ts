@@ -11,7 +11,7 @@ export const useContabilidad = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchOrders = useCallback(async (startDate: string, endDate: string, kitchenId: string) => {
+  const fetchOrders = useCallback(async (startDate: string, endDate: string, kitchenId?: string) => {
     if (!user) return;
     setLoading(true);
     setError(null);
