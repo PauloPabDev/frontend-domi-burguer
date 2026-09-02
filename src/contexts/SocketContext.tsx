@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import { addToast } from '@heroui/toast';
 import { ConnectionStatus } from '@/types/courier';
@@ -43,9 +44,16 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   kitchenId: initialKitchenId = null,
 }) => {
   const { user } = useAuth();
+  const pathname = usePathname();
   const socketRef = useRef<Socket | null>(null);
   const initialized = useRef(false);
   const kitchenIdRef = useRef<string | null>(initialKitchenId ?? null);
+  // Se actualiza en cada render (no en un efecto) para que emitLogin siempre
+  // lea la ruta más reciente, sin depender de que un efecto ya haya corrido.
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  // Evita duplicar el primer envío de página: el login inicial ya la manda.
+  const hasSkippedInitialPageEffect = useRef(false);
 
   const [orders, setOrders] = useState<WorkerOrder[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('IDLE');
@@ -61,7 +69,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     if (!socketRef.current?.connected || !user) return;
     const token = await user.getIdToken();
     const kId = overrideKitchenId !== undefined ? overrideKitchenId : kitchenIdRef.current;
-    socketRef.current.emit('login', { token, role, kitchenId: kId });
+    socketRef.current.emit('login', { token, role, kitchenId: kId, page: pathnameRef.current });
   }, [user, role]);
 
   const reconnect = useCallback(() => {
@@ -264,6 +272,20 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  // Informa cambios de ruta posteriores al login inicial (que ya mandó la
+  // página de entrada). Si el socket está desconectado en este instante no
+  // pasa nada: el próximo login/reconexión ya manda la página correcta vía
+  // pathnameRef.
+  useEffect(() => {
+    if (!hasSkippedInitialPageEffect.current) {
+      hasSkippedInitialPageEffect.current = true;
+      return;
+    }
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('presence/page', { page: pathname });
+    }
+  }, [pathname]);
 
   useEffect(() => {
     if (!navigator.onLine) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { OrderStatus } from '@/types/orders';
@@ -15,8 +16,13 @@ interface OrderSocketUpdate {
 
 export function useOrderSocket(orderId: string | null) {
   const { user } = useAuth();
+  const pathname = usePathname();
   const socketRef = useRef<Socket | null>(null);
   const initialized = useRef(false);
+  // El hook vive solo mientras el usuario está en la página del pedido, así
+  // que basta con capturar la ruta una vez (no cambia sin desmontar el hook).
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
 
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('IDLE');
   const [orderUpdate, setOrderUpdate] = useState<OrderSocketUpdate | null>(null);
@@ -32,7 +38,7 @@ export function useOrderSocket(orderId: string | null) {
     const emitLogin = async () => {
       if (!socketRef.current?.connected || !user) return;
       const token = await user.getIdToken();
-      socketRef.current.emit('login', { token, role: 'client', orderId });
+      socketRef.current.emit('login', { token, role: 'client', orderId, page: pathnameRef.current });
     };
 
     socketRef.current.on('connect', () => {
@@ -86,7 +92,7 @@ export function useOrderSocket(orderId: string | null) {
   useEffect(() => {
     if (connectionStatus === 'CONNECTED' && socketRef.current?.connected && user) {
       user.getIdToken().then((token) => {
-        socketRef.current?.emit('login', { token, role: 'client', orderId });
+        socketRef.current?.emit('login', { token, role: 'client', orderId, page: pathnameRef.current });
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

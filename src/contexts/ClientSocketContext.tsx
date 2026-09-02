@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import { addToast } from '@heroui/toast';
 import { ConnectionStatus } from '@/types/courier';
@@ -32,14 +33,21 @@ export const useClientSocket = () => useContext(ClientSocketContext);
 
 export const ClientSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
+  const pathname = usePathname();
   const socketRef = useRef<Socket | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('IDLE');
+  // Se actualiza en cada render (no en un efecto) para que emitLogin siempre
+  // lea la ruta más reciente, sin depender de que un efecto ya haya corrido.
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  // Evita duplicar el primer envío de página: el login inicial ya la manda.
+  const hasSkippedInitialPageEffect = useRef(false);
 
   const emitLogin = useCallback(async () => {
     if (!socketRef.current?.connected || !user) return;
     const token = await user.getIdToken();
-    socketRef.current.emit('login', { token, role: 'client' });
+    socketRef.current.emit('login', { token, role: 'client', page: pathnameRef.current });
   }, [user]);
 
   useEffect(() => {
@@ -100,6 +108,20 @@ export const ClientSocketProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  // Informa cambios de ruta posteriores al login inicial (que ya mandó la
+  // página de entrada). Si el socket está desconectado en este instante no
+  // pasa nada: el próximo login/reconexión ya manda la página correcta vía
+  // pathnameRef.
+  useEffect(() => {
+    if (!hasSkippedInitialPageEffect.current) {
+      hasSkippedInitialPageEffect.current = true;
+      return;
+    }
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('presence/page', { page: pathname });
+    }
+  }, [pathname]);
 
   return (
     <ClientSocketContext.Provider value={{ socket, connectionStatus }}>

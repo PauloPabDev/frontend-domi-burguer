@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Users, ChefHat, ShieldCheck, Package } from 'lucide-react';
+import { Users, ChefHat, ShieldCheck, Package, Activity } from 'lucide-react';
 
 const CARDS = [
   {
@@ -24,6 +24,13 @@ const CARDS = [
     title: 'Productos',
     description: 'Ver y editar productos del menú',
     color: 'bg-orange-50 text-orange-600',
+  },
+  {
+    href: '/admin/monitoreo',
+    Icon: Activity,
+    title: 'Monitoreo',
+    description: 'Clientes y trabajadores conectados en vivo',
+    color: 'bg-emerald-50 text-emerald-600',
   },
 ];
 
