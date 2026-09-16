@@ -120,10 +120,10 @@ export const PRODUCT_CARD_IMAGES: CardImageConfig[][] = [
     height: 230,
     className: "absolute top-[-0px] left-[26px] lg:top-[-38px] lg:left-[69px] w-[110px] h-[166px] lg:w-[153px] lg:h-[230px] object-cover",
   }],
-  // Jugo Natural de Mora
+  // Salsa de Ajo Pequeña
   [{
-    src: "/images/products/blackberry-juice-card.webp",
-    alt: "Jugo Natural de Mora",
+    src: "/images/products/sauce-card.webp",
+    alt: "Salsa de Ajo Pequeña",
     width: 153,
     height: 230,
     className: "absolute top-[-0px] left-[26px] lg:top-[-38px] lg:left-[69px] w-[110px] h-[166px] lg:w-[153px] lg:h-[230px] object-cover",
