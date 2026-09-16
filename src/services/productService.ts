@@ -56,7 +56,10 @@ export class ProductService {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error('Error al crear producto');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Error al crear producto');
+    }
     return response.json();
   }
 }

@@ -10,8 +10,8 @@ import { cn } from '@/lib/utils';
 import { Product } from '@/types/product';
 
 const TYPE_FILTERS = [
-  { value: '' as const,           label: 'Todos' },
-  { value: 'product' as const,    label: 'Productos' },
+  { value: '' as const, label: 'Todos' },
+  { value: 'product' as const, label: 'Productos' },
   { value: 'complement' as const, label: 'Complementos' },
 ];
 

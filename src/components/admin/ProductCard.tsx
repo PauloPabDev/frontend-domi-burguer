@@ -5,13 +5,13 @@ import { Product } from '@/types/product';
 import { cn } from '@/lib/utils';
 
 const TYPE_CONFIG = {
-  product:    { label: 'Producto',     color: 'text-orange-700',  bg: 'bg-orange-100' },
-  complement: { label: 'Complemento',  color: 'text-violet-700',  bg: 'bg-violet-100' },
+  product: { label: 'Producto', color: 'text-orange-700', bg: 'bg-orange-100' },
+  complement: { label: 'Complemento', color: 'text-violet-700', bg: 'bg-violet-100' },
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  active:   { label: 'Activo',     color: 'text-green-700',  bg: 'bg-green-100' },
-  inactive: { label: 'Inactivo',   color: 'text-red-700',    bg: 'bg-red-100' },
+  active: { label: 'Activo', color: 'text-green-700', bg: 'bg-green-100' },
+  inactive: { label: 'Inactivo', color: 'text-red-700', bg: 'bg-red-100' },
 };
 
 interface ProductCardProps {
@@ -52,6 +52,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onEdit }) => 
         >
           <Pencil size={12} className="text-neutral-black-80" />
         </button>
+        <span className="absolute bottom-1.5 left-1.5 max-w-[80%] truncate rounded-md bg-black/30 px-1.5 py-0.5 font-mono text-[9px] text-white/70">
+          {product.id}
+        </span>
       </div>
 
       {/* Body */}
