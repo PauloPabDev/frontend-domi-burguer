@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Product } from '@/types/product';
 
 const DEFAULTS = {
+  id: '',
   name: '',
   price: 0,
   description: '',
@@ -18,7 +19,7 @@ const DEFAULTS = {
 
 interface EditProductModalProps {
   product?: Product;
-  onSave: (id: string | null, data: Omit<Product, 'id'> | Partial<Omit<Product, 'id'>>) => Promise<void>;
+  onSave: (id: string | null, data: (Omit<Product, 'id'> & { id?: string }) | Partial<Omit<Product, 'id'>>) => Promise<void>;
   onClose: () => void;
 }
 
@@ -29,6 +30,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, onS
   const isCreating = !product;
 
   const [form, setForm] = useState({
+    id: DEFAULTS.id,
     name: product?.name ?? DEFAULTS.name,
     price: product?.price ?? DEFAULTS.price,
     description: product?.description ?? DEFAULTS.description,
@@ -47,11 +49,12 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, onS
 
   const handleSave = async () => {
     if (!form.name.trim()) { setError('El nombre es requerido'); return; }
-    if (form.price <= 0) { setError('El precio debe ser mayor a 0'); return; }
+    if (form.price < 0) { setError('El precio debe ser mayor a 0'); return; }
     setLoading(true);
     setError(null);
 
     const full = {
+      ...(isCreating && form.id.trim() ? { id: form.id.trim() } : {}),
       name: form.name.trim(),
       price: form.price,
       description: form.description || undefined,
@@ -65,8 +68,8 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, onS
     const payload = isCreating
       ? full
       : (Object.fromEntries(
-          Object.entries(full).filter(([k, v]) => v !== (product as unknown as Record<string, unknown>)[k])
-        ) as Partial<Omit<Product, 'id'>>);
+        Object.entries(full).filter(([k, v]) => v !== (product as unknown as Record<string, unknown>)[k])
+      ) as Partial<Omit<Product, 'id'>>);
 
     try {
       await onSave(product?.id ?? null, payload);
@@ -96,6 +99,20 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, onS
 
         {/* Body */}
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
+          {/* ID (opcional, solo al crear) */}
+          {isCreating && (
+            <div>
+              <label className={LABEL_CLASS}>ID del producto (opcional)</label>
+              <input
+                type="text"
+                value={form.id}
+                onChange={e => set('id', e.target.value)}
+                className={`${FIELD_CLASS} font-mono text-xs`}
+                placeholder="Se generará automáticamente si se deja vacío"
+              />
+            </div>
+          )}
+
           {/* Nombre */}
           <div>
             <label className={LABEL_CLASS}>Nombre</label>

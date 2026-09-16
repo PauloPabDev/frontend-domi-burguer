@@ -43,7 +43,7 @@ export default function AdminProductosPage() {
     if (id) {
       await updateProduct(id, data as Partial<Omit<Product, 'id'>>);
     } else {
-      await createProduct(data as Omit<Product, 'id'>);
+      await createProduct(data as Omit<Product, 'id'> & { id?: string });
     }
   };
 

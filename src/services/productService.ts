@@ -49,7 +49,7 @@ export class ProductService {
 
   static async create(
     token: string,
-    data: Omit<Product, 'id'>
+    data: Omit<Product, 'id'> & { id?: string }
   ): Promise<{ body: Product }> {
     const response = await fetch(`${this.API_URL}api/v2/products`, {
       method: 'POST',

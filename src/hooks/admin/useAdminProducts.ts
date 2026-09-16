@@ -40,7 +40,7 @@ export const useAdminProducts = () => {
     return body;
   };
 
-  const createProduct = async (data: Omit<Product, 'id'>) => {
+  const createProduct = async (data: Omit<Product, 'id'> & { id?: string }) => {
     if (!user) return;
     const token = await user.getIdToken();
     const { body } = await ProductService.create(token, data);
