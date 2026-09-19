@@ -7,10 +7,10 @@ import { PhoneNumberInput } from "@/components/ui/inputPhone";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   PhoneAuthProvider,
-  RecaptchaVerifier,
   linkWithCredential,
   unlink,
 } from "firebase/auth";
+import { getOrCreateRecaptchaVerifier, clearRecaptchaVerifier } from "@/lib/recaptcha";
 import { auth } from "@/lib/firebase";
 import { Modal } from "@/components/ui/modal";
 import { track } from "@/utils/analytics";
@@ -53,7 +53,6 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
   const otpAbortRef = useRef<AbortController | null>(null);
 
   const recaptchaContainerId = "phone-modal-recaptcha";
-  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
   // Claves para sessionStorage
   const STORAGE_KEY_VERIFICATION_ID = "phone_verification_id";
@@ -85,20 +84,9 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
     return remaining > 0 ? remaining : 0;
   };
 
-  const clearRecaptcha = () => {
-    if (recaptchaVerifierRef.current) {
-      try {
-        recaptchaVerifierRef.current.clear();
-      } catch {
-        // ignore
-      }
-      recaptchaVerifierRef.current = null;
-    }
-  };
-
   useEffect(() => {
     return () => {
-      clearRecaptcha();
+      clearRecaptchaVerifier(recaptchaContainerId);
     };
   }, []);
 
@@ -131,7 +119,7 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
       }
       clearError();
     } else {
-      clearRecaptcha();
+      clearRecaptchaVerifier(recaptchaContainerId);
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -195,21 +183,6 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
     return phoneValue;
   };
 
-  const getOrCreateRecaptcha = (): RecaptchaVerifier => {
-    clearRecaptcha();
-
-    const container = document.getElementById(recaptchaContainerId);
-    if (container) {
-      container.innerHTML = "";
-    }
-
-    recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerId, {
-      size: "invisible",
-    });
-
-    return recaptchaVerifierRef.current;
-  };
-
   const handleSendCode = async () => {
     if (!user) {
       setErrorMsg({
@@ -234,7 +207,7 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
       setSuccessMsg(null);
       setSending(true);
 
-      const recaptchaVerifier = getOrCreateRecaptcha();
+      const recaptchaVerifier = getOrCreateRecaptchaVerifier(recaptchaContainerId);
       const provider = new PhoneAuthProvider(auth);
 
       const vid = await provider.verifyPhoneNumber(normalized, recaptchaVerifier);
@@ -348,7 +321,7 @@ export const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
   const description =
     mode === "change"
       ? "Ingresa tu nuevo número de teléfono para vincularlo a tu cuenta."
-      : "Inicia sesión o regístrate con tu número de celular.";
+      : "Verifica tu número de celular para vincularlo a tu cuenta.";
 
   return (
     <Modal

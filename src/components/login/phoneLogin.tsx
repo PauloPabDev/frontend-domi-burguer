@@ -91,6 +91,9 @@ export const PhoneLogin = ({ onClose, onSuccess, redirectTo = "/profile" }: Phon
         return `${m}:${s}`;
     };
 
+    // Número de celular colombiano: siempre 10 dígitos locales (sin el +57)
+    const COLOMBIA_MOBILE_DIGITS = 10;
+
     // Normalizar número de teléfono
     const normalizePhone = (phone: string): string => {
         const cleaned = phone.replace(/\D/g, "");
@@ -99,11 +102,12 @@ export const PhoneLogin = ({ onClose, onSuccess, redirectTo = "/profile" }: Phon
 
     // Enviar código de verificación
     const handleSendCode = async () => {
+        const digits = phone.replace(/\D/g, "");
         const normalized = normalizePhone(phone);
-        if (normalized.length < 12) {
+        if (digits.length !== COLOMBIA_MOBILE_DIGITS) {
             setLocalError({
                 message: "Ingresa un número de teléfono válido.",
-                hint: "Revisa que hayas escrito el número completo, sin espacios ni letras (ej: 300 123 4567).",
+                hint: "Revisa que hayas escrito los 10 dígitos del número, sin espacios ni letras (ej: 300 123 4567).",
             });
             return;
         }
@@ -226,7 +230,7 @@ export const PhoneLogin = ({ onClose, onSuccess, redirectTo = "/profile" }: Phon
             {step === "phone" && (
                 <Button
                     onClick={handleSendCode}
-                    disabled={sending || !phone || phone.length < 10}
+                    disabled={sending || phone.replace(/\D/g, "").length !== COLOMBIA_MOBILE_DIGITS}
                     className="text-white rounded-[30px] mb-2 flex items-center gap-2 text-[16px] w-full h-[48px]"
                 >
                     {sending ? "Enviando..." : "ENVIAR CÓDIGO"}

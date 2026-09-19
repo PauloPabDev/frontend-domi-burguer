@@ -28,6 +28,14 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 /**
+ * Forzar español para los SMS de verificación telefónica (y demás correos/
+ * mensajes de Firebase Auth) sin depender del idioma del navegador. Se fija
+ * una sola vez aquí para que aplique a todos los flujos de teléfono (login,
+ * vincular, cambiar), no solo a la pantalla de login.
+ */
+auth.languageCode = 'es';
+
+/**
  * Configurar emuladores para desarrollo local si es necesario
  */
 if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === 'true') {

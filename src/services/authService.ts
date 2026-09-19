@@ -16,6 +16,7 @@ import {
 } from 'firebase/auth';
 
 import { auth } from '@/lib/firebase';
+import { getOrCreateRecaptchaVerifier } from '@/lib/recaptcha';
 import { AUTH_ERROR_MESSAGES, DEFAULT_AUTH_ERROR_MESSAGE } from '@/utils/constants/authErrorMessages';
 
 /**
@@ -142,21 +143,20 @@ export class AuthService {
   }
 
   /**
-   * Crear instancia de RecaptchaVerifier
+   * Crear instancia de RecaptchaVerifier. Limpia de forma segura cualquier
+   * instancia previa asociada al mismo contenedor (necesario para poder
+   * reenviar el código SMS sin que Firebase lance
+   * `auth/internal-error: reCAPTCHA has already been rendered`).
    */
   static createRecaptchaVerifier(
-    containerId: string, 
+    containerId: string,
     callbacks?: {
       success?: () => void;
       error?: (error: unknown) => void;
       expired?: () => void;
     }
   ): RecaptchaVerifier {
-    return new RecaptchaVerifier(auth, containerId, {
-      size: 'invisible',
-      callback: callbacks?.success,
-      'expired-callback': callbacks?.expired
-    });
+    return getOrCreateRecaptchaVerifier(containerId, callbacks);
   }
 
   /**

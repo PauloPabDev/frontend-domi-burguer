@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-import { auth } from "@/lib/firebase";
 import { GoogleLogin } from "./googleLogin";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -12,10 +10,6 @@ interface LoginSectionProps {
 }
 
 export const LoginSection = ({ onClose, redirectTo = "/profile", title }: LoginSectionProps) => {
-    useEffect(() => {
-        auth.languageCode = "es";
-    }, []);
-
     return (
         <div className="flex flex-col w-full h-full justify-center items-center px-5 md:px-0">
             <Card className="w-full max-w-[500px] bg-white rounded-[30px] shadow-lg border-0">
