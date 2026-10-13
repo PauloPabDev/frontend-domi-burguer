@@ -22,11 +22,7 @@ Domi Burguer es una plataforma de pedidos online de hamburguesas artesanales con
 
 ### Postres
 
-- **Cheesecake de Fresa** — $14.000 COP: Cremoso con base crocante y cobertura de fresas frescas.
-
-### Bebidas
-
-- **Jugo Natural de Mora** — $3.500 COP: Jugo de mora de 350 ml.
+- **Cheesecake de Fresa** — $14.000 COP: Cremoso con base crocante y cobertura de fresas frescas. (Agotado)
 
 ## Horarios de atención
 

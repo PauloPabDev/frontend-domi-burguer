@@ -45,10 +45,16 @@ export function ProductThumbnail({
             className={img.className}
           />
         ))}
+        {product.soldOut && (
+          <span className="absolute z-10 bottom-[8px] left-1/2 -translate-x-1/2 rounded-full bg-neutral-black-80 px-3 py-1 text-xs font-bold text-white">
+            AGOTADO
+          </span>
+        )}
         <Button
           variant="primary"
           size="icon-sm"
-          className={`absolute z-10 top-[5px] right-[5px] lg:top-[7px] lg:left-[232px] lg:w-10 lg:h-10 ${isActive ? "hidden" : ""}`}
+          className={`absolute z-10 top-[5px] right-[5px] lg:top-[7px] lg:left-[232px] lg:w-10 lg:h-10 ${isActive || product.soldOut ? "hidden" : ""}`}
+          disabled={product.soldOut}
           onClick={(e) => {
             e.stopPropagation();
             onAddToCart(product);
@@ -116,14 +122,6 @@ export const PRODUCT_CARD_IMAGES: CardImageConfig[][] = [
   [{
     src: "/images/products/cheesecake-card.webp",
     alt: "Cheesecake de Fresa",
-    width: 153,
-    height: 230,
-    className: "absolute top-[-0px] left-[26px] lg:top-[-38px] lg:left-[69px] w-[110px] h-[166px] lg:w-[153px] lg:h-[230px] object-cover",
-  }],
-  // Jugo Natural de Mora
-  [{
-    src: "/images/products/blackberry-juice-card.webp",
-    alt: "Jugo Natural de Mora",
     width: 153,
     height: 230,
     className: "absolute top-[-0px] left-[26px] lg:top-[-38px] lg:left-[69px] w-[110px] h-[166px] lg:w-[153px] lg:h-[230px] object-cover",

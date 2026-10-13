@@ -95,19 +95,6 @@ export const PRODUCTS: Product[] = [
     complements: [],
     allowCustomization: true,
     customizationType: "burger",
+    soldOut: true,
   },
-  {
-    id: 44,
-    name: "JUGO NATURAL DE MORA",
-    basePrice: 3500,
-    price: 3500,
-    body: "Jugo de mora de 350 ml.",
-    bigImage: "/images/products/blackberry-juice-large.webp",
-    image1: "/images/products/blackberry-juice-card.webp",
-    icons: [],
-    quantity: 1,
-    complements: [],
-    allowCustomization: true,
-    customizationType: "burger",
-  }
 ];

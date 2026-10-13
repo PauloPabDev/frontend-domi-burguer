@@ -186,17 +186,6 @@ const otrosData: Complement[] = [
 
 // GASEOSAS - Bebidas
 const gaseosasData: Complement[] = [
-  // Jugo natural de mora (350 ml)
-  {
-    id: 45,
-    name: "Jugo Natural de Mora",
-    price: 3500,
-    icon: "CupSoda",
-    quantity: 0,
-    type: "addable",
-    additionId: 45,
-    minusComplement: false,
-  },
   {
     id: 10,
     name: "Coca-Cola personal",

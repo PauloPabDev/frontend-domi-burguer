@@ -7,6 +7,9 @@ export const useAddToCart = () => {
   const { addItem } = useCartStore();
 
   const handleAddToCart = (product: Product) => {
+    // Producto agotado: no se puede agregar al carrito
+    if (product.soldOut) return;
+
     // Generar ID único basado en producto y complementos
     const uniqueId = generateCartItemId(product.id, product.complements);
     

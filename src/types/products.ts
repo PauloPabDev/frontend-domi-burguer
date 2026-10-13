@@ -31,4 +31,5 @@ export type Product = {
   complements: Complement[];
   allowCustomization: boolean;
   customizationType: CustomizationType;
+  soldOut?: boolean; // Producto agotado: se muestra pero no se puede comprar
 };

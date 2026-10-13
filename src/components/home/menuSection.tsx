@@ -146,7 +146,12 @@ export default function MenuSection() {
         {/* Columna 2 - Información del Producto 56 32*/}
         <div className="flex flex-col items-center justify-center p-10 md:p-20 md:pt-30 bg-accent-yellow-10 max-w-[720px] w-full mx-auto">
           <div className="flex flex-col w-full max-w-[400px] items-center gap-6 mb-8 md:mb-5">
-            <div className="transition-opacity duration-300">
+            <div className="flex flex-col items-center gap-3 transition-opacity duration-300">
+              {currentProduct.soldOut && (
+                <span className="rounded-full bg-neutral-black-80 px-4 py-1 text-sm font-bold text-white">
+                  AGOTADO
+                </span>
+              )}
               <h1 className="text-center">
                 {currentProduct.name.startsWith("HAMBURGUESA") ? (
                   <>
@@ -170,7 +175,7 @@ export default function MenuSection() {
               variant="outline"
               size="md"
               rightIcon={<EditarIcon className="w-4 h-4" />}
-              className={`w-[177px] ${!currentProduct.allowCustomization ? "hidden" : ""}`}
+              className={`w-[177px] ${!currentProduct.allowCustomization || currentProduct.soldOut ? "hidden" : ""}`}
               onClick={() => handleEditProduct()}
             >
               PERSONALIZAR
@@ -184,7 +189,7 @@ export default function MenuSection() {
             />
           </div>
 
-          <div className="flex w-full max-w-[720px] items-center justify-center gap-6 mb-8 md:mb-12">
+          <div className={`flex w-full max-w-[720px] items-center justify-center gap-6 mb-8 md:mb-12 ${currentProduct.soldOut ? "opacity-50 pointer-events-none" : ""}`}>
             <QuantitySelector
               value={currentProduct.quantity}
               onIncrease={handleIncrease}
@@ -201,6 +206,11 @@ export default function MenuSection() {
             </div>
           </div>
 
+          {currentProduct.soldOut ? (
+            <Button variant="primary" size="lg" className="w-[215px]" disabled>
+              AGOTADO
+            </Button>
+          ) : (
           <div className="flex flex-col sm:flex-row w-full max-w-[720px] items-center justify-center gap-3 sm:gap-6">
             <Link href={"/cart"}>
               <Button
@@ -230,6 +240,7 @@ export default function MenuSection() {
               AÑADIR AL CARRITO
             </Button>
           </div>
+          )}
         </div>
       </section>
 
