@@ -37,6 +37,11 @@ export function ProductCard({
           className="object-contain p-2"
           sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
         />
+        {product.soldOut && (
+          <span className="absolute top-2 left-2 rounded-full bg-neutral-black-80 px-3 py-1 text-xs font-bold text-white">
+            AGOTADO
+          </span>
+        )}
       </div>
 
       <div className="p-3 bg-white flex flex-col gap-2">
@@ -46,7 +51,17 @@ export function ProductCard({
         </p>
 
         <div className="flex items-center justify-center gap-2 mt-1">
-          {quantity === 0 ? (
+          {product.soldOut ? (
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              disabled
+              className="w-full"
+            >
+              AGOTADO
+            </Button>
+          ) : quantity === 0 ? (
             <Button
               type="button"
               variant="primary"

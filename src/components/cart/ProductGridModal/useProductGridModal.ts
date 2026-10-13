@@ -38,6 +38,9 @@ export function useProductGridModal(onClose: () => void) {
 
   const addProductToCart = useCallback(
     (product: Product) => {
+      // Producto agotado: no se puede agregar al carrito
+      if (product.soldOut) return;
+
       const existingItem = items.find(
         (item) => item.productId === product.id && item.complements.length === 0
       );
