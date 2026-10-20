@@ -194,7 +194,7 @@ export function OrderClientChip({
           onClick={handleOpen}
           className={cn(
             'flex items-center rounded-full pl-1 py-1 shrink-0 transition-colors',
-            size === 'sm' ? 'w-full gap-2 rounded-xl pr-2 text-left' : 'gap-2 pr-4',
+            size === 'sm' ? 'w-full gap-2 rounded-lg pr-2 text-left' : 'gap-2 pr-4',
             chipColorMap.compact[userKey],
             className,
           )}
@@ -204,7 +204,7 @@ export function OrderClientChip({
             alt={name ?? 'Cliente'}
             width={size === 'sm' ? 26 : 30}
             height={size === 'sm' ? 26 : 30}
-            className="rounded-full object-cover shrink-0"
+            className={cn('object-cover shrink-0', size === 'sm' ? 'rounded-md' : 'rounded-full')}
           />
           <span
             className={cn(

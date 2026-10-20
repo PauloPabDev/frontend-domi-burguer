@@ -16,6 +16,8 @@ interface OrderActionButtonsProps {
   /** Recibe true/false cada vez que cambia el estado de confirmación */
   onConfirmingChange?: (confirming: boolean) => void;
   className?: string;
+  /** Clases extra para cada botón (p. ej. radio de borde) */
+  buttonClassName?: string;
 }
 
 export function OrderActionButtons({
@@ -27,6 +29,7 @@ export function OrderActionButtons({
   stopPropagation = false,
   onConfirmingChange,
   className,
+  buttonClassName,
 }: OrderActionButtonsProps) {
   const [confirming, setConfirming] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -61,6 +64,7 @@ export function OrderActionButtons({
           className={cn(
             'text-xs font-medium text-neutral-black-100 hover:text-neutral-black-80 border border-neutral-black-20 rounded-xl transition-colors disabled:opacity-40',
             fullWidth ? 'flex-1 py-2.5' : 'px-3 py-1.5',
+            buttonClassName,
           )}
         >
           Cancelar
@@ -73,6 +77,7 @@ export function OrderActionButtons({
             size={size}
             variant={variant}
             fullWidth={fullWidth}
+            className={buttonClassName}
           >
             Confirmar
           </Button>
@@ -87,7 +92,7 @@ export function OrderActionButtons({
       size={size}
       variant={variant}
       fullWidth={fullWidth}
-      className={className}
+      className={cn(buttonClassName, className)}
     >
       {label}
     </Button>

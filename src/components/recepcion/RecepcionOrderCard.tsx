@@ -67,7 +67,7 @@ function CompactItemsList({ items }: { items: OrderItem[] }) {
         <li key={index}>
           <div className="flex items-start gap-1.5">
             <span
-              className="min-w-5 h-5 px-1 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0"
+              className="min-w-5 h-5 px-1 rounded-md text-white text-xs font-bold flex items-center justify-center shrink-0"
               style={{ backgroundColor: item.colorPrimary ?? 'var(--color-primary-red)' }}
             >
               {item.quantity}
@@ -84,7 +84,7 @@ function CompactItemsList({ items }: { items: OrderItem[] }) {
                 return (
                   <li key={i} className="flex items-start gap-1 text-[11px] text-neutral-black-100 leading-tight">
                     <span
-                      className="min-w-4 h-4 px-0.5 rounded-full text-white text-[10px] font-bold flex items-center justify-center shrink-0"
+                      className="min-w-4 h-4 px-0.5 rounded-md text-white text-[10px] font-bold flex items-center justify-center shrink-0"
                       style={{ backgroundColor: c.colorPrimary ?? 'var(--color-neutral-black-60)' }}
                     >
                       {total}
@@ -214,7 +214,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           <button
             type="button"
             onClick={() => setShowOrderMenu(true)}
-            className="shrink-0 bg-primary-red hover:opacity-80 rounded-full px-2 py-0.5 text-sm font-bold text-white transition-opacity"
+            className="shrink-0 bg-primary-red hover:opacity-80 rounded-md px-2 py-0.5 text-sm font-bold text-white transition-opacity"
             aria-label={`Opciones de orden #${order.dailyOrderNumber}`}
           >
             {order.dailyOrderNumber}
@@ -322,10 +322,10 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               <img
                 src={order.courier.photoURL}
                 alt={order.courier.name}
-                className="w-4 h-4 rounded-full object-cover shrink-0"
+                className="w-4 h-4 rounded-md object-cover shrink-0"
               />
             ) : order.courier?.name ? (
-              <span className="w-4 h-4 rounded-full bg-primary-red/15 text-primary-red flex items-center justify-center text-[8px] font-bold shrink-0">
+              <span className="w-4 h-4 rounded-md bg-primary-red/15 text-primary-red flex items-center justify-center text-[8px] font-bold shrink-0">
                 {order.courier.name.charAt(0).toUpperCase()}
               </span>
             ) : (
@@ -354,6 +354,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               label={transition.label}
               size="sm"
               fullWidth
+              buttonClassName="rounded-lg"
               onConfirm={() => onStatusChange(order.id, order.status, transition.next)}
             />
           )}

@@ -12,7 +12,7 @@ export function OrderComment({ comment, compact = false, className }: OrderComme
     <div
       className={cn(
         'flex items-start gap-1.5 bg-yellow-50 border border-yellow-200',
-        compact ? 'rounded-lg p-2' : 'rounded-xl p-2.5',
+        compact ? 'rounded-lg p-1.5' : 'rounded-xl p-2.5',
         className,
       )}
     >
