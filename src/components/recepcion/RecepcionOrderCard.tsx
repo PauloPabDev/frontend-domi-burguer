@@ -31,7 +31,9 @@ const TIMED_STATUSES: OrderStatus[] = ['fresh', 'preparing', 'ready_for_pickup',
 const ELAPSED_WARN_MIN = 20;
 const ELAPSED_LATE_MIN = 35;
 
-const SECTION = 'border-t border-neutral-black-10 px-2 py-2';
+// Espaciado único de la card: 12px laterales, 10px verticales por sección.
+// El radio de la card (20px) = radio de los botones (8px) + padding lateral (12px), para que sean concéntricos.
+const SECTION = 'border-t border-neutral-black-10 px-3 py-2.5';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -203,76 +205,78 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
     <>
       <div
         className={cn(
-          'rounded-xl border shadow-sm overflow-hidden',
+          'rounded-[20px] border shadow-sm overflow-hidden',
           cardColor ?? 'border-neutral-black-20 bg-white'
         )}
       >
         <OrderStatusStrip status={order.status} className="h-1" />
 
-        {/* 1. Identificación: número · sede · hora · tiempo transcurrido */}
-        <div className="flex items-center gap-1.5 px-2 pt-2 min-w-0">
-          <button
-            type="button"
-            onClick={() => setShowOrderMenu(true)}
-            className="shrink-0 min-w-7 h-7 px-1.5 flex items-center justify-center bg-primary-red hover:opacity-80 rounded-full text-sm font-bold text-white transition-opacity"
-            aria-label={`Opciones de orden #${order.dailyOrderNumber}`}
-          >
-            {order.dailyOrderNumber}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowKitchenModal(true)}
-            title={kitchenName ?? 'Asignar sede'}
-            className={cn(
-              'flex items-center gap-0.5 min-w-0 text-[11px] hover:text-primary-red transition-colors',
-              kitchenName ? 'text-neutral-black-100' : 'text-amber-600 font-semibold'
-            )}
-          >
-            <ChefHat size={11} className="shrink-0" />
-            <span className="truncate">{kitchenName ?? 'Sin sede'}</span>
-          </button>
-          <div className="ml-auto flex items-center gap-1.5 shrink-0 text-[11px] leading-none">
-            <span className="font-semibold text-neutral-black-100">{formatTime(order.createdAt)}</span>
-            {isTimed && (
-              <span
-                className={cn(
-                  'flex items-center gap-0.5 font-bold',
-                  elapsed >= ELAPSED_LATE_MIN
-                    ? 'text-primary-red'
-                    : elapsed >= ELAPSED_WARN_MIN
-                      ? 'text-amber-600'
-                      : 'text-neutral-black-100'
-                )}
-              >
-                <Clock size={10} />
-                {elapsed}m
-              </span>
-            )}
+        <div className="px-3 py-2.5 space-y-2">
+          {/* 1. Identificación: número · sede · hora · tiempo transcurrido */}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <button
+              type="button"
+              onClick={() => setShowOrderMenu(true)}
+              className="shrink-0 min-w-7 h-7 px-1.5 flex items-center justify-center bg-primary-red hover:opacity-80 rounded-full text-sm font-bold text-white transition-opacity"
+              aria-label={`Opciones de orden #${order.dailyOrderNumber}`}
+            >
+              {order.dailyOrderNumber}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowKitchenModal(true)}
+              title={kitchenName ?? 'Asignar sede'}
+              className={cn(
+                'flex items-center gap-0.5 min-w-0 text-[11px] hover:text-primary-red transition-colors',
+                kitchenName ? 'text-neutral-black-100' : 'text-amber-600 font-semibold'
+              )}
+            >
+              <ChefHat size={11} className="shrink-0" />
+              <span className="truncate">{kitchenName ?? 'Sin sede'}</span>
+            </button>
+            <div className="ml-auto flex items-center gap-1.5 shrink-0 text-[11px] leading-none">
+              <span className="font-semibold text-neutral-black-100">{formatTime(order.createdAt)}</span>
+              {isTimed && (
+                <span
+                  className={cn(
+                    'flex items-center gap-0.5 font-bold',
+                    elapsed >= ELAPSED_LATE_MIN
+                      ? 'text-primary-red'
+                      : elapsed >= ELAPSED_WARN_MIN
+                        ? 'text-amber-600'
+                        : 'text-neutral-black-100'
+                  )}
+                >
+                  <Clock size={10} />
+                  {elapsed}m
+                </span>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Cliente: foto + nombre completo */}
-        <div className="px-2 pt-1.5">
-          <OrderClientChip
-            name={order.client?.name ?? order.user?.name}
-            phone={order.client?.phone ?? order.user?.phone}
-            clientId={order.clientId}
-            avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
-            isUser={isUser}
-            origin={order?.origin}
-            size="sm"
-          />
-        </div>
+          {/* Cliente: foto + nombre completo */}
+          <div>
+            <OrderClientChip
+              name={order.client?.name ?? order.user?.name}
+              phone={order.client?.phone ?? order.user?.phone}
+              clientId={order.clientId}
+              avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
+              isUser={isUser}
+              origin={order?.origin}
+              size="sm"
+            />
+          </div>
 
-        {/* 2. Entrega: dirección (2 líneas) + comentario */}
-        <div className="px-2 pt-1.5 pb-2 space-y-1">
-          <OrderAddressRow
-            location={order.location}
-            address={order.deliveryAddress?.address}
-            floor={order.deliveryAddress?.floor}
-            compact
-          />
-          {order.comment && <OrderComment comment={order.comment} compact />}
+          {/* 2. Entrega: dirección (2 líneas) + comentario */}
+          <div className="space-y-1.5">
+            <OrderAddressRow
+              location={order.location}
+              address={order.deliveryAddress?.address}
+              floor={order.deliveryAddress?.floor}
+              compact
+            />
+            {order.comment && <OrderComment comment={order.comment} compact />}
+          </div>
         </div>
 
         {/* 3. Pedido (sin precios) */}
@@ -281,7 +285,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
         </div>
 
         {/* 4. Total con desglose en acordeón */}
-        <div className="border-t border-neutral-black-10 px-2 py-1.5">
+        <div className={SECTION}>
           <button
             type="button"
             onClick={() => setShowPrices((prev) => !prev)}
@@ -306,7 +310,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
         </div>
 
         {/* 5. Acciones: domiciliario · pago · siguiente paso (una por fila) */}
-        <div className="border-t border-neutral-black-10 bg-neutral-black-5/60 px-2 py-2 space-y-1.5">
+        <div className={cn(SECTION, 'bg-neutral-black-5/60 space-y-2')}>
           <button
             ref={courierButtonRef}
             type="button"
