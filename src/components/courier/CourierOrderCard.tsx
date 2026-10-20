@@ -113,7 +113,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
           )}
         </div>
 
-        {/* 2. Entrega: dirección + comentario */}
+        {/* 2. Entrega: dirección + cómo llegar + comentario */}
         <div className="space-y-1.5" onClick={stop}>
           <OrderAddressRow
             location={order.location}
@@ -121,6 +121,17 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
             floor={order.deliveryAddress?.floor}
             compact
           />
+          {navigationUrl && (
+            <a
+              href={navigationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-white py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
+            >
+              <Navigation size={15} />
+              Cómo llegar
+            </a>
+          )}
           {order.comment && <OrderComment comment={order.comment} compact />}
         </div>
       </div>
@@ -157,7 +168,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
         {showPrices && <OrderPriceBreakdown items={order.orderItems} deliveryPrice={order.deliveryPrice} />}
       </div>
 
-      {/* 5. Acciones: pago · navegar · siguiente paso (una por fila) */}
+      {/* 5. Acciones: pago · siguiente paso (una por fila) */}
       <div className={cn(SECTION, 'bg-neutral-black-5/60 space-y-2')} onClick={stop}>
         <OrderPaymentRow
           paymentMethod={order.paymentMethod}
@@ -165,18 +176,6 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
           paid={paid}
           compact
         />
-
-        {navigationUrl && (
-          <a
-            href={navigationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-white py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
-          >
-            <Navigation size={15} />
-            Cómo llegar
-          </a>
-        )}
 
         {transition && onStatusChange && (
           <OrderActionButtons
