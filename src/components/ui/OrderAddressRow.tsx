@@ -25,7 +25,7 @@ interface OrderAddressRowProps {
   location?: Location;
   address?: string;
   floor?: string;
-  /** Compacto: sin fondo ni acciones, solo ícono y texto pequeños (para recepción) */
+  /** Compacto: sin fondo, dirección en máx. 2 líneas + piso (para recepción) */
   compact?: boolean;
   className?: string;
 }
@@ -281,9 +281,14 @@ export function OrderAddressRow({
   if (compact) {
     return (
       <>
-        <div className={cn('flex items-center gap-1.5', className)}>
-          <MapPin size={11} className="text-neutral-black-100 shrink-0" />
-          <p className="text-sm font-bold text-neutral-black-80 line-clamp-1 flex-1 min-w-0">{displayAddress}</p>
+        <div className={cn('flex items-start gap-1', className)}>
+          <MapPin size={12} className="text-primary-red shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-bold text-neutral-black-80 leading-snug line-clamp-2">{displayAddress}</p>
+            {displayFloor && (
+              <p className="text-[11px] text-neutral-black-100 leading-tight truncate">Piso / Apto: {displayFloor}</p>
+            )}
+          </div>
           <button
             type="button"
             onClick={handleOpenSheet}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
-import { Clock, CreditCard, Loader2 } from 'lucide-react';
+import { Check, ChevronDown, Clock, CreditCard, Loader2 } from 'lucide-react';
 import bancolombiaLogo from "@/media/img/bancolombia.png";
 import nequiLogo from "@/media/img/nequi.png";
 import efectivoLogo from "@/media/img/efectivo.jpeg";
@@ -47,6 +47,11 @@ interface OrderPaymentRowProps {
   muted?: boolean;
   className?: string;
   recepcionMode?: boolean;
+  /**
+   * Compacto (recepción): solo método + botón "Aprobar", sin total.
+   * El selector de método se abre al tocar el método.
+   */
+  compact?: boolean;
   onPaymentMethodChange?: (method: string) => Promise<void>;
   onMarkPaid?: () => Promise<void>;
   /** Revertir un pago ya confirmado a "pendiente". Reservado para overrides de admin. */
@@ -61,11 +66,12 @@ export function OrderPaymentRow({
   muted = false,
   className,
   recepcionMode = false,
+  compact = false,
   onPaymentMethodChange,
   onMarkPaid,
   onMarkPending,
 }: OrderPaymentRowProps) {
-  const [showPicker, setShowPicker] = useState(true);
+  const [showPicker, setShowPicker] = useState(!compact);
   const [confirmingPaid, setConfirmingPaid] = useState(false);
   const [loadingMethod, setLoadingMethod] = useState<string | null>(null);
   const [loadingPaid, setLoadingPaid] = useState(false);
@@ -115,6 +121,128 @@ export function OrderPaymentRow({
   };
 
   const isLoading = !!loadingMethod || loadingPaid || loadingPending;
+
+  if (compact) {
+    return (
+      <div className={cn('relative space-y-1.5', className)}>
+        {isLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/70 backdrop-blur-[1px]">
+            <Loader2 size={16} className="text-neutral-black-100 animate-spin" />
+          </div>
+        )}
+
+        {/* Método + aprobar */}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handleMethodAreaClick}
+            disabled={!canChangeMethod}
+            className={cn(
+              'flex-1 min-w-0 flex items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-colors',
+              canChangeMethod
+                ? 'border-neutral-black-20 bg-white hover:bg-neutral-black-5 cursor-pointer'
+                : 'border-transparent cursor-default',
+            )}
+          >
+            {currentLogo ? (
+              <Image src={currentLogo.src} alt={currentLogo.alt} width={16} height={16} className="object-contain rounded-sm shrink-0" />
+            ) : (
+              <CreditCard size={14} className="text-neutral-black-100 shrink-0" />
+            )}
+            <span className="text-xs font-semibold text-neutral-black-80 truncate">
+              {PAYMENT_LABELS[paymentMethod] ?? paymentMethod}
+            </span>
+            {canChangeMethod && (
+              <ChevronDown
+                size={12}
+                className={cn('ml-auto text-neutral-black-100 shrink-0 transition-transform', showPicker && 'rotate-180')}
+              />
+            )}
+          </button>
+
+          {paid ? (
+            <span className="flex items-center gap-1 rounded-lg bg-green-100 px-2 py-1.5 text-xs font-semibold text-green-700 shrink-0">
+              <Check size={12} />
+              Pagado
+            </span>
+          ) : canMarkPaid && !confirmingPaid && (
+            <button
+              type="button"
+              onClick={() => setConfirmingPaid(true)}
+              className="rounded-lg border border-green-500 px-2 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 transition-colors shrink-0"
+            >
+              Aprobar
+            </button>
+          )}
+        </div>
+
+        {/* Confirmación de pago */}
+        {confirmingPaid && (
+          <div className="flex gap-1.5">
+            <button
+              type="button"
+              onClick={() => setConfirmingPaid(false)}
+              disabled={loadingPaid}
+              className="flex-1 py-1.5 rounded-lg bg-neutral-black-5 text-neutral-black-100 text-xs font-semibold hover:bg-neutral-black-10 transition-colors disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmPaid}
+              disabled={loadingPaid}
+              className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-semibold transition-colors disabled:opacity-60"
+            >
+              {loadingPaid && <Loader2 size={12} className="animate-spin" />}
+              Aprobar pago
+            </button>
+          </div>
+        )}
+
+        {/* Selector de método */}
+        {showPicker && canChangeMethod && (
+          <div className="grid grid-cols-3 gap-1">
+            {PAYMENT_METHODS.map((method) => {
+              const logo = PAYMENT_LOGOS[method];
+              const isActive = method === paymentMethod;
+              return (
+                <button
+                  key={method}
+                  type="button"
+                  onClick={() => handleMethodSelect(method)}
+                  disabled={!!loadingMethod}
+                  title={PAYMENT_LABELS[method]}
+                  className={cn(
+                    'flex flex-col items-center gap-0.5 rounded-lg py-1 text-[10px] font-medium transition-all disabled:opacity-50',
+                    isActive
+                      ? PAYMENT_ACTIVE_COLORS[method] ?? 'bg-neutral-black-80 text-white'
+                      : cn('bg-neutral-black-5 text-neutral-black-100', PAYMENT_HOVER_COLORS[method]),
+                  )}
+                >
+                  {loadingMethod === method ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : logo ? (
+                    <Image src={logo.src} alt={logo.alt} width={14} height={14} className="object-contain rounded-sm" />
+                  ) : (
+                    <CreditCard size={14} />
+                  )}
+                  <span className="truncate max-w-full px-0.5">{PAYMENT_LABELS[method]}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Vueltas en efectivo */}
+        {cashChange && !paid && (
+          <p className="text-[11px] text-neutral-black-100">
+            Con {formatCOP(cashChange.bill)} ·{' '}
+            <span className="font-semibold text-amber-600">devolver {formatCOP(cashChange.change)}</span>
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={cn('relative', withBorderTop && 'border-t border-neutral-black-10 pt-2', className)}>

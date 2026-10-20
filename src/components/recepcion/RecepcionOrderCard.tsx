@@ -1,16 +1,16 @@
 "use client";
 
-import { useRef, useState } from 'react';
-import { Bike } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Bike, ChefHat, ChevronDown, Clock } from 'lucide-react';
 import { WorkerOrder, WorkerKitchen } from '@/types/worker';
-import { OrderStatus } from '@/types/orders';
+import { OrderItem, OrderStatus } from '@/types/orders';
 import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
-import { OrderItemsList } from '@/components/ui/OrderItemsList';
+import { formatCOP } from '@/components/ui/OrderItemsList';
 import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderComment } from '@/components/ui/OrderComment';
-import { OrderNumberChip, OrderClientChip, OrderTimeChip, getClientOriginKey, cardOriginColorMap } from '@/components/ui/OrderClientChips';
+import { OrderClientChip, getClientOriginKey, cardOriginColorMap } from '@/components/ui/OrderClientChips';
 import { OrderNumberMenu } from './OrderNumberMenu';
 import { AssignCourierPopover } from './AssignCourierPopover';
 import { AssignKitchenModal } from './AssignKitchenModal';
@@ -24,7 +24,106 @@ const RECEPTION_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; la
   dispatched: { next: 'delivered', label: 'Marcar entregado' },
 };
 
-const SECTION = 'border-t border-neutral-black-10 px-3 py-2.5';
+// Estados en los que el tiempo transcurrido sigue siendo relevante para recepción
+const TIMED_STATUSES: OrderStatus[] = ['fresh', 'preparing', 'ready_for_pickup', 'dispatched'];
+
+// Umbrales (minutos) para colorear el tiempo transcurrido
+const ELAPSED_WARN_MIN = 20;
+const ELAPSED_LATE_MIN = 35;
+
+const SECTION = 'border-t border-neutral-black-10 px-2 py-2';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function useElapsedMinutes(createdAt: string, active: boolean) {
+  const getMinutes = () => Math.max(0, Math.floor((Date.now() - new Date(createdAt).getTime()) / 60_000));
+  const [minutes, setMinutes] = useState(getMinutes);
+
+  useEffect(() => {
+    if (!active) return;
+    setMinutes(getMinutes());
+    const id = setInterval(() => setMinutes(getMinutes()), 30_000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createdAt, active]);
+
+  return minutes;
+}
+
+function CompactItemsList({ items }: { items: OrderItem[] }) {
+  return (
+    <ul className="space-y-1">
+      {items.map((item, index) => (
+        <li key={index}>
+          <div className="flex items-start gap-1.5">
+            <span
+              className="min-w-5 h-5 px-1 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0"
+              style={{ backgroundColor: item.colorPrimary ?? 'var(--color-primary-red)' }}
+            >
+              {item.quantity}
+            </span>
+            <span className="text-[13px] font-bold text-neutral-black-80 leading-tight pt-0.5 line-clamp-2">
+              {item.name}
+            </span>
+          </div>
+
+          {item.complements && item.complements.length > 0 && (
+            <ul className="pl-6 mt-0.5 space-y-0.5">
+              {item.complements.map((c, i) => (
+                <li key={i} className="flex items-start gap-1 text-[11px] text-neutral-black-100 leading-tight">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0 mt-1"
+                    style={{ backgroundColor: c.colorPrimary ?? 'var(--color-neutral-black-30)' }}
+                  />
+                  <span>
+                    {c.quantity > 1 && <span className="font-bold">{c.quantity}× </span>}
+                    {c.name}
+                    {c.codes?.length ? ` (${c.codes.join(', ')})` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {item.notes && (
+            <p className="pl-6 text-[11px] italic text-amber-700 leading-tight line-clamp-2">{item.notes}</p>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function PriceRow({ label, value, muted = false }: { label: string; value: number; muted?: boolean }) {
+  return (
+    <div className={cn('flex items-start justify-between gap-2', muted ? 'text-neutral-black-100' : 'text-neutral-black-80')}>
+      <span className="min-w-0 leading-tight">{label}</span>
+      <span className="shrink-0 tabular-nums">{formatCOP(value)}</span>
+    </div>
+  );
+}
+
+function PriceBreakdown({ items, deliveryPrice }: { items: OrderItem[]; deliveryPrice: number }) {
+  return (
+    <div className="space-y-0.5 text-[11px] pt-1">
+      {items.map((item, index) => (
+        <div key={index} className="space-y-0.5">
+          <PriceRow label={`${item.quantity}× ${item.name ?? ''}`} value={item.price * item.quantity} />
+          {item.complements?.map((c, i) => (
+            <div key={i} className="pl-3">
+              <PriceRow label={c.name ?? ''} value={c.price * (c.quantity || 1)} muted />
+            </div>
+          ))}
+        </div>
+      ))}
+      {deliveryPrice > 0 && (
+        <div className="pt-0.5 mt-0.5 border-t border-neutral-black-10">
+          <PriceRow label="Domicilio" value={deliveryPrice} />
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── RecepcionOrderCard ───────────────────────────────────────────────────────
 
@@ -54,7 +153,11 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   const [showOrderMenu, setShowOrderMenu] = useState(false);
   const [showCourierModal, setShowCourierModal] = useState(false);
   const [showKitchenModal, setShowKitchenModal] = useState(false);
+  const [showPrices, setShowPrices] = useState(false);
   const courierButtonRef = useRef<HTMLButtonElement>(null);
+
+  const isTimed = TIMED_STATUSES.includes(order.status);
+  const elapsed = useElapsedMinutes(order.createdAt, isTimed);
 
   const transition = (() => {
     if (order.status === 'delivered') {
@@ -70,70 +173,151 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
 
   const isUser = !order.clientId && !!order.userId;
   const cardColor = cardOriginColorMap[getClientOriginKey(isUser, order?.origin)];
+  const kitchenName = order.kitchen?.name ?? kitchens.find((k) => k.id === order.kitchenId)?.name;
+  const itemCount = order.orderItems.reduce((acc, item) => acc + item.quantity, 0);
+  const paid = order.payment?.status === 'approved';
 
   return (
     <>
       <div
         className={cn(
-          'rounded-2xl border shadow-sm overflow-hidden',
+          'rounded-xl border shadow-sm overflow-hidden',
           cardColor ?? 'border-neutral-black-20 bg-white'
         )}
       >
-        <OrderStatusStrip status={order.status} />
+        <OrderStatusStrip status={order.status} className="h-1" />
 
-        {/* Header: número · cliente · hora */}
-        <div className="p-3 pb-2">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowOrderMenu(true)}
-              className="shrink-0 hover:opacity-80 transition-opacity"
-              aria-label={`Opciones de orden #${order.dailyOrderNumber}`}
-            >
-              <OrderNumberChip orderNumber={order.dailyOrderNumber} />
-            </button>
-            <OrderClientChip
-              name={order.client?.name ?? order.user?.name}
-              phone={order.client?.phone ?? order.user?.phone}
-              clientId={order.clientId}
-              avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
-              isUser={isUser}
-              origin={order?.origin}
-            />
-            <OrderTimeChip time={formatTime(order.createdAt)} className="ml-auto" />
+        {/* 1. Identificación: número · cliente · hora / tiempo transcurrido */}
+        <div className="flex items-center gap-1.5 px-2 pt-2 min-w-0">
+          <button
+            type="button"
+            onClick={() => setShowOrderMenu(true)}
+            className="shrink-0 bg-primary-red hover:opacity-80 rounded-full px-2 py-0.5 text-sm font-bold text-white transition-opacity"
+            aria-label={`Opciones de orden #${order.dailyOrderNumber}`}
+          >
+            {order.dailyOrderNumber}
+          </button>
+          <OrderClientChip
+            name={order.client?.name ?? order.user?.name}
+            phone={order.client?.phone ?? order.user?.phone}
+            clientId={order.clientId}
+            avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
+            isUser={isUser}
+            origin={order?.origin}
+            size="sm"
+          />
+          <div className="ml-auto flex flex-col items-end shrink-0 leading-none">
+            <span className="text-[10px] font-semibold text-neutral-black-100">{formatTime(order.createdAt)}</span>
+            {isTimed && (
+              <span
+                className={cn(
+                  'flex items-center gap-0.5 text-[10px] font-bold mt-0.5',
+                  elapsed >= ELAPSED_LATE_MIN
+                    ? 'text-primary-red'
+                    : elapsed >= ELAPSED_WARN_MIN
+                      ? 'text-amber-600'
+                      : 'text-neutral-black-100'
+                )}
+              >
+                <Clock size={9} />
+                {elapsed}m
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Dirección corta */}
-        <div className="px-3 pb-2">
+        {/* Cocina */}
+        <div className="px-2 pt-1">
+          <button
+            type="button"
+            onClick={() => setShowKitchenModal(true)}
+            className={cn(
+              'flex items-center gap-1 max-w-full text-[11px] hover:text-primary-red transition-colors',
+              kitchenName ? 'text-neutral-black-100' : 'text-amber-600 font-semibold'
+            )}
+          >
+            <ChefHat size={11} className="shrink-0" />
+            <span className="truncate">{kitchenName ?? 'Sin cocina asignada'}</span>
+          </button>
+        </div>
+
+        {/* 2. Entrega: dirección (2 líneas) + comentario */}
+        <div className="px-2 pt-1.5 pb-2 space-y-1">
           <OrderAddressRow
             location={order.location}
             address={order.deliveryAddress?.address}
             floor={order.deliveryAddress?.floor}
             compact
           />
+          {order.comment && <OrderComment comment={order.comment} compact />}
         </div>
 
-        {/* Comentario */}
-        {order.comment && (
-          <div className="px-3 pb-2">
-            <OrderComment comment={order.comment} />
-          </div>
-        )}
-
-        {/* Productos */}
+        {/* 3. Pedido (sin precios) */}
         <div className={SECTION}>
-          <OrderItemsList items={order.orderItems} deliveryPrice={order.deliveryPrice} />
+          <CompactItemsList items={order.orderItems} />
         </div>
 
-        {/* Pago y total */}
-        <div className={SECTION}>
+        {/* 4. Total con desglose en acordeón */}
+        <div className="border-t border-neutral-black-10 px-2 py-1.5">
+          <button
+            type="button"
+            onClick={() => setShowPrices((prev) => !prev)}
+            aria-expanded={showPrices}
+            className="w-full flex items-center gap-1 text-left"
+          >
+            <span className="text-[11px] text-neutral-black-100">{itemCount} prod.</span>
+            <span
+              className={cn(
+                'ml-auto text-sm font-bold tabular-nums',
+                paid ? 'text-green-600' : 'text-neutral-black-80'
+              )}
+            >
+              {formatCOP(order.totalPrice)}
+            </span>
+            <ChevronDown
+              size={14}
+              className={cn('text-neutral-black-100 shrink-0 transition-transform', showPrices && 'rotate-180')}
+            />
+          </button>
+          {showPrices && <PriceBreakdown items={order.orderItems} deliveryPrice={order.deliveryPrice} />}
+        </div>
+
+        {/* 5. Acciones: domiciliario · pago · siguiente paso (una por fila) */}
+        <div className="border-t border-neutral-black-10 bg-neutral-black-5/60 px-2 py-2 space-y-1.5">
+          <button
+            ref={courierButtonRef}
+            type="button"
+            onClick={() => setShowCourierModal((prev) => !prev)}
+            className={cn(
+              'w-full flex items-center gap-1.5 text-xs rounded-lg border px-2 py-1.5 bg-white transition-colors hover:text-primary-red',
+              order.courier
+                ? 'text-neutral-black-80 border-neutral-black-20'
+                : 'text-neutral-black-100 border-dashed border-neutral-black-30'
+            )}
+          >
+            {order.courier?.photoURL ? (
+              <img
+                src={order.courier.photoURL}
+                alt={order.courier.name}
+                className="w-4 h-4 rounded-full object-cover shrink-0"
+              />
+            ) : order.courier?.name ? (
+              <span className="w-4 h-4 rounded-full bg-primary-red/15 text-primary-red flex items-center justify-center text-[8px] font-bold shrink-0">
+                {order.courier.name.charAt(0).toUpperCase()}
+              </span>
+            ) : (
+              <Bike size={13} className="shrink-0" />
+            )}
+            <span className="truncate font-semibold">{order.courier?.name ?? 'Asignar domiciliario'}</span>
+            <ChevronDown size={12} className="ml-auto text-neutral-black-100 shrink-0" />
+          </button>
+
           <OrderPaymentRow
             paymentMethod={order.paymentMethod}
-            paid={order.payment?.status === 'approved'}
+            paid={paid}
             total={order.totalPrice}
-            muted
             recepcionMode
+            compact
             onPaymentMethodChange={
               onPaymentMethodChange
                 ? (method) => onPaymentMethodChange(order.id, order.paymentMethod, method)
@@ -141,38 +325,13 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
             }
             onMarkPaid={onMarkPaid ? () => onMarkPaid(order.id) : undefined}
           />
-        </div>
-
-        {/* Footer: domiciliario + acción */}
-        <div className={cn(SECTION, 'flex items-center gap-2')}>
-          <button
-            ref={courierButtonRef}
-            type="button"
-            onClick={() => setShowCourierModal((prev) => !prev)}
-            className="flex items-center gap-2 text-xs text-neutral-black-100 hover:text-primary-red border border-neutral-black-20 rounded-xl px-3 py-2 transition-colors shrink-0"
-          >
-            {order.courier?.photoURL ? (
-              <img
-                src={order.courier.photoURL}
-                alt={order.courier.name}
-                className="w-5 h-5 rounded-full object-cover shrink-0"
-              />
-            ) : order.courier?.name ? (
-              <span className="w-5 h-5 rounded-full bg-primary-red/15 text-primary-red flex items-center justify-center text-[9px] font-bold shrink-0">
-                {order.courier.name.charAt(0).toUpperCase()}
-              </span>
-            ) : (
-              <Bike size={13} />
-            )}
-            <span className="max-w-[70px] truncate">{order.courier?.name ?? 'Moto'}</span>
-          </button>
 
           {transition && (
             <OrderActionButtons
               label={transition.label}
-              size="md"
+              size="sm"
+              fullWidth
               onConfirm={() => onStatusChange(order.id, order.status, transition.next)}
-              className="ml-auto"
             />
           )}
         </div>

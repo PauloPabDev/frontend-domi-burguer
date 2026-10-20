@@ -134,6 +134,8 @@ interface OrderClientChipProps {
   phoneVisible?: boolean;
   isUser?: boolean;
   origin?: 'public' | null;
+  /** sm: avatar y texto reducidos (card compacta de recepción) */
+  size?: 'md' | 'sm';
 }
 
 export function OrderClientChip({
@@ -145,6 +147,7 @@ export function OrderClientChip({
   phoneVisible = false,
   isUser = false,
   origin = null,
+  size = 'md',
 }: OrderClientChipProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -190,7 +193,8 @@ export function OrderClientChip({
           type="button"
           onClick={handleOpen}
           className={cn(
-            'flex items-center gap-2 rounded-full pl-1 pr-4 py-1 shrink-0 transition-colors',
+            'flex items-center rounded-full pl-1 py-1 shrink-0 transition-colors',
+            size === 'sm' ? 'gap-1.5 pr-2.5 py-0.5 min-w-0 shrink' : 'gap-2 pr-4',
             chipColorMap.compact[userKey],
             className,
           )}
@@ -198,11 +202,16 @@ export function OrderClientChip({
           <img
             src={avatarSrc}
             alt={name ?? 'Cliente'}
-            width={30}
-            height={30}
-            className="rounded-full object-cover"
+            width={size === 'sm' ? 20 : 30}
+            height={size === 'sm' ? 20 : 30}
+            className="rounded-full object-cover shrink-0"
           />
-          <span className="text-base font-bold text-neutral-black-80 truncate max-w-[110px]">
+          <span
+            className={cn(
+              'font-bold text-neutral-black-80 truncate',
+              size === 'sm' ? 'text-sm max-w-[120px]' : 'text-base max-w-[110px]',
+            )}
+          >
             {name ?? 'Cliente'}
           </span>
         </button>
