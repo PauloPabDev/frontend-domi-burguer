@@ -1,12 +1,18 @@
 "use client";
 
+import { useState } from 'react';
+import { ChevronDown, Navigation, Phone } from 'lucide-react';
 import { CourierOrder } from '@/types/courier';
 import { OrderStatus } from '@/types/orders';
-import { OrderItemsList } from '@/components/ui/OrderItemsList';
+import { STATUS_CONFIG } from '@/types/worker';
+import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
+import { formatCOP } from '@/components/ui/OrderItemsList';
+import { OrderItemsCompactList, OrderPriceBreakdown } from '@/components/ui/OrderItemsCompactList';
+import { OrderElapsedTime } from '@/components/ui/OrderElapsedTime';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
+import { OrderComment } from '@/components/ui/OrderComment';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
-import { OrderStatusBadge } from '@/components/ui/OrderStatusBadge';
-import { OrderNumberChip, OrderClientChip, OrderTimeChip } from '@/components/ui/OrderClientChips';
+import { OrderClientChip, getClientOriginKey, cardOriginColorMap } from '@/components/ui/OrderClientChips';
 import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/lib/dates';
@@ -23,7 +29,19 @@ const STATUS_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label
   dispatched: { next: 'delivered', label: 'Marcar entregado' },
 };
 
-const SECTION = 'border-t border-neutral-black-10 p-4';
+// Misma estructura que la card de recepción, con más aire para uso en celular:
+// 16px laterales, 12px verticales por sección.
+// El radio de la card (24px) = radio de los botones (8px) + padding lateral (16px), para que sean concéntricos.
+const SECTION = 'border-t border-neutral-black-10 px-4 py-3';
+
+function getNavigationUrl(order: CourierOrder) {
+  const coords = order.location?.coordinates;
+  if (coords?.lat != null && coords?.lng != null) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`;
+  }
+  const address = order.location?.address ?? order.deliveryAddress?.address;
+  return address ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}` : null;
+}
 
 export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   order,
@@ -31,67 +49,144 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   onSelect,
   onStatusChange,
 }) => {
+  const [showPrices, setShowPrices] = useState(false);
+
   const transition = STATUS_TRANSITIONS[order.status];
+  const statusConfig = STATUS_CONFIG[order.status];
+  const isUser = !order.clientId && !!order.userId;
+  const cardColor = cardOriginColorMap[getClientOriginKey(isUser, order?.origin)];
+  const phone = order.client?.phone ?? order.user?.phone;
+  const paid = order.payment?.status === 'approved';
+  const itemCount = order.orderItems.reduce((acc, item) => acc + item.quantity, 0);
+  const navigationUrl = getNavigationUrl(order);
+
+  // La card es seleccionable: los controles internos no deben cambiar la selección
+  const stop = (e: React.MouseEvent) => e.stopPropagation();
+
   return (
     <div
       className={cn(
-        'rounded-2xl border bg-white shadow-sm transition-all duration-200 overflow-hidden',
-        isSelected ? 'border-primary-red ring-2 ring-primary-red/20' : 'border-neutral-black-20',
+        'rounded-3xl border shadow-sm transition-all duration-200 overflow-hidden',
+        cardColor ?? 'bg-white',
+        isSelected ? 'border-primary-red ring-2 ring-primary-red/20' : !cardColor && 'border-neutral-black-20',
       )}
       onClick={onSelect}
     >
-      {/* Cliente */}
-      <div className="p-4 flex items-center gap-2">
-        <OrderNumberChip orderNumber={order.dailyOrderNumber} />
-        <OrderClientChip
-          name={order.client?.name ?? order.user?.name}
-          phone={order.client?.phone ?? order.user?.phone}
-          clientId={order.clientId}
-          avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
-          isUser={!order.clientId && !!order.userId}
-          phoneVisible
-        />
-        <OrderTimeChip time={formatTime(order.createdAt)} className="ml-auto" />
+      <OrderStatusStrip status={order.status} className="h-1" />
+
+      <div className="px-4 py-3 space-y-2.5">
+        {/* 1. Identificación: número · estado · hora · tiempo transcurrido */}
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="shrink-0 min-w-8 h-8 px-2 flex items-center justify-center bg-primary-red rounded-full text-base font-bold text-white">
+            {order.dailyOrderNumber}
+          </span>
+          {statusConfig && (
+            <span className={cn('text-xs font-semibold truncate', statusConfig.color)}>{statusConfig.label}</span>
+          )}
+          <div className="ml-auto flex items-center gap-1.5 shrink-0 text-xs leading-none">
+            <span className="font-semibold text-neutral-black-100">{formatTime(order.createdAt)}</span>
+            <OrderElapsedTime createdAt={order.createdAt} status={order.status} />
+          </div>
+        </div>
+
+        {/* Cliente: foto + nombre completo + llamar */}
+        <div className="flex items-center gap-2" onClick={stop}>
+          <div className="flex-1 min-w-0">
+            <OrderClientChip
+              name={order.client?.name ?? order.user?.name}
+              phone={phone}
+              clientId={order.clientId}
+              avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
+              isUser={isUser}
+              origin={order?.origin}
+              size="sm"
+            />
+          </div>
+          {phone && (
+            <a
+              href={`tel:${phone}`}
+              aria-label="Llamar al cliente"
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors shrink-0"
+            >
+              <Phone size={16} />
+            </a>
+          )}
+        </div>
+
+        {/* 2. Entrega: dirección + comentario */}
+        <div className="space-y-1.5" onClick={stop}>
+          <OrderAddressRow
+            location={order.location}
+            address={order.deliveryAddress?.address}
+            floor={order.deliveryAddress?.floor}
+            compact
+          />
+          {order.comment && <OrderComment comment={order.comment} compact />}
+        </div>
       </div>
 
-      {/* Dirección */}
+      {/* 3. Pedido (sin precios) */}
       <div className={SECTION}>
-        <OrderAddressRow
-          location={order.location}
-          address={order.deliveryAddress?.address}
-          floor={order.deliveryAddress?.floor}
-        />
+        <OrderItemsCompactList items={order.orderItems} />
       </div>
 
-      {/* Productos */}
+      {/* 4. Total a cobrar con desglose en acordeón */}
       <div className={SECTION}>
-        <OrderItemsList items={order.orderItems} deliveryPrice={order.deliveryPrice} />
-        {order.comment && (
-          <p className="mt-2 text-xs text-neutral-black-100 italic border-l-2 border-neutral-black-20 pl-2">
-            {order.comment}
-          </p>
-        )}
+        <button
+          type="button"
+          onClick={(e) => { stop(e); setShowPrices((prev) => !prev); }}
+          aria-expanded={showPrices}
+          className="w-full flex items-center gap-1 text-left"
+        >
+          <span className="text-xs text-neutral-black-100">
+            {paid ? 'Pagado' : 'Cobrar'} · {itemCount} prod.
+          </span>
+          <span
+            className={cn(
+              'ml-auto text-base font-bold tabular-nums',
+              paid ? 'text-green-600' : 'text-neutral-black-80'
+            )}
+          >
+            {formatCOP(order.totalPrice)}
+          </span>
+          <ChevronDown
+            size={16}
+            className={cn('text-neutral-black-100 shrink-0 transition-transform', showPrices && 'rotate-180')}
+          />
+        </button>
+        {showPrices && <OrderPriceBreakdown items={order.orderItems} deliveryPrice={order.deliveryPrice} />}
       </div>
 
-      {/* Pago */}
-      <div className={SECTION}>
+      {/* 5. Acciones: pago · navegar · siguiente paso (una por fila) */}
+      <div className={cn(SECTION, 'bg-neutral-black-5/60 space-y-2')} onClick={stop}>
         <OrderPaymentRow
           paymentMethod={order.paymentMethod}
           total={order.totalPrice}
-          paid={order.payment?.status === 'approved'}
+          paid={paid}
+          compact
         />
-      </div>
 
-      {/* Footer: estado + acción */}
-      <div className={cn(SECTION, 'flex items-center justify-between gap-3')}>
-        <OrderStatusBadge status={order.status} />
+        {navigationUrl && (
+          <a
+            href={navigationUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-white py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
+          >
+            <Navigation size={15} />
+            Cómo llegar
+          </a>
+        )}
+
         {transition && onStatusChange && (
           <OrderActionButtons
             label={transition.label}
             variant={transition.next === 'delivered' ? 'dark' : 'primary'}
+            size="md"
+            fullWidth
+            buttonClassName="rounded-lg"
             onConfirm={() => onStatusChange(order.id, order.status, transition.next)}
             stopPropagation
-            className="ml-auto"
           />
         )}
       </div>
