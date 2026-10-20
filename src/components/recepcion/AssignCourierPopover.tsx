@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils';
 const POPOVER_WIDTH = 260;
 const GAP = 6;
 
+// Radio concéntrico: filas rounded-lg (8px) + padding de la lista (8px) = contenedor rounded-2xl (16px)
+
 interface AssignCourierPopoverProps {
   anchorRef: RefObject<HTMLElement | null>;
   currentCourierId?: string;
@@ -106,7 +108,7 @@ export const AssignCourierPopover: React.FC<AssignCourierPopoverProps> = ({
         maxHeight: position.maxHeight + 88,
         [position.anchor]: position.offset,
       }}
-      className="z-50 bg-white rounded-xl shadow-lg border border-neutral-black-10 overflow-hidden flex flex-col"
+      className="z-50 bg-white rounded-2xl shadow-lg border border-neutral-black-10 overflow-hidden flex flex-col"
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-black-10 shrink-0">
@@ -129,7 +131,7 @@ export const AssignCourierPopover: React.FC<AssignCourierPopoverProps> = ({
       )}
 
       {/* Courier list */}
-      <div className="overflow-y-auto p-1.5 space-y-0.5" style={{ maxHeight: position.maxHeight }}>
+      <div className="overflow-y-auto p-2 space-y-0.5" style={{ maxHeight: position.maxHeight }}>
         <button
           onClick={() => handleSelect(null)}
           className="w-full flex items-center gap-2 p-2 rounded-lg border border-transparent hover:bg-neutral-black-10 transition-colors text-left"
@@ -171,10 +173,10 @@ export const AssignCourierPopover: React.FC<AssignCourierPopoverProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="px-2 py-1.5 border-t border-neutral-black-10 shrink-0">
+      <div className="p-2 border-t border-neutral-black-10 shrink-0">
         <button
           onClick={handleOpenPanel}
-          className="w-full flex items-center justify-center gap-1.5 text-[11px] text-neutral-black-40 hover:text-neutral-black-60 transition-colors py-1"
+          className="w-full flex items-center justify-center gap-1.5 rounded-lg text-[11px] text-neutral-black-40 hover:bg-neutral-black-5 hover:text-neutral-black-60 transition-colors py-1.5"
         >
           <Settings size={11} />
           Gestionar domiciliarios activos
