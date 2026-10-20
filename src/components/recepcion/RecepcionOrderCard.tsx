@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from 'react';
-import { Bike, ChefHat, ChevronDown } from 'lucide-react';
+import { Bike, Check, ChefHat, ChevronDown, Copy } from 'lucide-react';
 import { WorkerOrder, WorkerKitchen } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
@@ -60,6 +60,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   const [showKitchenModal, setShowKitchenModal] = useState(false);
   const [showPrices, setShowPrices] = useState(false);
   const [showItems, setShowItems] = useState(true);
+  const [totalCopied, setTotalCopied] = useState(false);
   const courierButtonRef = useRef<HTMLButtonElement>(null);
 
   const transition = (() => {
@@ -79,6 +80,16 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   const kitchenName = order.kitchen?.name ?? kitchens.find((k) => k.id === order.kitchenId)?.name;
   const itemCount = order.orderItems.reduce((acc, item) => acc + item.quantity, 0);
   const paid = order.payment?.status === 'approved';
+
+  const handleCopyTotal = async () => {
+    try {
+      await navigator.clipboard.writeText(String(order.totalPrice));
+      setTotalCopied(true);
+      setTimeout(() => setTotalCopied(false), 1500);
+    } catch {
+      // Sin permiso de portapapeles: el valor sigue siendo seleccionable a mano
+    }
+  };
 
   return (
     <>
@@ -179,26 +190,39 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
 
         {/* 4. Total con desglose en acordeón */}
         <div className={SECTION}>
-          <button
-            type="button"
-            onClick={() => setShowPrices((prev) => !prev)}
-            aria-expanded={showPrices}
-            className="w-full flex items-center gap-1 text-left"
-          >
-            <span className="text-[11px] text-neutral-black-100">{itemCount} prod.</span>
-            <span
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setShowPrices((prev) => !prev)}
+              aria-expanded={showPrices}
+              aria-label={showPrices ? 'Ocultar desglose de precios' : 'Ver desglose de precios'}
+              className="flex items-center gap-0.5 text-[11px] text-neutral-black-100 hover:text-neutral-black-80 transition-colors"
+            >
+              {itemCount} prod.
+              <ChevronDown
+                size={14}
+                className={cn('shrink-0 transition-transform', showPrices && 'rotate-180')}
+              />
+            </button>
+
+            {/* Total: clic para copiar el valor (solo dígitos, listo para pegar en Nequi / Bancolombia) */}
+            <button
+              type="button"
+              onClick={handleCopyTotal}
+              title="Copiar total"
               className={cn(
-                'ml-auto text-sm font-bold tabular-nums',
+                'ml-auto flex items-center gap-1 rounded-lg px-1.5 py-0.5 -mr-1.5 text-sm font-bold tabular-nums select-text hover:bg-neutral-black-5 transition-colors',
                 paid ? 'text-green-600' : 'text-neutral-black-80'
               )}
             >
               {formatCOP(order.totalPrice)}
-            </span>
-            <ChevronDown
-              size={14}
-              className={cn('text-neutral-black-100 shrink-0 transition-transform', showPrices && 'rotate-180')}
-            />
-          </button>
+              {totalCopied ? (
+                <Check size={12} className="text-green-600 shrink-0" />
+              ) : (
+                <Copy size={12} className="text-neutral-black-100 shrink-0" />
+              )}
+            </button>
+          </div>
           {showPrices && <OrderPriceBreakdown items={order.orderItems} deliveryPrice={order.deliveryPrice} />}
         </div>
 
