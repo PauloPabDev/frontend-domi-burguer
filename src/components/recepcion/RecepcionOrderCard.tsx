@@ -209,7 +209,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
       >
         <OrderStatusStrip status={order.status} className="h-1" />
 
-        {/* 1. Identificación: número · cliente · hora / tiempo transcurrido */}
+        {/* 1. Identificación: número · sede · hora · tiempo transcurrido */}
         <div className="flex items-center gap-1.5 px-2 pt-2 min-w-0">
           <button
             type="button"
@@ -219,6 +219,40 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           >
             {order.dailyOrderNumber}
           </button>
+          <button
+            type="button"
+            onClick={() => setShowKitchenModal(true)}
+            title={kitchenName ?? 'Asignar sede'}
+            className={cn(
+              'flex items-center gap-0.5 min-w-0 text-[11px] hover:text-primary-red transition-colors',
+              kitchenName ? 'text-neutral-black-100' : 'text-amber-600 font-semibold'
+            )}
+          >
+            <ChefHat size={11} className="shrink-0" />
+            <span className="truncate">{kitchenName ?? 'Sin sede'}</span>
+          </button>
+          <div className="ml-auto flex items-center gap-1.5 shrink-0 text-[11px] leading-none">
+            <span className="font-semibold text-neutral-black-100">{formatTime(order.createdAt)}</span>
+            {isTimed && (
+              <span
+                className={cn(
+                  'flex items-center gap-0.5 font-bold',
+                  elapsed >= ELAPSED_LATE_MIN
+                    ? 'text-primary-red'
+                    : elapsed >= ELAPSED_WARN_MIN
+                      ? 'text-amber-600'
+                      : 'text-neutral-black-100'
+                )}
+              >
+                <Clock size={10} />
+                {elapsed}m
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Cliente: foto + nombre completo */}
+        <div className="px-2 pt-1.5">
           <OrderClientChip
             name={order.client?.name ?? order.user?.name}
             phone={order.client?.phone ?? order.user?.phone}
@@ -228,39 +262,6 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
             origin={order?.origin}
             size="sm"
           />
-          <div className="ml-auto flex flex-col items-end shrink-0 leading-none">
-            <span className="text-[10px] font-semibold text-neutral-black-100">{formatTime(order.createdAt)}</span>
-            {isTimed && (
-              <span
-                className={cn(
-                  'flex items-center gap-0.5 text-[10px] font-bold mt-0.5',
-                  elapsed >= ELAPSED_LATE_MIN
-                    ? 'text-primary-red'
-                    : elapsed >= ELAPSED_WARN_MIN
-                      ? 'text-amber-600'
-                      : 'text-neutral-black-100'
-                )}
-              >
-                <Clock size={9} />
-                {elapsed}m
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Cocina */}
-        <div className="px-2 pt-1">
-          <button
-            type="button"
-            onClick={() => setShowKitchenModal(true)}
-            className={cn(
-              'flex items-center gap-1 max-w-full text-[11px] hover:text-primary-red transition-colors',
-              kitchenName ? 'text-neutral-black-100' : 'text-amber-600 font-semibold'
-            )}
-          >
-            <ChefHat size={11} className="shrink-0" />
-            <span className="truncate">{kitchenName ?? 'Sin cocina asignada'}</span>
-          </button>
         </div>
 
         {/* 2. Entrega: dirección (2 líneas) + comentario */}
