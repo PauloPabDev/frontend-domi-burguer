@@ -25,7 +25,7 @@ interface OrderAddressRowProps {
   location?: Location;
   address?: string;
   floor?: string;
-  /** Compacto: sin fondo, dirección en máx. 2 líneas + piso (para recepción) */
+  /** Compacto: dirección en máx. 2 líneas + piso y comentario visibles (para recepción) */
   compact?: boolean;
   className?: string;
 }
@@ -281,21 +281,28 @@ export function OrderAddressRow({
   if (compact) {
     return (
       <>
-        <div className={cn('flex items-start gap-1', className)}>
-          <MapPin size={12} className="text-primary-red shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
+        <div className={cn('flex items-start gap-1.5', className)}>
+          <div className="flex-1 min-w-0 space-y-0.5">
             <p className="text-[13px] font-bold text-neutral-black-80 leading-snug line-clamp-2">{displayAddress}</p>
             {displayFloor && (
-              <p className="text-[11px] text-neutral-black-100 leading-tight truncate">Piso / Apto: {displayFloor}</p>
+              <p className="text-[11px] text-neutral-black-100 leading-tight">
+                Piso / Apto: <span className="font-semibold text-neutral-black-80">{displayFloor}</span>
+              </p>
+            )}
+            {location?.comment && (
+              <p className="text-[11px] italic text-neutral-black-100 leading-tight line-clamp-2">
+                {location.comment}
+              </p>
             )}
           </div>
           <button
             type="button"
             onClick={handleOpenSheet}
-            title="Más opciones"
-            className="flex items-center justify-center w-5 h-5 rounded-md hover:bg-neutral-black-10 transition-colors shrink-0"
+            title="Opciones de dirección"
+            aria-label="Opciones de dirección"
+            className="flex items-center justify-center w-6 h-6 rounded-full bg-neutral-black-5 text-neutral-black-100 hover:bg-neutral-black-10 hover:text-neutral-black-80 transition-colors shrink-0"
           >
-            <MoreHorizontal size={12} className="text-neutral-black-100" />
+            <MoreHorizontal size={14} />
           </button>
         </div>
 
