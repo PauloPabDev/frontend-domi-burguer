@@ -204,7 +204,7 @@ export function OrderClientChip({
             alt={name ?? 'Cliente'}
             width={size === 'sm' ? 26 : 30}
             height={size === 'sm' ? 26 : 30}
-            className={cn('object-cover shrink-0', size === 'sm' ? 'rounded-md' : 'rounded-full')}
+            className="rounded-full object-cover shrink-0"
           />
           <span
             className={cn(
