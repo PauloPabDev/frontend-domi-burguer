@@ -10,7 +10,7 @@ import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderComment } from '@/components/ui/OrderComment';
-import { OrderItemsCompactList, OrderPriceBreakdown } from '@/components/ui/OrderItemsCompactList';
+import { OrderItemsCompactList, OrderItemsSummary, OrderPriceBreakdown } from '@/components/ui/OrderItemsCompactList';
 import { OrderElapsedTime } from '@/components/ui/OrderElapsedTime';
 import { OrderClientChip, getClientOriginKey, cardOriginColorMap } from '@/components/ui/OrderClientChips';
 import { OrderNumberMenu } from './OrderNumberMenu';
@@ -59,6 +59,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   const [showCourierModal, setShowCourierModal] = useState(false);
   const [showKitchenModal, setShowKitchenModal] = useState(false);
   const [showPrices, setShowPrices] = useState(false);
+  const [showItems, setShowItems] = useState(true);
   const courierButtonRef = useRef<HTMLButtonElement>(null);
 
   const transition = (() => {
@@ -143,9 +144,37 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           </div>
         </div>
 
-        {/* 3. Pedido (sin precios) */}
+        {/* 3. Pedido (sin precios), colapsable: resumen de cantidades por color */}
         <div className={SECTION}>
-          <OrderItemsCompactList items={order.orderItems} />
+          <button
+            type="button"
+            onClick={() => setShowItems((prev) => !prev)}
+            aria-expanded={showItems}
+            aria-label={showItems ? 'Colapsar productos' : 'Ver productos'}
+            className="w-full flex items-start gap-1 text-left"
+          >
+            {showItems ? (
+              <span className="text-[11px] font-semibold text-neutral-black-100">
+                Pedido · {itemCount} prod.
+              </span>
+            ) : (
+              <div className="flex-1 min-w-0">
+                <OrderItemsSummary items={order.orderItems} />
+              </div>
+            )}
+            <ChevronDown
+              size={14}
+              className={cn(
+                'ml-auto text-neutral-black-100 shrink-0 transition-transform',
+                showItems ? 'rotate-180' : 'mt-1'
+              )}
+            />
+          </button>
+          {showItems && (
+            <div className="mt-1.5">
+              <OrderItemsCompactList items={order.orderItems} />
+            </div>
+          )}
         </div>
 
         {/* 4. Total con desglose en acordeón */}
