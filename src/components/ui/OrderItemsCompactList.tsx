@@ -14,31 +14,61 @@ function getComplementQuantities(item: OrderItem, complement: OrderItem) {
   };
 }
 
-export function OrderItemsCompactList({ items }: { items: OrderItem[] }) {
+// sm: recepción y domiciliario (columnas angostas) · lg: cocina (se lee de lejos)
+const LIST_SIZES = {
+  sm: {
+    list: 'space-y-1',
+    qty: 'min-w-5 h-5 px-1 text-xs',
+    name: 'text-[13px] pt-0.5',
+    sub: 'pl-6 mt-0.5 space-y-0.5',
+    complement: 'gap-1 text-[11px]',
+    complementQty: 'min-w-4 h-4 px-0.5 text-[10px]',
+    formula: 'text-[10px]',
+    notes: 'pl-6 text-[11px]',
+  },
+  lg: {
+    list: 'space-y-2.5',
+    qty: 'min-w-7 h-7 px-1.5 text-sm',
+    name: 'text-base pt-0.5',
+    sub: 'pl-9 mt-1 space-y-1',
+    complement: 'gap-1.5 text-sm',
+    complementQty: 'min-w-5 h-5 px-1 text-xs',
+    formula: 'text-xs',
+    notes: 'pl-9 text-sm',
+  },
+} as const;
+
+interface OrderItemsCompactListProps {
+  items: OrderItem[];
+  size?: keyof typeof LIST_SIZES;
+}
+
+export function OrderItemsCompactList({ items, size = 'sm' }: OrderItemsCompactListProps) {
+  const sz = LIST_SIZES[size];
   return (
-    <ul className="space-y-1">
+    <ul className={sz.list}>
       {items.map((item, index) => (
         <li key={index}>
           <div className="flex items-start gap-1.5">
             <span
-              className="min-w-5 h-5 px-1 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0"
+              className={cn('rounded-full text-white font-bold flex items-center justify-center shrink-0', sz.qty)}
               style={{ backgroundColor: item.colorPrimary ?? 'var(--color-primary-red)' }}
             >
               {item.quantity}
             </span>
-            <span className="text-[13px] font-bold text-neutral-black-80 leading-tight pt-0.5 line-clamp-2">
+            <span className={cn('font-bold text-neutral-black-80 leading-tight line-clamp-2', sz.name)}>
               {item.name}
             </span>
           </div>
 
           {item.complements && item.complements.length > 0 && (
-            <ul className="pl-6 mt-0.5 space-y-0.5">
+            <ul className={sz.sub}>
               {item.complements.map((c, i) => {
                 const { total, formula } = getComplementQuantities(item, c);
                 return (
-                  <li key={i} className="flex items-start gap-1 text-[11px] text-neutral-black-100 leading-tight">
+                  <li key={i} className={cn('flex items-start text-neutral-black-100 leading-tight', sz.complement)}>
                     <span
-                      className="min-w-4 h-4 px-0.5 rounded-full text-white text-[10px] font-bold flex items-center justify-center shrink-0"
+                      className={cn('rounded-full text-white font-bold flex items-center justify-center shrink-0', sz.complementQty)}
                       style={{ backgroundColor: c.colorPrimary ?? 'var(--color-neutral-black-60)' }}
                     >
                       {total}
@@ -46,7 +76,7 @@ export function OrderItemsCompactList({ items }: { items: OrderItem[] }) {
                     <span className="pt-px">
                       <span className="font-semibold text-neutral-black-80">{c.name}</span>
                       {c.codes?.length ? ` (${c.codes.join(', ')})` : ''}
-                      {formula && <span className="ml-1 text-[10px] text-neutral-black-100">({formula})</span>}
+                      {formula && <span className={cn('ml-1 text-neutral-black-100', sz.formula)}>({formula})</span>}
                     </span>
                   </li>
                 );
@@ -55,7 +85,7 @@ export function OrderItemsCompactList({ items }: { items: OrderItem[] }) {
           )}
 
           {item.notes && (
-            <p className="pl-6 text-[11px] italic text-amber-700 leading-tight line-clamp-2">{item.notes}</p>
+            <p className={cn('italic text-amber-700 leading-tight line-clamp-2', sz.notes)}>{item.notes}</p>
           )}
         </li>
       ))}
