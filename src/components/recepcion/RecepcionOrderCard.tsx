@@ -50,6 +50,16 @@ function useElapsedMinutes(createdAt: string, active: boolean) {
   return minutes;
 }
 
+// La cantidad de un complemento es por unidad del producto: 4 combos con 2 papas = 8 papas.
+// Se muestra el total y, si el producto tiene más de una unidad, la multiplicación que lo explica.
+function getComplementQuantities(item: OrderItem, complement: OrderItem) {
+  const perUnit = complement.quantity || 1;
+  return {
+    total: perUnit * item.quantity,
+    formula: item.quantity > 1 ? `${perUnit}×${item.quantity}` : null,
+  };
+}
+
 function CompactItemsList({ items }: { items: OrderItem[] }) {
   return (
     <ul className="space-y-1">
@@ -69,19 +79,24 @@ function CompactItemsList({ items }: { items: OrderItem[] }) {
 
           {item.complements && item.complements.length > 0 && (
             <ul className="pl-6 mt-0.5 space-y-0.5">
-              {item.complements.map((c, i) => (
-                <li key={i} className="flex items-start gap-1 text-[11px] text-neutral-black-100 leading-tight">
-                  <span
-                    className="w-1.5 h-1.5 rounded-full shrink-0 mt-1"
-                    style={{ backgroundColor: c.colorPrimary ?? 'var(--color-neutral-black-30)' }}
-                  />
-                  <span>
-                    {c.quantity > 1 && <span className="font-bold">{c.quantity}× </span>}
-                    {c.name}
-                    {c.codes?.length ? ` (${c.codes.join(', ')})` : ''}
-                  </span>
-                </li>
-              ))}
+              {item.complements.map((c, i) => {
+                const { total, formula } = getComplementQuantities(item, c);
+                return (
+                  <li key={i} className="flex items-start gap-1 text-[11px] text-neutral-black-100 leading-tight">
+                    <span
+                      className="min-w-4 h-4 px-0.5 rounded-full text-white text-[10px] font-bold flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: c.colorPrimary ?? 'var(--color-neutral-black-60)' }}
+                    >
+                      {total}
+                    </span>
+                    <span className="pt-px">
+                      <span className="font-semibold text-neutral-black-80">{c.name}</span>
+                      {c.codes?.length ? ` (${c.codes.join(', ')})` : ''}
+                      {formula && <span className="ml-1 text-[10px] text-neutral-black-100">({formula})</span>}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           )}
 
@@ -109,11 +124,18 @@ function PriceBreakdown({ items, deliveryPrice }: { items: OrderItem[]; delivery
       {items.map((item, index) => (
         <div key={index} className="space-y-0.5">
           <PriceRow label={`${item.quantity}× ${item.name ?? ''}`} value={item.price * item.quantity} />
-          {item.complements?.map((c, i) => (
-            <div key={i} className="pl-3">
-              <PriceRow label={c.name ?? ''} value={c.price * (c.quantity || 1)} muted />
-            </div>
-          ))}
+          {item.complements?.map((c, i) => {
+            const { total, formula } = getComplementQuantities(item, c);
+            return (
+              <div key={i} className="pl-3">
+                <PriceRow
+                  label={`${total} ${c.name ?? ''}${formula ? ` (${formula})` : ''}`}
+                  value={c.price * total}
+                  muted
+                />
+              </div>
+            );
+          })}
         </div>
       ))}
       {deliveryPrice > 0 && (
