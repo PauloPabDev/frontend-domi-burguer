@@ -112,18 +112,17 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
             >
               {order.dailyOrderNumber}
             </button>
-            <button
-              type="button"
-              onClick={() => setShowKitchenModal(true)}
-              title={kitchenName ?? 'Asignar sede'}
+            {/* Sede: solo informativa; se cambia desde el menú del número de orden */}
+            <span
+              title={kitchenName ?? 'Sin sede'}
               className={cn(
-                'flex items-center gap-0.5 min-w-0 text-[11px] hover:text-primary-red transition-colors',
+                'flex items-center gap-0.5 min-w-0 text-[11px]',
                 kitchenName ? 'text-neutral-black-100' : 'text-amber-600 font-semibold'
               )}
             >
               <ChefHat size={11} className="shrink-0" />
               <span className="truncate">{kitchenName ?? 'Sin sede'}</span>
-            </button>
+            </span>
             <div className="ml-auto flex items-center gap-1.5 shrink-0 text-[11px] leading-none">
               <span className="font-semibold text-neutral-black-100">{formatTime(order.createdAt)}</span>
               <OrderElapsedTime createdAt={order.createdAt} status={order.status} />
