@@ -6,7 +6,75 @@ import Link from 'next/link';
 import { Phone, UserRound, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const MOCK_AVATAR = 'https://i.pravatar.cc/32?img=12';
+// Paleta cálida para avatares sin foto: cada letra cae siempre en el mismo color
+const AVATAR_COLORS = [
+  'bg-rose-400',
+  'bg-orange-400',
+  'bg-amber-500',
+  'bg-lime-500',
+  'bg-emerald-500',
+  'bg-teal-500',
+  'bg-sky-500',
+  'bg-indigo-400',
+  'bg-violet-400',
+  'bg-fuchsia-400',
+  'bg-pink-400',
+  'bg-red-400',
+] as const;
+
+function getInitial(name?: string): string {
+  const letter = name?.trim().charAt(0);
+  return letter ? letter.toLocaleUpperCase('es') : '?';
+}
+
+function getAvatarColor(initial: string): string {
+  // Quita tildes para que "Á" y "A" compartan color
+  const base = initial.normalize('NFD').charCodeAt(0);
+  return AVATAR_COLORS[base % AVATAR_COLORS.length];
+}
+
+interface ClientAvatarProps {
+  src?: string;
+  name?: string;
+  size: number;
+  className?: string;
+  onClick?: (e: React.MouseEvent) => void;
+}
+
+function ClientAvatar({ src, name, size, className, onClick }: ClientAvatarProps) {
+  const [failed, setFailed] = useState(false);
+
+  if (src && !failed) {
+    return (
+      <img
+        src={src}
+        alt={name ?? 'Cliente'}
+        width={size}
+        height={size}
+        className={cn('rounded-full object-cover shrink-0', className)}
+        onClick={onClick}
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+
+  const initial = getInitial(name);
+  return (
+    <span
+      role="img"
+      aria-label={name ?? 'Cliente'}
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.45) }}
+      className={cn(
+        'flex items-center justify-center rounded-full font-bold text-white select-none shrink-0',
+        getAvatarColor(initial),
+        className,
+      )}
+      onClick={onClick}
+    >
+      {initial}
+    </span>
+  );
+}
 
 // ─── OrderNumberChip ───────────────────────────────────────────────────────────
 
@@ -29,7 +97,7 @@ interface ClientActionMenuProps {
   name?: string;
   phone?: string;
   clientId?: string;
-  avatarSrc: string;
+  avatarSrc?: string;
   onClose: () => void;
 }
 
@@ -43,13 +111,7 @@ function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientA
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
-          <img
-            src={avatarSrc}
-            alt={name ?? 'Cliente'}
-            width={40}
-            height={40}
-            className="rounded-full object-cover shrink-0"
-          />
+          <ClientAvatar src={avatarSrc} name={name} size={40} />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-neutral-black-80 truncate">{name ?? 'Cliente'}</p>
             {phone && <p className="text-xs text-neutral-black-100">{phone}</p>}
@@ -142,7 +204,7 @@ export function OrderClientChip({
   name,
   phone,
   clientId,
-  avatarSrc = MOCK_AVATAR,
+  avatarSrc,
   className,
   phoneVisible = false,
   isUser = false,
@@ -163,12 +225,11 @@ export function OrderClientChip({
           chipColorMap.expanded[userKey],
           className,
         )}>
-          <img
+          <ClientAvatar
             src={avatarSrc}
-            alt={name ?? 'Cliente'}
-            width={30}
-            height={30}
-            className="rounded-full object-cover cursor-pointer shrink-0"
+            name={name}
+            size={30}
+            className="cursor-pointer"
             onClick={handleOpen}
           />
           <div className="flex flex-col items-start min-w-0">
@@ -199,13 +260,7 @@ export function OrderClientChip({
             className,
           )}
         >
-          <img
-            src={avatarSrc}
-            alt={name ?? 'Cliente'}
-            width={size === 'sm' ? 26 : 30}
-            height={size === 'sm' ? 26 : 30}
-            className="rounded-full object-cover shrink-0"
-          />
+          <ClientAvatar src={avatarSrc} name={name} size={size === 'sm' ? 26 : 30} />
           <span
             className={cn(
               'font-bold text-neutral-black-80',

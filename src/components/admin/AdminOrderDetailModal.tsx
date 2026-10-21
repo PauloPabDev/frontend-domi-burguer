@@ -110,7 +110,7 @@ export function AdminOrderDetailModal({
               name={clientName}
               phone={clientPhone}
               clientId={order.clientId}
-              avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
+              avatarSrc={order.clientId ? order.client?.photoURL : order.user?.photoURL}
               isUser={isUser}
               origin={order.origin}
               phoneVisible

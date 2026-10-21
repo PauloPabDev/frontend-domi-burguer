@@ -140,7 +140,7 @@ export function OrderRow({ order }: { order: WorkerOrder }) {
         name={order.client?.name ?? order.user?.name}
         phone={order.client?.phone ?? order.user?.phone}
         clientId={order.clientId}
-        avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
+        avatarSrc={order.clientId ? order.client?.photoURL : order.user?.photoURL}
         isUser={!order.clientId && !!order.userId}
         origin={order.origin}
       />
