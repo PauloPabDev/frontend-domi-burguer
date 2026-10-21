@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { WorkerOrder, WorkerKitchen, STATUS_CONFIG } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { RecepcionOrderCard } from './RecepcionOrderCard';
+import { RecepcionOrderDetailModal } from './RecepcionOrderDetailModal';
 import { cn } from '@/lib/utils';
 
 // Estados "en curso": la pestaña por defecto los junta en una sola lista
@@ -37,6 +38,10 @@ interface RecepcionOrderListProps {
  */
 export const RecepcionOrderList: React.FC<RecepcionOrderListProps> = ({ orders, ...cardHandlers }) => {
   const [filter, setFilter] = useState<ListFilter>('active');
+  // Se guarda el id (no la orden) para que el modal refleje los cambios en vivo del socket;
+  // si la orden desaparece (p. ej. se cancela), el modal se cierra solo.
+  const [detailOrderId, setDetailOrderId] = useState<string | null>(null);
+  const detailOrder = detailOrderId ? orders.find((o) => o.id === detailOrderId) : undefined;
 
   const countFor = (statuses: OrderStatus[]) => orders.filter((o) => statuses.includes(o.status)).length;
 
@@ -110,12 +115,25 @@ export const RecepcionOrderList: React.FC<RecepcionOrderListProps> = ({ orders, 
                 key={order.id}
                 className="grow basis-auto min-w-[min(100%,320px)] max-w-full md:max-w-[calc((100%-0.5rem)/2)] xl:max-w-[calc((100%-1rem)/3)]"
               >
-                <RecepcionOrderCard order={order} {...cardHandlers} compact />
+                <RecepcionOrderCard
+                  order={order}
+                  {...cardHandlers}
+                  compact
+                  onOpenDetail={() => setDetailOrderId(order.id)}
+                />
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {detailOrder && (
+        <RecepcionOrderDetailModal
+          order={detailOrder}
+          {...cardHandlers}
+          onClose={() => setDetailOrderId(null)}
+        />
+      )}
     </div>
   );
 };

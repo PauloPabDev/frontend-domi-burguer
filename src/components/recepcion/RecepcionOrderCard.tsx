@@ -54,6 +54,8 @@ interface RecepcionOrderCardProps {
   onMarkPending?: (orderId: string) => Promise<void>;
   /** Vista simple: número, cliente, resumen de productos, domiciliario, total y siguiente paso */
   compact?: boolean;
+  /** Vista simple: clic en la card (fuera de sus botones) para ver el detalle completo */
+  onOpenDetail?: () => void;
 }
 
 export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
@@ -67,6 +69,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   onMarkPaid,
   onMarkPending,
   compact = false,
+  onOpenDetail,
 }) => {
   const [showOrderMenu, setShowOrderMenu] = useState(false);
   const [showCourierModal, setShowCourierModal] = useState(false);
@@ -147,6 +150,15 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
     </button>
   );
 
+  // Los botones de la card conservan su acción; los clics que llegan por
+  // burbujeo desde los portales (menú de la orden, popover del domiciliario)
+  // no están dentro del DOM de la card y se ignoran.
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (!e.currentTarget.contains(target) || target.closest('button, a')) return;
+    onOpenDetail?.();
+  };
+
   return (
     <>
       {compact ? (
@@ -155,8 +167,10 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
         <div
           className={cn(
             'relative h-full rounded-2xl border shadow-sm overflow-hidden pl-3 pr-2 py-2 flex items-center gap-2.5',
+            onOpenDetail && 'cursor-pointer hover:shadow-md transition-shadow',
             cardColor ?? 'border-neutral-black-20 bg-white'
           )}
+          onClick={onOpenDetail ? handleCardClick : undefined}
         >
           <OrderStatusStrip status={order.status} className="absolute inset-y-0 left-0 w-1 h-auto" />
 
