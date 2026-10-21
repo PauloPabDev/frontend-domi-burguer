@@ -154,7 +154,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
         // número · cliente · productos · domiciliario · total · siguiente paso (siempre en el borde derecho)
         <div
           className={cn(
-            'relative rounded-2xl border shadow-sm overflow-hidden pl-3 pr-2 py-2 flex items-center gap-2.5',
+            'relative h-full rounded-2xl border shadow-sm overflow-hidden pl-3 pr-2 py-2 flex items-center gap-2.5',
             cardColor ?? 'border-neutral-black-20 bg-white'
           )}
         >
@@ -169,8 +169,8 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
             {order.dailyOrderNumber}
           </button>
 
-          {/* Cliente · tiempo transcurrido */}
-          <div className="w-24 shrink-0 min-w-0 space-y-0.5">
+          {/* Cliente · tiempo transcurrido: ancho según el nombre (tope 9rem), el sobrante queda para los productos */}
+          <div className="max-w-36 shrink-0 min-w-0 space-y-0.5">
             <p title={clientName} className="truncate text-xs font-semibold text-neutral-black-80">
               {clientName}
             </p>

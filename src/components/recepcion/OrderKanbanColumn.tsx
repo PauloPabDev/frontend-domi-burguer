@@ -17,8 +17,6 @@ interface OrderKanbanColumnProps {
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid?: (orderId: string) => Promise<void>;
   onMarkPending?: (orderId: string) => Promise<void>;
-  /** Vista simple de las cards (columna más angosta) */
-  compact?: boolean;
 }
 
 function blend(a: number, b: number, t: number) {
@@ -36,7 +34,6 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   onPaymentMethodChange,
   onMarkPaid,
   onMarkPending,
-  compact = false,
 }) => {
   const cfg = STATUS_CONFIG[status];
   const isEmpty = orders.length === 0;
@@ -62,10 +59,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
 
   return (
     <div
-      className={cn(
-        'flex flex-col shrink-0 h-full transition-[width] duration-200 ease-out',
-        compact ? 'w-[480px]' : 'w-[230px]'
-      )}
+      className="flex flex-col shrink-0 h-full w-[230px]"
     >
       {/* Column header */}
       <div className={cn('flex items-center gap-2 px-3 py-2 rounded-xl mb-2 shrink-0', cfg.bg)}>
@@ -101,7 +95,6 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
               onPaymentMethodChange={onPaymentMethodChange}
               onMarkPaid={onMarkPaid}
               onMarkPending={onMarkPending}
-              compact={compact}
             />
           ))}
         </div>

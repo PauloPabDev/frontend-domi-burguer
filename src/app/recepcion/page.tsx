@@ -9,6 +9,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
 import { OrderKanbanColumn } from '@/components/recepcion/OrderKanbanColumn';
+import { RecepcionOrderList } from '@/components/recepcion/RecepcionOrderList';
 import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
 import { WorkerOrderService } from '@/services/workerOrderService';
 import { OrderStatus } from '@/types/orders';
@@ -175,26 +176,42 @@ export default function RecepcionPage() {
           {compactView ? 'Vista completa' : 'Vista simple'}
         </button>
       </div>
-      <div className="flex-1 overflow-x-auto overflow-y-hidden min-h-0">
-        <div className="flex gap-2 min-w-max h-full">
-          {KANBAN_STATUSES.map((status) => (
-            <OrderKanbanColumn
-              key={status}
-              status={status}
-              orders={ordersByStatus[status] ?? []}
-              kitchens={kitchens}
-              onStatusChange={handleStatusChange}
-              onAssignCourier={handleAssignCourier}
-              onAssignKitchen={handleAssignKitchen}
-              onDelete={handleDeleteOrder}
-              onPaymentMethodChange={handlePaymentMethodChange}
-              onMarkPaid={handleMarkPaid}
-              onMarkPending={isAdmin ? handleMarkPending : undefined}
-              compact={compactView}
-            />
-          ))}
+      {compactView ? (
+        // Vista simple: una sola lista (sin columnas) que aprovecha todo el ancho
+        <div className="flex-1 min-h-0">
+          <RecepcionOrderList
+            orders={filteredOrders}
+            kitchens={kitchens}
+            onStatusChange={handleStatusChange}
+            onAssignCourier={handleAssignCourier}
+            onAssignKitchen={handleAssignKitchen}
+            onDelete={handleDeleteOrder}
+            onPaymentMethodChange={handlePaymentMethodChange}
+            onMarkPaid={handleMarkPaid}
+            onMarkPending={isAdmin ? handleMarkPending : undefined}
+          />
         </div>
-      </div>
+      ) : (
+        <div className="flex-1 overflow-x-auto overflow-y-hidden min-h-0">
+          <div className="flex gap-2 min-w-max h-full">
+            {KANBAN_STATUSES.map((status) => (
+              <OrderKanbanColumn
+                key={status}
+                status={status}
+                orders={ordersByStatus[status] ?? []}
+                kitchens={kitchens}
+                onStatusChange={handleStatusChange}
+                onAssignCourier={handleAssignCourier}
+                onAssignKitchen={handleAssignKitchen}
+                onDelete={handleDeleteOrder}
+                onPaymentMethodChange={handlePaymentMethodChange}
+                onMarkPaid={handleMarkPaid}
+                onMarkPending={isAdmin ? handleMarkPending : undefined}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
