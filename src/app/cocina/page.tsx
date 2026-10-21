@@ -18,16 +18,16 @@ type SortMode = 'time' | 'status';
 const STATUS_ORDER: Record<string, number> = { ready_for_pickup: 0, preparing: 1, fresh: 2 };
 
 function buildProductSummary(orders: WorkerOrder[]) {
-  const map = new Map<string, number>();
+  const map = new Map<string, { id: string; name: string; color?: string; qty: number }>();
   for (const order of orders) {
     for (const item of order.orderItems) {
       if (!item.id) continue;
-      map.set(item.id, (map.get(item.id) ?? 0) + item.quantity);
+      const entry = map.get(item.id) ?? { id: item.id, name: item.name ?? item.id, color: item.colorPrimary, qty: 0 };
+      entry.qty += item.quantity;
+      map.set(item.id, entry);
     }
   }
-  return Array.from(map.entries())
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, qty]) => ({ name, qty }));
+  return Array.from(map.values()).sort((a, b) => b.qty - a.qty);
 }
 
 export default function CocinaPage() {
@@ -117,13 +117,18 @@ export default function CocinaPage() {
           <span className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide shrink-0">
             Pendiente:
           </span>
-          {productSummary.map(({ name, qty }) => (
+          {productSummary.map(({ id, name, color, qty }) => (
             <span
-              key={name}
-              className="flex items-center gap-1.5 bg-white border border-neutral-black-20 rounded-full px-3 py-1 shrink-0"
+              key={id}
+              className="flex items-center gap-1.5 bg-white border border-neutral-black-20 rounded-full pl-1 pr-3 py-1 shrink-0"
             >
-              <span className="text-xs font-bold text-primary-red">{qty}×</span>
-              <span className="text-xs text-neutral-black-80">{name}</span>
+              <span
+                className="min-w-6 h-6 px-1 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                style={{ backgroundColor: color ?? 'var(--color-primary-red)' }}
+              >
+                {qty}
+              </span>
+              <span className="text-xs font-bold text-neutral-black-80">{name}</span>
             </span>
           ))}
         </div>
