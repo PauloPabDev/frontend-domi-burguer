@@ -17,7 +17,12 @@ interface OrderKanbanColumnProps {
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid?: (orderId: string) => Promise<void>;
   onMarkPending?: (orderId: string) => Promise<void>;
+  /** Columna vacía reducida a una franja vertical (cuando el tablero no cabe a lo ancho) */
+  collapsed?: boolean;
 }
+
+/** Ancho de una columna expandida (debe coincidir con w-[230px]) */
+export const KANBAN_COLUMN_WIDTH = 230;
 
 function blend(a: number, b: number, t: number) {
   return Math.round(a + (b - a) * t);
@@ -34,6 +39,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   onPaymentMethodChange,
   onMarkPaid,
   onMarkPending,
+  collapsed = false,
 }) => {
   const cfg = STATUS_CONFIG[status];
   const isEmpty = orders.length === 0;
@@ -56,6 +62,23 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
 
     el.style.setProperty('--scroll-thumb', `rgb(${r} ${g} ${b})`);
   }, []);
+
+  if (collapsed && isEmpty) {
+    return (
+      <div
+        title={`${cfg.label}: sin órdenes`}
+        className={cn('flex flex-col items-center gap-2 shrink-0 h-full w-10 py-3 rounded-xl', cfg.bg)}
+      >
+        <div className={cn('w-2 h-2 rounded-full shrink-0', cfg.dotColor)} />
+        <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/60 shrink-0', cfg.color)}>
+          0
+        </span>
+        <span className={cn('text-xs font-bold whitespace-nowrap [writing-mode:vertical-rl]', cfg.color)}>
+          {cfg.label}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div

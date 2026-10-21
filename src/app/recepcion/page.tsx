@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutList, Rows3 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
@@ -8,7 +8,7 @@ import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
-import { OrderKanbanColumn } from '@/components/recepcion/OrderKanbanColumn';
+import { OrderKanbanColumn, KANBAN_COLUMN_WIDTH } from '@/components/recepcion/OrderKanbanColumn';
 import { RecepcionOrderList } from '@/components/recepcion/RecepcionOrderList';
 import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
 import { WorkerOrderService } from '@/services/workerOrderService';
@@ -26,6 +26,10 @@ const KANBAN_STATUSES: OrderStatus[] = [
   'delivered',
   'pending_payment',
 ];
+
+const KANBAN_GAP = 8; // gap-2 entre columnas
+const KANBAN_FULL_WIDTH =
+  KANBAN_STATUSES.length * KANBAN_COLUMN_WIDTH + (KANBAN_STATUSES.length - 1) * KANBAN_GAP;
 
 export default function RecepcionPage() {
   const { user } = useAuth();
@@ -64,6 +68,19 @@ export default function RecepcionPage() {
     filterCourierIds.size === 0
       ? enrichedOrders
       : enrichedOrders.filter((o) => o.courierId && filterCourierIds.has(o.courierId));
+
+  // Ancho disponible del tablero: si las columnas no caben, las vacías se colapsan
+  const [boardWidth, setBoardWidth] = useState<number | null>(null);
+  const boardObserver = useRef<ResizeObserver | null>(null);
+  const boardRef = useCallback((el: HTMLDivElement | null) => {
+    boardObserver.current?.disconnect();
+    boardObserver.current = null;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => setBoardWidth(entry.contentRect.width));
+    observer.observe(el);
+    boardObserver.current = observer;
+  }, []);
+  const collapseEmptyColumns = boardWidth !== null && boardWidth < KANBAN_FULL_WIDTH;
 
   const ordersByStatus = KANBAN_STATUSES.reduce<Record<string, typeof enrichedOrders>>(
     (acc, status) => {
@@ -192,7 +209,7 @@ export default function RecepcionPage() {
           />
         </div>
       ) : (
-        <div className="flex-1 overflow-x-auto overflow-y-hidden min-h-0">
+        <div ref={boardRef} className="flex-1 overflow-x-auto overflow-y-hidden min-h-0">
           <div className="flex gap-2 min-w-max h-full">
             {KANBAN_STATUSES.map((status) => (
               <OrderKanbanColumn
@@ -207,6 +224,7 @@ export default function RecepcionPage() {
                 onPaymentMethodChange={handlePaymentMethodChange}
                 onMarkPaid={handleMarkPaid}
                 onMarkPending={isAdmin ? handleMarkPending : undefined}
+                collapsed={collapseEmptyColumns}
               />
             ))}
           </div>
