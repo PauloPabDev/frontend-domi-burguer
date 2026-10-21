@@ -11,8 +11,15 @@ import { cn } from '@/lib/utils';
 const ACTIVE_STATUSES: OrderStatus[] = ['fresh', 'preparing', 'ready_for_pickup', 'dispatched'];
 // Estados que se revisan aparte (crecen durante el día y se miran menos)
 const CLOSING_STATUSES: OrderStatus[] = ['delivered', 'pending_payment'];
+// "Todas": las órdenes actuales en cualquier estado del tablero
+const ALL_STATUSES: OrderStatus[] = [...ACTIVE_STATUSES, ...CLOSING_STATUSES];
 
-type ListFilter = 'active' | OrderStatus;
+type ListFilter = 'all' | 'active' | OrderStatus;
+
+const FILTER_STATUSES: Partial<Record<ListFilter, OrderStatus[]>> = {
+  all: ALL_STATUSES,
+  active: ACTIVE_STATUSES,
+};
 
 interface RecepcionOrderListProps {
   orders: WorkerOrder[];
@@ -46,13 +53,14 @@ export const RecepcionOrderList: React.FC<RecepcionOrderListProps> = ({ orders, 
   const countFor = (statuses: OrderStatus[]) => orders.filter((o) => statuses.includes(o.status)).length;
 
   const tabs: { key: ListFilter; label: string; count: number; dots: string[] }[] = [
+    { key: 'all', label: 'Todas', count: countFor(ALL_STATUSES), dots: [] },
     {
       key: 'active',
       label: 'En curso',
       count: countFor(ACTIVE_STATUSES),
       dots: ACTIVE_STATUSES.map((s) => STATUS_CONFIG[s].dotColor),
     },
-    ...[...ACTIVE_STATUSES, ...CLOSING_STATUSES].map((status) => ({
+    ...ALL_STATUSES.map((status) => ({
       key: status,
       label: STATUS_CONFIG[status].label,
       count: countFor([status]),
@@ -60,7 +68,7 @@ export const RecepcionOrderList: React.FC<RecepcionOrderListProps> = ({ orders, 
     })),
   ];
 
-  const visibleStatuses = filter === 'active' ? ACTIVE_STATUSES : [filter];
+  const visibleStatuses = FILTER_STATUSES[filter] ?? [filter as OrderStatus];
   const visibleOrders = orders
     .filter((o) => visibleStatuses.includes(o.status))
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -84,11 +92,13 @@ export const RecepcionOrderList: React.FC<RecepcionOrderListProps> = ({ orders, 
                   : 'bg-white text-neutral-black-80 border-neutral-black-20 hover:border-neutral-black-40'
               )}
             >
-              <span className="flex -space-x-0.5">
-                {tab.dots.map((dot) => (
-                  <span key={dot} className={cn('w-2 h-2 rounded-full ring-1 ring-white', dot)} />
-                ))}
-              </span>
+              {tab.dots.length > 0 && (
+                <span className="flex -space-x-0.5">
+                  {tab.dots.map((dot) => (
+                    <span key={dot} className={cn('w-2 h-2 rounded-full ring-1 ring-white', dot)} />
+                  ))}
+                </span>
+              )}
               {tab.label}
               <span
                 className={cn(
