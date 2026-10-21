@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { ChevronDown, MapPin } from 'lucide-react';
 import { WorkerOrder, STATUS_CONFIG } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
-import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
 import { OrderItemsCompactList } from '@/components/ui/OrderItemsCompactList';
 import { OrderElapsedTime } from '@/components/ui/OrderElapsedTime';
 import { OrderComment } from '@/components/ui/OrderComment';
@@ -38,39 +37,36 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onSta
   const cardColor = cardOriginColorMap[getClientOriginKey(isUser, order?.origin)];
 
   return (
+    // El estado se lee por el color del borde (los 4 lados); el fondo sigue indicando el origen del cliente
     <div
       className={cn(
-        'rounded-3xl border shadow-sm overflow-hidden',
-        cardColor ?? 'border-neutral-black-20 bg-white'
+        'rounded-3xl border-[3px] shadow-sm overflow-hidden',
+        cardColor ?? 'bg-white'
       )}
+      style={{ borderColor: statusConfig?.hex }}
     >
-      <OrderStatusStrip status={order.status} className="h-1" />
-
       <div className="px-4 py-3 space-y-2.5">
-        {/* 1. Identificación: número · estado · hora · tiempo transcurrido */}
+        {/* 1. Identificación: número · cliente · hora · tiempo transcurrido */}
         <div className="flex items-center gap-2 min-w-0">
           <span className="shrink-0 min-w-8 h-8 px-2 flex items-center justify-center bg-primary-red rounded-full text-base font-bold text-white">
             {order.dailyOrderNumber}
           </span>
-          {statusConfig && (
-            <span className={cn('text-xs font-semibold truncate', statusConfig.color)}>{statusConfig.label}</span>
-          )}
-          <div className="ml-auto flex items-center gap-1.5 shrink-0 text-sm leading-none">
+          <div className="flex-1 min-w-0">
+            <OrderClientChip
+              name={order.client?.name ?? order.user?.name}
+              phone={order.client?.phone ?? order.user?.phone}
+              clientId={order.clientId}
+              avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
+              isUser={isUser}
+              origin={order?.origin}
+              size="sm"
+            />
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0 text-sm leading-none">
             <span className="font-semibold text-neutral-black-100">{formatTime(order.createdAt)}</span>
             <OrderElapsedTime createdAt={order.createdAt} status={order.status} />
           </div>
         </div>
-
-        {/* Cliente: foto + nombre completo */}
-        <OrderClientChip
-          name={order.client?.name ?? order.user?.name}
-          phone={order.client?.phone ?? order.user?.phone}
-          clientId={order.clientId}
-          avatarSrc={order.client?.photoURL ?? order.user?.photoURL}
-          isUser={isUser}
-          origin={order?.origin}
-          size="sm"
-        />
 
         {/* Comentario completo: suele traer instrucciones de preparación */}
         {order.comment && <OrderComment comment={order.comment} />}
