@@ -13,7 +13,7 @@ import type { PaymentMethod } from '@/types/orders';
 
 const COLOMBIAN_BILLS = [1_000, 2_000, 5_000, 10_000, 20_000, 50_000, 100_000, 200_000];
 
-function getCashChange(total: number): { bill: number; change: number } | null {
+export function getCashChange(total: number): { bill: number; change: number } | null {
   const bill = COLOMBIAN_BILLS.find((b) => b > total);
   if (!bill) return null;
   return { bill, change: bill - total };
@@ -48,7 +48,8 @@ interface OrderPaymentRowProps {
   className?: string;
   recepcionMode?: boolean;
   /**
-   * Compacto (recepción): solo método + botón "Aprobar", sin total.
+   * Compacto (recepción): solo método + botón "Aprobar", sin total ni vueltas
+   * (la card de recepción las muestra junto al total).
    * El selector de método se abre al tocar el método.
    */
   compact?: boolean;
@@ -233,13 +234,6 @@ export function OrderPaymentRow({
           </div>
         )}
 
-        {/* Vueltas en efectivo */}
-        {cashChange && !paid && (
-          <p className="text-[11px] text-neutral-black-100">
-            Con {formatCOP(cashChange.bill)} ·{' '}
-            <span className="font-semibold text-amber-600">devolver {formatCOP(cashChange.change)}</span>
-          </p>
-        )}
       </div>
     );
   }

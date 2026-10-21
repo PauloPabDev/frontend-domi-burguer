@@ -6,7 +6,7 @@ import { WorkerOrder, WorkerKitchen } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
 import { formatCOP } from '@/components/ui/OrderItemsList';
-import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
+import { OrderPaymentRow, getCashChange } from '@/components/ui/OrderPaymentRow';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderComment } from '@/components/ui/OrderComment';
@@ -98,6 +98,8 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   const kitchenName = order.kitchen?.name ?? kitchens.find((k) => k.id === order.kitchenId)?.name;
   const itemCount = order.orderItems.reduce((acc, item) => acc + item.quantity, 0);
   const paid = order.payment?.status === 'approved';
+  const cashChange =
+    order.paymentMethod === 'cash' && order.totalPrice > 0 ? getCashChange(order.totalPrice) : null;
   const clientName = order.client?.name ?? order.user?.name ?? 'Sin nombre';
 
   const handleCopyTotal = async () => {
@@ -329,7 +331,15 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
                 aria-label={showPrices ? 'Ocultar desglose de precios' : 'Ver desglose de precios'}
                 className="flex items-center gap-0.5 text-[11px] text-neutral-black-100 hover:text-neutral-black-80 transition-colors"
               >
-                {itemCount} prod.
+                {/* Con domicilio se muestra su costo en lugar del conteo de productos */}
+                {order.deliveryPrice > 0 ? (
+                  <span className="flex items-center gap-0.5 font-semibold tabular-nums" title="Domicilio">
+                    <Bike size={12} className="shrink-0" />
+                    {formatCOP(order.deliveryPrice)}
+                  </span>
+                ) : (
+                  `${itemCount} prod.`
+                )}
                 <ChevronDown
                   size={14}
                   className={cn('shrink-0 transition-transform', showPrices && 'rotate-180')}
@@ -338,6 +348,13 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
 
               {totalButton}
             </div>
+            {/* Vueltas en efectivo, junto al total para leer los precios en un solo lugar */}
+            {cashChange && !paid && (
+              <div className="flex items-center justify-between mt-1 pt-1 border-t border-dashed border-neutral-black-10 text-[11px] tabular-nums">
+                <span className="text-neutral-black-100">Con {formatCOP(cashChange.bill)}</span>
+                <span className="font-semibold text-amber-600">Devolver {formatCOP(cashChange.change)}</span>
+              </div>
+            )}
             {showPrices && <OrderPriceBreakdown items={order.orderItems} deliveryPrice={order.deliveryPrice} />}
           </div>
 
