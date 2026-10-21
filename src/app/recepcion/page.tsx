@@ -153,7 +153,10 @@ export default function RecepcionPage() {
   };
 
   return (
-    <div className="-mb-4 h-[calc(100vh-106px)] flex flex-col gap-2">
+    // Alto exacto del viewport: main aporta mt-[100px] + py-4 (16px arriba) y
+    // el -mb-4 anula su padding inferior → 100 + 16 = 116px. Si no cuadra,
+    // aparece un scroll de página. dvh evita el sobrante de la barra del navegador en móvil.
+    <div className="-mb-4 h-[calc(100dvh-116px)] flex flex-col gap-2">
       <div className="flex items-start gap-2 shrink-0">
         <CourierFilterPanel className="flex-1 min-w-0" />
         <button
