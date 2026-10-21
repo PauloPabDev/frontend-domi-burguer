@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +19,8 @@ interface OrderActionButtonsProps {
   className?: string;
   /** Clases extra para cada botón (p. ej. radio de borde) */
   buttonClassName?: string;
+  /** Modo circular: solo el ícono (el label queda como tooltip) y la confirmación también en círculos */
+  icon?: React.ReactNode;
 }
 
 export function OrderActionButtons({
@@ -30,6 +33,7 @@ export function OrderActionButtons({
   onConfirmingChange,
   className,
   buttonClassName,
+  icon,
 }: OrderActionButtonsProps) {
   const [confirming, setConfirming] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -51,6 +55,49 @@ export function OrderActionButtons({
       setLoading(false);
     }
   };
+
+  if (icon) {
+    if (confirming) {
+      return (
+        <div className={cn('flex items-center gap-1', className)} onClick={stop}>
+          <button
+            type="button"
+            onClick={(e) => { stop(e); setConfirmingState(false); }}
+            disabled={loading}
+            title="Cancelar"
+            aria-label="Cancelar"
+            className="w-8 h-8 rounded-full border border-neutral-black-20 bg-white flex items-center justify-center text-neutral-black-100 hover:text-neutral-black-80 transition-colors disabled:opacity-40"
+          >
+            <X size={14} />
+          </button>
+          <Button
+            onClick={handleConfirm}
+            loading={loading}
+            size="icon-sm"
+            variant={variant}
+            title={`Confirmar: ${label}`}
+            aria-label={`Confirmar: ${label}`}
+            className="rounded-full"
+          >
+            <Check size={15} />
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <Button
+        onClick={(e) => { stop(e); setConfirmingState(true); }}
+        size="icon-sm"
+        variant={variant}
+        title={label}
+        aria-label={label}
+        className={cn('rounded-full', className)}
+      >
+        {icon}
+      </Button>
+    );
+  }
 
   if (confirming) {
     return (

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from 'react';
+import { LayoutList, Rows3 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
@@ -11,6 +13,9 @@ import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
 import { WorkerOrderService } from '@/services/workerOrderService';
 import { OrderStatus } from '@/types/orders';
 import { notify } from '@/utils/notify';
+import { cn } from '@/lib/utils';
+
+const COMPACT_VIEW_KEY = 'domi_recepcion_compact_view';
 
 const KANBAN_STATUSES: OrderStatus[] = [
   'fresh',
@@ -31,6 +36,28 @@ export default function RecepcionPage() {
   // Revertir un pago ya confirmado es una corrección exclusiva de admin;
   // recepción conserva el cobro normal (marcar como pagado) sin restricción.
   const isAdmin = userProfile?.roles?.includes('admin') ?? false;
+
+  // Vista simple: preferencia por navegador. Se lee tras montar para no romper la hidratación.
+  const [compactView, setCompactView] = useState(false);
+  useEffect(() => {
+    try {
+      setCompactView(localStorage.getItem(COMPACT_VIEW_KEY) === '1');
+    } catch {
+      // Almacenamiento bloqueado: se queda la vista completa
+    }
+  }, []);
+
+  const toggleCompactView = () => {
+    setCompactView((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(COMPACT_VIEW_KEY, next ? '1' : '0');
+      } catch {
+        // Sin persistencia: el cambio aplica solo a esta sesión
+      }
+      return next;
+    });
+  };
 
   const filteredOrders =
     filterCourierIds.size === 0
@@ -127,7 +154,24 @@ export default function RecepcionPage() {
 
   return (
     <div className="-mb-4 h-[calc(100vh-106px)] flex flex-col gap-2">
-      <CourierFilterPanel />
+      <div className="flex items-start gap-2 shrink-0">
+        <CourierFilterPanel className="flex-1 min-w-0" />
+        <button
+          type="button"
+          onClick={toggleCompactView}
+          aria-pressed={compactView}
+          title={compactView ? 'Ver cards completas' : 'Simplificar cards'}
+          className={cn(
+            'ml-auto flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border transition-all shrink-0',
+            compactView
+              ? 'bg-neutral-black-80 text-white border-transparent'
+              : 'bg-white text-neutral-black-60 border-neutral-black-20 hover:border-neutral-black-40'
+          )}
+        >
+          {compactView ? <Rows3 size={13} /> : <LayoutList size={13} />}
+          {compactView ? 'Vista completa' : 'Vista simple'}
+        </button>
+      </div>
       <div className="flex-1 overflow-x-auto overflow-y-hidden min-h-0">
         <div className="flex gap-2 min-w-max h-full">
           {KANBAN_STATUSES.map((status) => (
@@ -143,6 +187,7 @@ export default function RecepcionPage() {
               onPaymentMethodChange={handlePaymentMethodChange}
               onMarkPaid={handleMarkPaid}
               onMarkPending={isAdmin ? handleMarkPending : undefined}
+              compact={compactView}
             />
           ))}
         </div>
