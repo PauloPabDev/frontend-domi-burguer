@@ -17,6 +17,8 @@ interface OrderKanbanColumnProps {
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid?: (orderId: string) => Promise<void>;
   onMarkPending?: (orderId: string) => Promise<void>;
+  /** Vista simple de las cards (columna más angosta) */
+  compact?: boolean;
 }
 
 function blend(a: number, b: number, t: number) {
@@ -34,6 +36,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   onPaymentMethodChange,
   onMarkPaid,
   onMarkPending,
+  compact = false,
 }) => {
   const cfg = STATUS_CONFIG[status];
   const isEmpty = orders.length === 0;
@@ -61,29 +64,23 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
     <div
       className={cn(
         'flex flex-col shrink-0 h-full transition-[width] duration-200 ease-out',
-        isEmpty ? 'w-14' : 'w-[230px]'
+        compact ? 'w-[480px]' : 'w-[230px]'
       )}
     >
       {/* Column header */}
-      <div
-        className={cn(
-          'flex items-center gap-2 px-3 py-2 rounded-xl mb-2 shrink-0',
-          cfg.bg,
-          isEmpty && 'justify-center px-1.5'
-        )}
-      >
+      <div className={cn('flex items-center gap-2 px-3 py-2 rounded-xl mb-2 shrink-0', cfg.bg)}>
         <div className={cn('w-2 h-2 rounded-full shrink-0', cfg.dotColor)} />
-        {!isEmpty && <span className={cn('text-xs font-bold truncate', cfg.color)}>{cfg.label}</span>}
-        <span
-          className={cn(
-            'text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/60 shrink-0',
-            cfg.color,
-            isEmpty && 'ml-0'
-          )}
-        >
+        <span className={cn('text-xs font-bold truncate', cfg.color)}>{cfg.label}</span>
+        <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/60 shrink-0', cfg.color)}>
           {orders.length}
         </span>
       </div>
+
+      {isEmpty && (
+        <div className="flex-1 rounded-2xl border border-dashed border-neutral-black-20 flex items-start justify-center pt-6 text-xs text-neutral-black-40">
+          Sin órdenes
+        </div>
+      )}
 
       {/* Cards */}
       {!isEmpty && (
@@ -104,6 +101,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
               onPaymentMethodChange={onPaymentMethodChange}
               onMarkPaid={onMarkPaid}
               onMarkPending={onMarkPending}
+              compact={compact}
             />
           ))}
         </div>

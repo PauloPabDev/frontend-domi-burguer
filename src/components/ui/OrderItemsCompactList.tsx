@@ -135,7 +135,46 @@ export function OrderPriceBreakdown({ items, deliveryPrice }: { items: OrderItem
  * Resumen visual del pedido (lista colapsada): un círculo por producto con su cantidad y color,
  * y debajo los complementos como badges pequeños con su cantidad total.
  */
-export function OrderItemsSummary({ items }: { items: OrderItem[] }) {
+export function OrderItemsSummary({ items, inline = false }: { items: OrderItem[]; inline?: boolean }) {
+  // En línea: los productos saltan de renglón si no caben; los complementos van en cadena
+  // (badges solapados) justo debajo de su producto, con altura mínima para no estirar la card
+  if (inline) {
+    return (
+      <div className="flex flex-wrap items-start gap-x-1.5 gap-y-1">
+        {items.map((item, index) => (
+          <div
+            key={index}
+            className="flex flex-col items-center"
+            title={[
+              `${item.quantity}× ${item.name ?? ''}`,
+              ...(item.complements ?? []).map((c) => `  ${getComplementQuantities(item, c).total} ${c.name ?? ''}`),
+            ].join('\n')}
+          >
+            <span
+              className="min-w-5 h-5 px-1 rounded-full text-white text-[11px] font-bold flex items-center justify-center"
+              style={{ backgroundColor: item.colorPrimary ?? 'var(--color-primary-red)' }}
+            >
+              {item.quantity}
+            </span>
+            {item.complements && item.complements.length > 0 && (
+              <div className="flex -space-x-1 -mt-0.5">
+                {item.complements.map((c, i) => (
+                  <span
+                    key={i}
+                    className="min-w-3 h-3 px-0.5 rounded-full ring-1 ring-white text-white text-[8px] font-bold leading-none flex items-center justify-center"
+                    style={{ backgroundColor: c.colorPrimary ?? 'var(--color-neutral-black-60)' }}
+                  >
+                    {getComplementQuantities(item, c).total}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-wrap items-start gap-1.5">
       {items.map((item, index) => (
