@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { SocketProvider } from '@/contexts/SocketContext';
 import { KitchenNavbar } from '@/components/cocina/KitchenNavbar';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
+import { cn } from '@/lib/utils';
 
 function KitchenLayoutInner({ children }: { children: React.ReactNode }) {
   const { kitchens, selectedKitchenId, selectedKitchen, selectKitchen, loading } = useKitchenSelector();
+  // En el panel de órdenes el nav va colapsado en un botón flotante, no reserva espacio arriba
+  const navCollapsed = usePathname() === '/cocina';
 
   return (
     <SocketProvider role="cook" kitchenId={selectedKitchenId}>
@@ -19,7 +22,7 @@ function KitchenLayoutInner({ children }: { children: React.ReactNode }) {
         onKitchenChange={selectKitchen}
         loadingKitchens={loading}
       />
-      <main className="w-full px-4 mt-[100px] pb-6">
+      <main className={cn('w-full px-4', navCollapsed ? 'mt-4 pb-24' : 'mt-[100px] pb-6')}>
         {children}
       </main>
     </SocketProvider>
