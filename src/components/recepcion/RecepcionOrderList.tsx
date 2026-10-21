@@ -7,11 +7,11 @@ import { RecepcionOrderCard } from './RecepcionOrderCard';
 import { RecepcionOrderDetailModal } from './RecepcionOrderDetailModal';
 import { cn } from '@/lib/utils';
 
-// Estados "en curso": la pestaña por defecto los junta en una sola lista
+// Estados "en curso": la pestaña En curso los junta en una sola lista
 const ACTIVE_STATUSES: OrderStatus[] = ['fresh', 'preparing', 'ready_for_pickup', 'dispatched'];
 // Estados que se revisan aparte (crecen durante el día y se miran menos)
 const CLOSING_STATUSES: OrderStatus[] = ['delivered', 'pending_payment'];
-// "Todas": las órdenes actuales en cualquier estado del tablero
+// "Todas" (pestaña por defecto): las órdenes actuales en cualquier estado del tablero
 const ALL_STATUSES: OrderStatus[] = [...ACTIVE_STATUSES, ...CLOSING_STATUSES];
 
 type ListFilter = 'all' | 'active' | OrderStatus;
@@ -44,7 +44,7 @@ interface RecepcionOrderListProps {
  * fila, y con nombres y pedidos cortos entran más.
  */
 export const RecepcionOrderList: React.FC<RecepcionOrderListProps> = ({ orders, ...cardHandlers }) => {
-  const [filter, setFilter] = useState<ListFilter>('active');
+  const [filter, setFilter] = useState<ListFilter>('all');
   // Se guarda el id (no la orden) para que el modal refleje los cambios en vivo del socket;
   // si la orden desaparece (p. ej. se cancela), el modal se cierra solo.
   const [detailOrderId, setDetailOrderId] = useState<string | null>(null);
