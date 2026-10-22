@@ -57,6 +57,10 @@ export function OrderActionButtons({
   };
 
   if (icon) {
+    // md: 40px, objetivo táctil cómodo para la vista de celular
+    const circle = size === 'md' ? 'w-10 h-10' : 'w-8 h-8';
+    const iconButtonSize = size === 'md' ? 'icon' : 'icon-sm';
+
     if (confirming) {
       return (
         <div className={cn('flex items-center gap-1', className)} onClick={stop}>
@@ -66,20 +70,20 @@ export function OrderActionButtons({
             disabled={loading}
             title="Cancelar"
             aria-label="Cancelar"
-            className="w-8 h-8 rounded-full border border-neutral-black-20 bg-white flex items-center justify-center text-neutral-black-100 hover:text-neutral-black-80 transition-colors disabled:opacity-40"
+            className={cn(circle, 'rounded-full border border-neutral-black-20 bg-white flex items-center justify-center text-neutral-black-100 hover:text-neutral-black-80 transition-colors disabled:opacity-40')}
           >
-            <X size={14} />
+            <X size={size === 'md' ? 16 : 14} />
           </button>
           <Button
             onClick={handleConfirm}
             loading={loading}
-            size="icon-sm"
+            size={iconButtonSize}
             variant={variant}
             title={`Confirmar: ${label}`}
             aria-label={`Confirmar: ${label}`}
             className="rounded-full"
           >
-            <Check size={15} />
+            <Check size={size === 'md' ? 18 : 15} />
           </Button>
         </div>
       );
@@ -88,7 +92,7 @@ export function OrderActionButtons({
     return (
       <Button
         onClick={(e) => { stop(e); setConfirmingState(true); }}
-        size="icon-sm"
+        size={iconButtonSize}
         variant={variant}
         title={label}
         aria-label={label}

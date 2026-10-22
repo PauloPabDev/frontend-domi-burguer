@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 // La cantidad de un complemento es por unidad del producto: 4 combos con 2 papas = 8 papas.
 // Se muestra el total y, si el producto tiene más de una unidad, la multiplicación que lo explica.
-function getComplementQuantities(item: OrderItem, complement: OrderItem) {
+export function getComplementQuantities(item: OrderItem, complement: OrderItem) {
   const perUnit = complement.quantity || 1;
   return {
     total: perUnit * item.quantity,

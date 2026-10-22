@@ -41,7 +41,7 @@ interface ClientAvatarProps {
   onClick?: (e: React.MouseEvent) => void;
 }
 
-function ClientAvatar({ src, name, size, className, onClick }: ClientAvatarProps) {
+export function ClientAvatar({ src, name, size, className, onClick }: ClientAvatarProps) {
   const [failed, setFailed] = useState(false);
 
   if (src && !failed) {
