@@ -8,11 +8,12 @@ import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
+import { usePaymentChangeRequest } from '@/hooks/reception/usePaymentChangeRequest';
 import { OrderKanbanColumn, KANBAN_COLUMN_WIDTH } from '@/components/recepcion/OrderKanbanColumn';
 import { RecepcionOrderList } from '@/components/recepcion/RecepcionOrderList';
 import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
 import { WorkerOrderService } from '@/services/workerOrderService';
-import { OrderStatus } from '@/types/orders';
+import { OrderStatus, PaymentStatus } from '@/types/orders';
 import { notify } from '@/utils/notify';
 import { cn } from '@/lib/utils';
 
@@ -38,8 +39,9 @@ export default function RecepcionPage() {
   const { kitchens } = useKitchenSelector();
   const { filterCourierIds } = useCourierPanel();
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
-  // Revertir un pago ya confirmado es una corrección exclusiva de admin;
-  // recepción conserva el cobro normal (marcar como pagado) sin restricción.
+  const handleRequestPaymentChange = usePaymentChangeRequest();
+  // Cambiar el método o el estado del pago es exclusivo de admin; recepción
+  // conserva el cobro normal (aprobar el pago) y para lo demás envía una solicitud.
   const isAdmin = userProfile?.roles?.includes('admin') ?? false;
 
   // Vista simple: preferencia por navegador. Se lee tras montar para no romper la hidratación.
@@ -146,17 +148,21 @@ export default function RecepcionPage() {
     }
   };
 
-  const handleMarkPending = async (orderId: string) => {
+  const handlePaymentStatusChange = async (orderId: string, status: PaymentStatus) => {
     if (!user) return;
     try {
       const token = await user.getIdToken();
-      await WorkerOrderService.markPaymentPending(token, orderId);
-      notify.success('Pago marcado como pendiente', 'El pago fue revertido a pendiente.');
+      await WorkerOrderService.updatePaymentStatus(token, orderId, status);
+      notify.success('Estado del pago actualizado');
     } catch (e) {
-      notify.error('Error al marcar el pago como pendiente', e instanceof Error ? e.message : undefined);
+      notify.error('Error al cambiar el estado del pago', e instanceof Error ? e.message : undefined);
       throw e;
     }
   };
+
+  const paymentHandlers = isAdmin
+    ? { onPaymentMethodChange: handlePaymentMethodChange, onPaymentStatusChange: handlePaymentStatusChange }
+    : { onRequestPaymentChange: handleRequestPaymentChange };
 
   const handleDeleteOrder = async (orderId: string) => {
     if (!user) return;
@@ -203,9 +209,8 @@ export default function RecepcionPage() {
             onAssignCourier={handleAssignCourier}
             onAssignKitchen={handleAssignKitchen}
             onDelete={handleDeleteOrder}
-            onPaymentMethodChange={handlePaymentMethodChange}
             onMarkPaid={handleMarkPaid}
-            onMarkPending={isAdmin ? handleMarkPending : undefined}
+            {...paymentHandlers}
           />
         </div>
       ) : (
@@ -221,9 +226,8 @@ export default function RecepcionPage() {
                 onAssignCourier={handleAssignCourier}
                 onAssignKitchen={handleAssignKitchen}
                 onDelete={handleDeleteOrder}
-                onPaymentMethodChange={handlePaymentMethodChange}
                 onMarkPaid={handleMarkPaid}
-                onMarkPending={isAdmin ? handleMarkPending : undefined}
+                {...paymentHandlers}
                 collapsed={collapseEmptyColumns}
               />
             ))}

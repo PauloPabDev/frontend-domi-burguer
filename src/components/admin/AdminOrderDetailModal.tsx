@@ -2,9 +2,10 @@
 
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Bike, ChefHat, Loader2, ShieldCheck, Trash2, X } from 'lucide-react';
+import { Bike, ChefHat, CreditCard, Loader2, ShieldCheck, Trash2, X } from 'lucide-react';
 import { WorkerOrder, WorkerKitchen } from '@/types/worker';
-import { OrderStatus } from '@/types/orders';
+import { OrderStatus, PaymentStatus } from '@/types/orders';
+import { PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
 import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
 import { OrderStatusTimeline } from '@/components/ui/OrderStatusTimeline';
 import { OrderStatusPicker } from '@/components/ui/OrderStatusPicker';
@@ -15,6 +16,7 @@ import { OrderComment } from '@/components/ui/OrderComment';
 import { OrderClientChip } from '@/components/ui/OrderClientChips';
 import { AssignCourierPopover } from '@/components/recepcion/AssignCourierPopover';
 import { AssignKitchenModal } from '@/components/recepcion/AssignKitchenModal';
+import { PaymentChangeModal } from '@/components/recepcion/PaymentChangeModal';
 import { formatDateTime } from '@/lib/dates';
 
 interface AdminOrderDetailModalProps {
@@ -26,7 +28,7 @@ interface AdminOrderDetailModalProps {
   onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
   onPaymentMethodChange: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid: (orderId: string) => Promise<void>;
-  onMarkPending: (orderId: string) => Promise<void>;
+  onPaymentStatusChange: (orderId: string, status: PaymentStatus) => Promise<void>;
   onDelete: (orderId: string) => Promise<void>;
 }
 
@@ -47,11 +49,12 @@ export function AdminOrderDetailModal({
   onAssignKitchen,
   onPaymentMethodChange,
   onMarkPaid,
-  onMarkPending,
+  onPaymentStatusChange,
   onDelete,
 }: AdminOrderDetailModalProps) {
   const [showCourierPopover, setShowCourierPopover] = useState(false);
   const [showKitchenModal, setShowKitchenModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const courierButtonRef = useRef<HTMLButtonElement>(null);
@@ -59,6 +62,14 @@ export function AdminOrderDetailModal({
   const clientName = order.client?.name ?? order.user?.name;
   const clientPhone = order.client?.phone ?? order.user?.phone;
   const isUser = !order.clientId && !!order.userId;
+
+  const handlePaymentChange = async (change: PaymentChangeRequestInput) => {
+    if (change.type === 'paymentMethod') {
+      await onPaymentMethodChange(order.id, order.paymentMethod, change.value);
+    } else {
+      await onPaymentStatusChange(order.id, change.value);
+    }
+  };
 
   const handleDelete = async () => {
     if (!confirmingDelete) { setConfirmingDelete(true); return; }
@@ -141,7 +152,17 @@ export function AdminOrderDetailModal({
 
           {/* Pago */}
           <div className={SECTION}>
-            <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide mb-3">Pago</p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide">Pago</p>
+              <button
+                type="button"
+                onClick={() => setShowPaymentModal(true)}
+                className="flex items-center gap-1 text-xs font-semibold text-neutral-black-80 hover:text-primary-red transition-colors"
+              >
+                <CreditCard size={13} />
+                Cambiar método o estado
+              </button>
+            </div>
             <OrderPaymentRow
               paymentMethod={order.paymentMethod}
               paid={order.payment?.status === 'approved'}
@@ -149,7 +170,7 @@ export function AdminOrderDetailModal({
               recepcionMode
               onPaymentMethodChange={(method) => onPaymentMethodChange(order.id, order.paymentMethod, method)}
               onMarkPaid={() => onMarkPaid(order.id)}
-              onMarkPending={() => onMarkPending(order.id)}
+              onMarkPending={() => onPaymentStatusChange(order.id, 'pending')}
             />
           </div>
 
@@ -226,6 +247,15 @@ export function AdminOrderDetailModal({
           currentKitchenId={order.kitchenId}
           onAssign={(id) => onAssignKitchen(order.id, id)}
           onClose={() => setShowKitchenModal(false)}
+        />
+      )}
+
+      {showPaymentModal && (
+        <PaymentChangeModal
+          order={order}
+          mode="apply"
+          onSubmit={handlePaymentChange}
+          onClose={() => setShowPaymentModal(false)}
         />
       )}
     </div>,

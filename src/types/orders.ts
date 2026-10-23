@@ -61,8 +61,11 @@ export interface Delivery {
 
 export type PaymentMethod = 'cash' | 'bancolombia' | 'nequi';
 
+// Mismos valores que PAYMENT_STATUS del backend
+export type PaymentStatus = 'pending' | 'approved' | 'failed';
+
 export interface Payment {
-  status: 'pending' | 'approved' | 'rejected';
+  status: PaymentStatus;
   method: PaymentMethod;
 }
 

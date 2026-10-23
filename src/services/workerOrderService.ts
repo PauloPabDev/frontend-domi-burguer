@@ -1,5 +1,5 @@
 import { WorkerOrder, WorkerKitchen, WorkerUser } from '@/types/worker';
-import { OrderStatus } from '@/types/orders';
+import { OrderStatus, PaymentStatus } from '@/types/orders';
 import { getApiUrl } from '@/utils/apiUrl';
 
 export interface AdminOrderPayload {
@@ -25,6 +25,12 @@ export interface KitchenInfo {
   address?: string;
   phone?: string;
   dailyOrders?: number;
+}
+
+// Mensaje del backend (boom: { message }) o, si no viene, el genérico
+async function responseError(response: Response, fallback: string): Promise<Error> {
+  const body = await response.json().catch(() => ({}));
+  return new Error((body as { message?: string }).message || fallback);
 }
 
 export class WorkerOrderService {
@@ -86,10 +92,11 @@ export class WorkerOrderService {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ previousPaymentMethod, paymentMethod }),
     });
-    if (!response.ok) throw new Error('Error al actualizar el método de pago');
+    if (!response.ok) throw await responseError(response, 'Error al actualizar el método de pago');
     return response.json();
   }
 
+  /** Aprobar el pago: el cobro normal, permitido a recepción y admin */
   static async markPaid(
     token: string,
     orderId: string
@@ -98,19 +105,22 @@ export class WorkerOrderService {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     });
-    if (!response.ok) throw new Error('Error al registrar el pago');
+    if (!response.ok) throw await responseError(response, 'Error al registrar el pago');
     return response.json();
   }
 
-  static async markPaymentPending(
+  /** Cambiar el estado del pago a cualquier valor: solo admin (el backend lo valida) */
+  static async updatePaymentStatus(
     token: string,
-    orderId: string
+    orderId: string,
+    status: PaymentStatus
   ): Promise<{ body: WorkerOrder }> {
-    const response = await fetch(`${this.API_URL}api/v2/orders/payment/${orderId}?status=pending`, {
+    const params = new URLSearchParams({ status });
+    const response = await fetch(`${this.API_URL}api/v2/orders/payment/${orderId}?${params}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     });
-    if (!response.ok) throw new Error('Error al marcar el pago como pendiente');
+    if (!response.ok) throw await responseError(response, 'Error al cambiar el estado del pago');
     return response.json();
   }
 

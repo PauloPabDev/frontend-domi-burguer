@@ -83,6 +83,12 @@ export const PAYMENT_LABELS: Record<string, string> = {
   nequi: 'Nequi',
 };
 
+export const PAYMENT_STATUS_LABELS: Record<string, string> = {
+  approved: 'Aprobado',
+  pending: 'Pendiente',
+  failed: 'Fallido',
+};
+
 export interface WorkerKitchen {
   id: string;
   name: string;

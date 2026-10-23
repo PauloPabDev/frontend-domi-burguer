@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { AdminNavbar } from '@/components/admin/AdminNavbar';
+import { SocketProvider } from '@/contexts/SocketContext';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
@@ -29,10 +30,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!user || (userProfile && !userProfile.roles?.includes('admin'))) return null;
 
+  // El socket de admin recibe las solicitudes de cambio de pago que envía recepción
   return (
-    <>
+    <SocketProvider role="admin">
       <AdminNavbar />
       <main className="max-w-screen-xl mx-auto px-4 mt-[100px] py-6">{children}</main>
-    </>
+    </SocketProvider>
   );
 }

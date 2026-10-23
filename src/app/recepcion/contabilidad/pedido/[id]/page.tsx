@@ -13,7 +13,7 @@ import { formatCOP } from '../../utils';
 const PAYMENT_STATUS = {
   pending:  { label: 'Pago pendiente', color: 'text-orange-700', bg: 'bg-orange-100' },
   approved: { label: 'Pagado',         color: 'text-teal-700',   bg: 'bg-teal-100'   },
-  rejected: { label: 'Rechazado',      color: 'text-red-700',    bg: 'bg-red-100'    },
+  failed:   { label: 'Pago fallido',   color: 'text-red-700',    bg: 'bg-red-100'    },
 } as const;
 
 function formatDateTime(iso: string) {

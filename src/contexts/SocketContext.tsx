@@ -8,10 +8,26 @@ import { ConnectionStatus } from '@/types/courier';
 import { RawSocketOrder } from '@/types/rawSocketOrder';
 import { WorkerOrder } from '@/types/worker';
 import { CourierLocation } from '@/types/courierLocation';
+import {
+  PaymentChangeRequest,
+  PaymentChangeRequestInput,
+  PaymentChangeRequestResult,
+  PaymentChangeResolution,
+  SocketAck,
+  SocketMessage,
+} from '@/types/paymentChangeRequest';
 import { useAuth } from '@/contexts/AuthContext';
 import { normalizeSocketOrder, normalizeSocketOrders } from '@/utils/normalizeSocketOrder';
-import { playOrderNotification, playKitchenNotification } from '@/utils/notificationSound';
+import {
+  playOrderNotification,
+  playKitchenNotification,
+  playSuccessNotification,
+  playAlertNotification,
+} from '@/utils/notificationSound';
 import { getSocketUrl, SOCKET_OPTIONS } from '@/utils/socketConfig';
+
+// Tiempo máximo esperando la respuesta (ack) del servidor a una solicitud
+const ACK_TIMEOUT_MS = 10_000;
 
 interface SocketContextType {
   orders: WorkerOrder[];
@@ -20,6 +36,15 @@ interface SocketContextType {
   changeKitchen: (kitchenId: string | null) => void;
   /** Ubicación en vivo de domiciliarios (Traccar). Solo se llena para recepción/admin. */
   courierLocations: CourierLocation[];
+  /** Solicitudes de cambio de pago pendientes. Solo les llegan a los admins. */
+  paymentRequests: PaymentChangeRequest[];
+  /** Recepción le pide a un admin cambiar el método o el estado del pago de una orden */
+  requestPaymentChange: (
+    orderId: string,
+    input: PaymentChangeRequestInput
+  ) => Promise<{ requestId: string; adminsOnline: number }>;
+  /** Admin aprueba (el backend aplica el cambio) o rechaza una solicitud */
+  resolvePaymentRequest: (requestId: string, resolution: PaymentChangeResolution) => Promise<void>;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -58,6 +83,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const [orders, setOrders] = useState<WorkerOrder[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('IDLE');
   const [courierLocations, setCourierLocations] = useState<CourierLocation[]>([]);
+  const [paymentRequests, setPaymentRequests] = useState<PaymentChangeRequest[]>([]);
   const orderIdsRef = useRef<Set<string>>(new Set());
   const courierAssignedIdsRef = useRef<Set<string>>(new Set());
 
@@ -69,8 +95,42 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     if (!socketRef.current?.connected || !user) return;
     const token = await user.getIdToken();
     const kId = overrideKitchenId !== undefined ? overrideKitchenId : kitchenIdRef.current;
+    // Al entrar, el servidor reenvía las solicitudes que siguen pendientes; se
+    // vacía la bandeja para no conservar las que se resolvieron estando desconectado.
+    setPaymentRequests([]);
     socketRef.current.emit('login', { token, role, kitchenId: kId, page: pathnameRef.current });
   }, [user, role]);
+
+  // Emite con el token del usuario y espera la respuesta { ok, data } | { ok: false, error }
+  const emitWithAck = useCallback(async <T,>(event: string, payload: Record<string, unknown>): Promise<T> => {
+    const socket = socketRef.current;
+    if (!socket?.connected || !user) {
+      throw new Error('Sin conexión con el servidor, intenta de nuevo en un momento');
+    }
+    const token = await user.getIdToken();
+    let ack: SocketAck<T>;
+    try {
+      ack = await socket.timeout(ACK_TIMEOUT_MS).emitWithAck(event, { ...payload, token });
+    } catch {
+      throw new Error('El servidor no respondió, intenta de nuevo');
+    }
+    if (!ack.ok) throw new Error(ack.error);
+    return ack.data;
+  }, [user]);
+
+  const requestPaymentChange = useCallback(
+    (orderId: string, input: PaymentChangeRequestInput) =>
+      emitWithAck<{ requestId: string; adminsOnline: number }>('order/paymentChangeRequest', { orderId, ...input }),
+    [emitWithAck]
+  );
+
+  const resolvePaymentRequest = useCallback(
+    async (requestId: string, resolution: PaymentChangeResolution) => {
+      await emitWithAck('order/paymentChangeRequest/resolve', { requestId, resolution });
+      setPaymentRequests((prev) => prev.filter((r) => r.id !== requestId));
+    },
+    [emitWithAck]
+  );
 
   const reconnect = useCallback(() => {
     if (socketRef.current && !socketRef.current.connected) {
@@ -245,6 +305,47 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       });
     });
 
+    // Mensajes del servidor. Algunos son texto suelto (avisos de sala) y se ignoran;
+    // los de tipo paymentChangeRequest* son las solicitudes de cambio de pago.
+    socketRef.current.on('message', (msg: SocketMessage | string) => {
+      if (!msg || typeof msg !== 'object') return;
+
+      if (msg.type === 'paymentChangeRequest') {
+        const request = msg.data as PaymentChangeRequest;
+        setPaymentRequests((prev) => (prev.some((r) => r.id === request.id) ? prev : [...prev, request]));
+        if (!request.replay) {
+          playOrderNotification();
+          addToast({
+            title: `Solicitud de cambio de pago · #${request.dailyOrderNumber}`,
+            description: msg.message,
+            color: 'warning',
+            timeout: 8000,
+          });
+        }
+        return;
+      }
+
+      // Otro admin (o este mismo) ya la resolvió
+      if (msg.type === 'paymentChangeRequestResolved') {
+        const { requestId } = msg.data as PaymentChangeRequestResult;
+        setPaymentRequests((prev) => prev.filter((r) => r.id !== requestId));
+        return;
+      }
+
+      // Respuesta a una solicitud que hizo este usuario
+      if (msg.type === 'paymentChangeRequestResult') {
+        const approved = (msg.data as PaymentChangeRequestResult).resolution === 'approve';
+        if (approved) playSuccessNotification();
+        else playAlertNotification();
+        addToast({
+          title: approved ? 'Solicitud aprobada' : 'Solicitud rechazada',
+          description: msg.message,
+          color: approved ? 'success' : 'danger',
+          timeout: 8000,
+        });
+      }
+    });
+
     socketRef.current.on('order/delete', (raw: RawSocketOrder) => {
       const order = normalizeSocketOrder(raw);
       orderIdsRef.current.delete(order.id);
@@ -308,7 +409,18 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   }, []);
 
   return (
-    <SocketContext.Provider value={{ orders, connectionStatus, reconnect, changeKitchen, courierLocations }}>
+    <SocketContext.Provider
+      value={{
+        orders,
+        connectionStatus,
+        reconnect,
+        changeKitchen,
+        courierLocations,
+        paymentRequests,
+        requestPaymentChange,
+        resolvePaymentRequest,
+      }}
+    >
       {children}
     </SocketContext.Provider>
   );

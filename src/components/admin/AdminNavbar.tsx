@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { NavWorkerAvatar } from '@/components/navbar/NavWorkerAvatar';
 import { NavPillShell } from '@/components/navbar/NavPillShell';
 import { NavPillLogo } from '@/components/navbar/NavPillLogo';
+import { PaymentRequestsInbox } from '@/components/admin/PaymentRequestsInbox';
 
 interface NavLink {
   href: string;
@@ -39,6 +40,7 @@ export const AdminNavbar: React.FC = () => {
 
       {/* Right: Nav buttons + logout */}
       <div className="flex items-center justify-end gap-2">
+        <PaymentRequestsInbox labelClassName="hidden xl:inline" />
         {NAV_LINKS.map(({ href, label, Icon, matchStart }) => {
           const isActive = matchStart ? pathname.startsWith(href) : pathname === href;
           return (

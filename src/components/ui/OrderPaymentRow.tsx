@@ -19,7 +19,7 @@ export function getCashChange(total: number): { bill: number; change: number } |
   return { bill, change: bill - total };
 }
 
-const PAYMENT_LOGOS: Record<string, { src: StaticImageData; alt: string }> = {
+export const PAYMENT_LOGOS: Record<string, { src: StaticImageData; alt: string }> = {
   cash: { src: efectivoLogo, alt: 'Efectivo' },
   bancolombia: { src: bancolombiaLogo, alt: 'Bancolombia' },
   nequi: { src: nequiLogo, alt: 'Nequi' },
@@ -37,7 +37,7 @@ const PAYMENT_HOVER_COLORS: Record<string, string> = {
   nequi: 'hover:bg-[#fce4f3] hover:text-[#da0081] focus:bg-[#fce4f3] focus:text-[#da0081]',
 };
 
-const PAYMENT_METHODS: PaymentMethod[] = ['cash', 'bancolombia', 'nequi'];
+export const PAYMENT_METHODS: PaymentMethod[] = ['cash', 'bancolombia', 'nequi'];
 
 interface OrderPaymentRowProps {
   paymentMethod: string;

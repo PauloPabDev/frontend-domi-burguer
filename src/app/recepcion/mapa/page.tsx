@@ -11,11 +11,13 @@ import { RecepcionOrderCard } from '@/components/recepcion/RecepcionOrderCard';
 import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
 import { CourierDetailPopover } from '@/components/recepcion/CourierDetailPopover';
 import { WorkerOrderService } from '@/services/workerOrderService';
-import { OrderStatus } from '@/types/orders';
+import { OrderStatus, PaymentStatus } from '@/types/orders';
 import { STATUS_CONFIG } from '@/types/worker';
 import { MapPin, Bike } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { usePaymentChangeRequest } from '@/hooks/reception/usePaymentChangeRequest';
 
 const MAP_STATUSES: OrderStatus[] = ['fresh', 'preparing', 'ready_for_pickup', 'dispatched', 'delivered',];
 
@@ -24,6 +26,9 @@ export default function RecepcionMapaPage() {
   const { orders, connectionStatus, courierLocations } = useSocket();
   const { kitchens } = useKitchenSelector();
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
+  const { userProfile } = useUserProfile();
+  const isAdmin = userProfile?.roles?.includes('admin') ?? false;
+  const handleRequestPaymentChange = usePaymentChangeRequest();
 
   const { filterCourierIds, allCouriers } = useCourierPanel();
   // Cruza cada domiciliario de Traccar (id_arceliuz) con su usuario real de la app
@@ -142,11 +147,16 @@ export default function RecepcionMapaPage() {
     await WorkerOrderService.markPaid(token, orderId);
   };
 
-  const handleMarkPending = async (orderId: string) => {
+  const handlePaymentStatusChange = async (orderId: string, status: PaymentStatus) => {
     if (!user) return;
     const token = await user.getIdToken();
-    await WorkerOrderService.markPaymentPending(token, orderId);
+    await WorkerOrderService.updatePaymentStatus(token, orderId, status);
   };
+
+  // Cambiar el pago es exclusivo de admin; recepción envía una solicitud
+  const paymentHandlers = isAdmin
+    ? { onPaymentMethodChange: handlePaymentMethodChange, onPaymentStatusChange: handlePaymentStatusChange }
+    : { onRequestPaymentChange: handleRequestPaymentChange };
 
   const handleDeleteOrder = async (orderId: string) => {
     if (!user) return;
@@ -262,9 +272,8 @@ export default function RecepcionMapaPage() {
                   onAssignCourier={handleAssignCourier}
                   onAssignKitchen={handleAssignKitchen}
                   onDelete={handleDeleteOrder}
-                  onPaymentMethodChange={handlePaymentMethodChange}
                   onMarkPaid={handleMarkPaid}
-                  onMarkPending={handleMarkPending}
+                  {...paymentHandlers}
                 />
               </div>
             ))}

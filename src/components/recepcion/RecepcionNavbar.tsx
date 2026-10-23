@@ -13,6 +13,8 @@ import { NavKitchenDropdown } from '@/components/navbar/NavKitchenDropdown';
 import { NavItemsDropdown } from '@/components/navbar/NavItemsDropdown';
 import { NavPillItem } from '@/components/navbar/NavPillItem';
 import { useCourierPanel } from '@/contexts/CourierPanelContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { PaymentRequestsInbox } from '@/components/admin/PaymentRequestsInbox';
 
 interface RecepcionNavbarProps {
   kitchens?: WorkerKitchen[];
@@ -36,6 +38,9 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
 }) => {
   const { orders, connectionStatus } = useSocket();
   const { activeCouriers, openPanel } = useCourierPanel();
+  const { userProfile } = useUserProfile();
+  // Las solicitudes de cambio de pago de recepción solo las resuelve un admin
+  const isAdmin = userProfile?.roles?.includes('admin') ?? false;
   const pathname = usePathname();
   const navShadow = useNavShadow(connectionStatus);
 
@@ -111,6 +116,7 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
 
       {/* Right: mobile → todo en el dropdown; desde md → accesos principales sueltos + dropdown con los secundarios */}
       <div className="flex-1 min-w-0 flex items-center justify-end gap-1.5 lg:gap-2">
+        {isAdmin && <PaymentRequestsInbox kitchens={kitchens} labelClassName="hidden 2xl:inline" />}
         <div className="flex md:hidden">
           <NavItemsDropdown items={navItems.map(toDropdownItem)} />
         </div>

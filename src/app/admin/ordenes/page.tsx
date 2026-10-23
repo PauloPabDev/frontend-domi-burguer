@@ -12,7 +12,7 @@ import { AdminOrderRow } from '@/components/admin/AdminOrderRow';
 import { AdminOrderDetailModal } from '@/components/admin/AdminOrderDetailModal';
 import { WorkerOrderService } from '@/services/workerOrderService';
 import { WorkerOrder } from '@/types/worker';
-import { OrderStatus } from '@/types/orders';
+import { OrderStatus, PaymentStatus } from '@/types/orders';
 import { getStartOfDay, getEndOfDay } from '@/lib/dates';
 import { normalize } from '@/lib/utils';
 import { notify } from '@/utils/notify';
@@ -156,15 +156,15 @@ export default function AdminOrdenesPage() {
     }
   };
 
-  const handleMarkPending = async (orderId: string) => {
+  const handlePaymentStatusChange = async (orderId: string, status: PaymentStatus) => {
     if (!user) return;
     try {
       const token = await user.getIdToken();
-      await WorkerOrderService.markPaymentPending(token, orderId);
-      notify.success('Pago revertido a pendiente');
+      await WorkerOrderService.updatePaymentStatus(token, orderId, status);
+      notify.success('Estado del pago actualizado');
       refresh();
     } catch (e) {
-      notify.error('Error al marcar el pago como pendiente', e instanceof Error ? e.message : undefined);
+      notify.error('Error al cambiar el estado del pago', e instanceof Error ? e.message : undefined);
       throw e;
     }
   };
@@ -289,7 +289,7 @@ export default function AdminOrdenesPage() {
             onAssignKitchen={handleAssignKitchen}
             onPaymentMethodChange={handlePaymentMethodChange}
             onMarkPaid={handleMarkPaid}
-            onMarkPending={handleMarkPending}
+            onPaymentStatusChange={handlePaymentStatusChange}
             onDelete={handleDeleteOrder}
           />
         )}
