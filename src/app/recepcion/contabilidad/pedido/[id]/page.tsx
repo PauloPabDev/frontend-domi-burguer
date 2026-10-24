@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, Bike, ChefHat, Clock, CreditCard, MapPin,
-  MessageSquare, Phone, User, ShoppingBag,
+  MessageSquare, Phone, User, ShoppingBag, Loader2,
 } from 'lucide-react';
 import { OrderStatusBadge } from '@/components/ui/OrderStatusBadge';
 import { PAYMENT_LABELS, WorkerOrder } from '@/types/worker';
@@ -58,18 +58,99 @@ export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [order, setOrder] = useState<WorkerOrder | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem(`order_${id}`);
-    if (!raw) return;
-    try { setOrder(JSON.parse(raw)); } catch { /* ignore */ }
+    const loadOrder = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // First try sessionStorage
+        const raw = sessionStorage.getItem(`order_${id}`);
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            setOrder(parsed);
+            setIsLoading(false);
+            return;
+          } catch {
+            // Continue to API if sessionStorage parse fails
+          }
+        }
+
+        // If not in sessionStorage, fetch from API
+        const getAuthToken = () => {
+          // Try multiple locations for auth token
+          if (typeof window !== 'undefined') {
+            return localStorage.getItem('authToken') ||
+              localStorage.getItem('token') ||
+              sessionStorage.getItem('authToken') ||
+              sessionStorage.getItem('token');
+          }
+          return null;
+        };
+
+        const token = getAuthToken();
+        if (!token) {
+          setError('No autenticado. Por favor inicia sesión.');
+          setIsLoading(false);
+          return;
+        }
+
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8087';
+        const response = await fetch(`${apiUrl}/api/v2/orders/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Pedido no encontrado');
+          } else if (response.status === 403) {
+            setError('No tienes permiso para ver este pedido');
+          } else {
+            setError(`Error ${response.status}: No se pudo cargar el pedido`);
+          }
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await response.json();
+        // Handle both { body: Order } and direct Order responses
+        const orderData = data.body || data;
+        setOrder(orderData);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Error desconocido al cargar el pedido';
+        setError(message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (id) {
+      loadOrder();
+    }
   }, [id]);
 
-  if (!order) {
+  if (isLoading) {
+    return (
+      <div className="max-w-2xl mx-auto py-20 flex flex-col items-center gap-4 text-neutral-black-50">
+        <Loader2 className="animate-spin h-8 w-8" />
+        <p className="text-sm">Cargando pedido...</p>
+      </div>
+    );
+  }
+
+  if (error || !order) {
     return (
       <div className="max-w-2xl mx-auto py-20 flex flex-col items-center gap-4 text-neutral-black-50">
         <ShoppingBag size={40} className="opacity-30" />
-        <p className="text-sm">Pedido no encontrado.</p>
+        <p className="text-sm text-center">{error ?? 'Pedido no encontrado.'}</p>
         <button
           onClick={() => router.back()}
           className="text-primary-red text-sm font-semibold hover:underline"
