@@ -63,6 +63,8 @@ interface RecepcionOrderCardProps {
   compact?: boolean;
   /** Vista simple: clic en la card (fuera de sus botones) para ver el detalle completo */
   onOpenDetail?: () => void;
+  /** Solo lectura (contabilidad): sin menú de la orden, domiciliario ni botones de acción */
+  readOnly?: boolean;
 }
 
 export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
@@ -78,6 +80,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   onRequestPaymentChange,
   compact = false,
   onOpenDetail,
+  readOnly = false,
 }) => {
   const [showOrderMenu, setShowOrderMenu] = useState(false);
   const [showCourierModal, setShowCourierModal] = useState(false);
@@ -200,6 +203,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           <button
             type="button"
             onClick={() => setShowOrderMenu(true)}
+            disabled={readOnly}
             className="shrink-0 min-w-9 h-9 px-1.5 flex items-center justify-center bg-primary-red hover:opacity-80 rounded-full text-sm font-bold text-white transition-opacity"
             aria-label={`Opciones de orden #${order.dailyOrderNumber}`}
           >
@@ -224,6 +228,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
             ref={courierButtonRef}
             type="button"
             onClick={() => setShowCourierModal((prev) => !prev)}
+            disabled={readOnly}
             title={order.courier?.name ?? 'Asignar domiciliario'}
             aria-label={order.courier?.name ?? 'Asignar domiciliario'}
             className={cn(
@@ -238,7 +243,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
 
           <div className="shrink-0">{totalButton}</div>
 
-          {transition && (
+          {transition && !readOnly && (
             <OrderActionButtons
               label={transition.label}
               icon={<TransitionIcon size={16} />}
@@ -262,6 +267,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowOrderMenu(true)}
+            disabled={readOnly}
                 className="shrink-0 min-w-7 h-7 px-1.5 flex items-center justify-center bg-primary-red hover:opacity-80 rounded-full text-sm font-bold text-white transition-opacity"
                 aria-label={`Opciones de orden #${order.dailyOrderNumber}`}
               >
@@ -385,6 +391,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               ref={courierButtonRef}
               type="button"
               onClick={() => setShowCourierModal((prev) => !prev)}
+            disabled={readOnly}
               className={cn(
                 'w-full flex items-center gap-1.5 text-xs rounded-lg border px-2 py-1.5 bg-white transition-colors hover:text-primary-red',
                 order.courier
@@ -411,7 +418,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               onMarkPaid={onMarkPaid ? () => onMarkPaid(order.id) : undefined}
             />
 
-            {transition && (
+            {transition && !readOnly && (
               <OrderActionButtons
                 label={transition.label}
                 size="sm"

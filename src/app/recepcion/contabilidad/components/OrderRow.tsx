@@ -1,6 +1,5 @@
 "use client";
 
-import Link from 'next/link';
 import Image from 'next/image';
 import { Bike, MapPin, AlertCircle, CreditCard, ChevronRight } from 'lucide-react';
 import { WorkerOrder, STATUS_CONFIG } from '@/types/worker';
@@ -122,7 +121,7 @@ function AddressCell({ order }: { order: WorkerOrder }) {
 
 // ─── OrderRow ─────────────────────────────────────────────────────────────────
 
-export function OrderRow({ order }: { order: WorkerOrder }) {
+export function OrderRow({ order, onOpen }: { order: WorkerOrder; onOpen: (order: WorkerOrder) => void }) {
   const paid = order.payment?.status === 'approved';
   const statusColor = STATUS_CONFIG[order.status]?.hex ?? '#e5e5e5';
 
@@ -169,13 +168,14 @@ export function OrderRow({ order }: { order: WorkerOrder }) {
       <AddressCell order={order} />
 
       {/* Ver más */}
-      <Link
-        href={`/orders/${order.id}`}
+      <button
+        type="button"
+        onClick={() => onOpen(order)}
         className="flex items-center gap-1 shrink-0 rounded-xl bg-neutral-black-5 hover:bg-neutral-black-10 px-3 py-1.5 text-xs font-semibold text-neutral-black-60 transition-colors"
       >
         Ver más
         <ChevronRight size={13} />
-      </Link>
+      </button>
     </div>
   );
 }

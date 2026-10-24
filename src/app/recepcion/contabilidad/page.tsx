@@ -11,6 +11,7 @@ import { getStartOfDay, getEndOfDay, normalize } from './utils';
 import { FilterPanel } from './components/FilterPanel';
 import { StatsSection } from './components/StatsSection';
 import { OrderRow } from './components/OrderRow';
+import { ContabilidadOrderDetailModal } from '@/components/recepcion/ContabilidadOrderDetailModal';
 
 export default function ContabilidadPage() {
   const { orders: rawOrders, loading, error, fetchOrders } = useContabilidad();
@@ -21,6 +22,9 @@ export default function ContabilidadPage() {
   const [search, setSearch] = useState('');
   const [selectedCourier, setSelectedCourier] = useState('');
   const [showStats, setShowStats] = useState(true);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+
+  const selectedOrder = allOrders.find((o) => o.id === selectedOrderId) ?? null;
 
   useEffect(() => {
     if (!selectedKitchenId) return;
@@ -201,7 +205,7 @@ export default function ContabilidadPage() {
             ) : (
               <div className="space-y-2">
                 {filteredOrders.map((order) => (
-                  <OrderRow key={order.id} order={order} />
+                  <OrderRow key={order.id} order={order} onOpen={(o) => setSelectedOrderId(o.id)} />
                 ))}
               </div>
             )}
@@ -215,6 +219,14 @@ export default function ContabilidadPage() {
           <ShoppingBag size={40} className="opacity-30" />
           <p className="text-sm">No hay pedidos en el período seleccionado</p>
         </div>
+      )}
+
+      {selectedOrder && (
+        <ContabilidadOrderDetailModal
+          order={selectedOrder}
+          kitchens={kitchens}
+          onClose={() => setSelectedOrderId(null)}
+        />
       )}
     </div>
   );
