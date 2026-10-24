@@ -8,6 +8,7 @@ import { Metadata, Viewport } from "next";
 import { metadataConfig, viewportConfig } from "./metadata";
 import Script from "next/script";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
+import { PushSubscriptionSync } from "@/components/pwa/PushSubscriptionSync";
 import { Suspense } from "react";
 import { PromoCodeDetector } from "@/components/promo/PromoCodeDetector";
 import { LayoutShell } from "@/components/LayoutShell";
@@ -40,6 +41,7 @@ export default function RootLayout({
       </head>
       <body className={montserrat.variable}>
         <AuthProvider>
+          <PushSubscriptionSync />
           <ProductsProvider>
           <HeroUIProvider>
             <AppToastProvider />

@@ -12,6 +12,9 @@ import { OrderStatusBanner } from "./OrderStatusBanner";
 import { OrderDeliveryCard } from "./OrderDeliveryCard";
 import { OrderSummaryPanel } from "./OrderSummaryPanel";
 import { OrderWhatsAppHelp } from "./OrderWhatsAppHelp";
+import { EnableNotificationsPrompt } from "@/components/notifications/EnableNotificationsPrompt";
+
+const FINISHED_STATUSES = ["delivered", "invoiced", "cancelled"];
 
 interface OrderDetailPageProps {
     params: Promise<{ id: string }>;
@@ -64,6 +67,8 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                     />
 
                     <OrderStatusBanner status={order.status} />
+
+                    {!FINISHED_STATUSES.includes(order.status) && <EnableNotificationsPrompt />}
 
                     <div className="flex flex-col gap-4 w-full">
                         {order.deliveryAddress && <OrderDeliveryCard address={order.deliveryAddress} />}

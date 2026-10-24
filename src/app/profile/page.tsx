@@ -9,6 +9,7 @@ import { ProfileHeader } from "./ProfileHeader";
 import { PointsSection } from "./PointsSection";
 import { AddressesSection } from "./AddressesSection";
 import { PhoneSection } from "./PhoneSection";
+import { NotificationsSection } from "./NotificationsSection";
 import { CodesSection } from "./CodesSection";
 import { OrdersSection } from "./OrdersSection";
 import { WorkSection } from "./WorkSection";
@@ -39,6 +40,7 @@ export default function ProfilePage() {
                     <WorkSection />
                     <AddressesSection />
                     <PhoneSection />
+                    <NotificationsSection />
                     <OrdersSection />
                     <CodesSection />
                     <PointsSection />
