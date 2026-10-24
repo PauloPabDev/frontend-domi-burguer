@@ -15,8 +15,8 @@ export const PRODUCTS: Product[] = [
   {
     id: 48,
     name: "SÁNDUCHE ARTESANAL",
-    basePrice: 19900, // TODO: precio provisional
-    price: 19900,
+    basePrice: 18000,
+    price: 18000,
     body: "Sánduche artesanal con mermelada de tocineta, queso derretido y lechuga fresca, en pan hecho en casa.", // TODO: descripción provisional
     bigImage: "/images/products/sandwich-large.webp",
     image1: "/images/products/sandwich-thumbnail.webp",
