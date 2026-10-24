@@ -1,5 +1,6 @@
 import { WorkerOrder, WorkerKitchen, WorkerUser } from '@/types/worker';
-import { OrderStatus, PaymentStatus } from '@/types/orders';
+import { OrderStatus } from '@/types/orders';
+import { PaymentChange } from '@/types/paymentChangeRequest';
 import { getApiUrl } from '@/utils/apiUrl';
 
 export interface AdminOrderPayload {
@@ -81,6 +82,7 @@ export class WorkerOrderService {
     return response.json();
   }
 
+  /** Cambiar el método mientras el pago no esté aprobado: recepción y admin */
   static async updatePaymentMethod(
     token: string,
     orderId: string,
@@ -109,18 +111,26 @@ export class WorkerOrderService {
     return response.json();
   }
 
-  /** Cambiar el estado del pago a cualquier valor: solo admin (el backend lo valida) */
-  static async updatePaymentStatus(
+  /**
+   * Corrección de admin (endpoints /orders/admin/*): cambia el método aunque el pago
+   * ya esté aprobado, o el estado del pago a cualquier valor.
+   */
+  static async adminChangePayment(
     token: string,
     orderId: string,
-    status: PaymentStatus
+    previousPaymentMethod: string,
+    change: PaymentChange
   ): Promise<{ body: WorkerOrder }> {
-    const params = new URLSearchParams({ status });
-    const response = await fetch(`${this.API_URL}api/v2/orders/payment/${orderId}?${params}`, {
+    const request =
+      change.type === 'paymentMethod'
+        ? { path: 'paymentMethod', body: { previousPaymentMethod, paymentMethod: change.value } }
+        : { path: 'paymentStatus', body: { status: change.value } };
+    const response = await fetch(`${this.API_URL}api/v2/orders/admin/${request.path}/${orderId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(request.body),
     });
-    if (!response.ok) throw await responseError(response, 'Error al cambiar el estado del pago');
+    if (!response.ok) throw await responseError(response, 'Error al corregir el pago');
     return response.json();
   }
 

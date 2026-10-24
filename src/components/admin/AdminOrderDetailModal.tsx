@@ -4,8 +4,8 @@ import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Bike, ChefHat, CreditCard, Loader2, ShieldCheck, Trash2, X } from 'lucide-react';
 import { WorkerOrder, WorkerKitchen } from '@/types/worker';
-import { OrderStatus, PaymentStatus } from '@/types/orders';
-import { PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
+import { OrderStatus } from '@/types/orders';
+import { PaymentChange, PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
 import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
 import { OrderStatusTimeline } from '@/components/ui/OrderStatusTimeline';
 import { OrderStatusPicker } from '@/components/ui/OrderStatusPicker';
@@ -26,9 +26,11 @@ interface AdminOrderDetailModalProps {
   onStatusChange: (orderId: string, prev: OrderStatus, next: OrderStatus) => Promise<void>;
   onAssignCourier: (orderId: string, courierId: string | null) => Promise<void>;
   onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
+  /** Cobro normal: método mientras el pago no esté aprobado */
   onPaymentMethodChange: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid: (orderId: string) => Promise<void>;
-  onPaymentStatusChange: (orderId: string, status: PaymentStatus) => Promise<void>;
+  /** Corrección de admin: método aunque el pago esté aprobado y cualquier estado */
+  onAdminPaymentChange: (orderId: string, previousMethod: string, change: PaymentChange) => Promise<void>;
   onDelete: (orderId: string) => Promise<void>;
 }
 
@@ -49,7 +51,7 @@ export function AdminOrderDetailModal({
   onAssignKitchen,
   onPaymentMethodChange,
   onMarkPaid,
-  onPaymentStatusChange,
+  onAdminPaymentChange,
   onDelete,
 }: AdminOrderDetailModalProps) {
   const [showCourierPopover, setShowCourierPopover] = useState(false);
@@ -63,13 +65,9 @@ export function AdminOrderDetailModal({
   const clientPhone = order.client?.phone ?? order.user?.phone;
   const isUser = !order.clientId && !!order.userId;
 
-  const handlePaymentChange = async (change: PaymentChangeRequestInput) => {
-    if (change.type === 'paymentMethod') {
-      await onPaymentMethodChange(order.id, order.paymentMethod, change.value);
-    } else {
-      await onPaymentStatusChange(order.id, change.value);
-    }
-  };
+  // El motivo solo se usa en las solicitudes; la corrección envía tipo y valor
+  const handlePaymentChange = (change: PaymentChangeRequestInput) =>
+    onAdminPaymentChange(order.id, order.paymentMethod, change);
 
   const handleDelete = async () => {
     if (!confirmingDelete) { setConfirmingDelete(true); return; }
@@ -170,7 +168,9 @@ export function AdminOrderDetailModal({
               recepcionMode
               onPaymentMethodChange={(method) => onPaymentMethodChange(order.id, order.paymentMethod, method)}
               onMarkPaid={() => onMarkPaid(order.id)}
-              onMarkPending={() => onPaymentStatusChange(order.id, 'pending')}
+              onMarkPending={() =>
+                onAdminPaymentChange(order.id, order.paymentMethod, { type: 'paymentStatus', value: 'pending' })
+              }
             />
           </div>
 

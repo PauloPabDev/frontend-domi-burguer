@@ -3,8 +3,8 @@
 import { useRef, useState } from 'react';
 import { ArrowRight, Banknote, Bike, Check, ChefHat, ChevronDown, Copy, PackageCheck, Receipt, type LucideIcon } from 'lucide-react';
 import { WorkerOrder, WorkerKitchen } from '@/types/worker';
-import { OrderStatus, PaymentStatus } from '@/types/orders';
-import { PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
+import { OrderStatus } from '@/types/orders';
+import { PaymentChange, PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
 import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
 import { formatCOP } from '@/components/ui/OrderItemsList';
 import { OrderPaymentRow, getCashChange } from '@/components/ui/OrderPaymentRow';
@@ -51,13 +51,13 @@ interface RecepcionOrderCardProps {
   onAssignCourier: (orderId: string, courierId: string | null) => Promise<void>;
   onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
   onDelete: (orderId: string) => Promise<void>;
-  /** Solo admin: cambiar el método de pago */
+  /** Cambiar el método mientras el pago no esté aprobado (cobro normal): recepción y admin */
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   /** Aprobar el pago (cobro normal): recepción y admin */
   onMarkPaid?: (orderId: string) => Promise<void>;
-  /** Solo admin: cambiar el estado del pago a cualquier valor */
-  onPaymentStatusChange?: (orderId: string, status: PaymentStatus) => Promise<void>;
-  /** Recepción: pedirle a un admin un cambio de método o estado del pago */
+  /** Solo admin: corregir el método (aunque el pago esté aprobado) o el estado a cualquier valor */
+  onAdminPaymentChange?: (orderId: string, previousMethod: string, change: PaymentChange) => Promise<void>;
+  /** Recepción: pedirle a un admin una corrección del método o del estado del pago */
   onRequestPaymentChange?: (orderId: string, input: PaymentChangeRequestInput) => Promise<void>;
   /** Vista simple: número, cliente, resumen de productos, domiciliario, total y siguiente paso */
   compact?: boolean;
@@ -74,7 +74,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
   onDelete,
   onPaymentMethodChange,
   onMarkPaid,
-  onPaymentStatusChange,
+  onAdminPaymentChange,
   onRequestPaymentChange,
   compact = false,
   onOpenDetail,
@@ -111,17 +111,15 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
     order.paymentMethod === 'cash' && order.totalPrice > 0 ? getCashChange(order.totalPrice) : null;
   const clientName = order.client?.name ?? order.user?.name ?? 'Sin nombre';
 
-  // Admin cambia el pago directamente; recepción solo puede solicitarlo
-  const canApplyPaymentChange = !!onPaymentMethodChange && !!onPaymentStatusChange;
-  const paymentChangeMode = canApplyPaymentChange ? 'apply' : onRequestPaymentChange ? 'request' : undefined;
+  // Correcciones del pago (menú de la orden): admin las aplica; recepción las solicita
+  const paymentChangeMode = onAdminPaymentChange ? 'apply' : onRequestPaymentChange ? 'request' : undefined;
 
-  const handlePaymentChange = async (change: PaymentChangeRequestInput) => {
-    if (paymentChangeMode === 'request') {
-      await onRequestPaymentChange?.(order.id, change);
-    } else if (change.type === 'paymentMethod') {
-      await onPaymentMethodChange?.(order.id, order.paymentMethod, change.value);
+  // La corrección envía tipo y valor; el motivo solo viaja en la solicitud
+  const handlePaymentChange = async (input: PaymentChangeRequestInput) => {
+    if (onAdminPaymentChange) {
+      await onAdminPaymentChange(order.id, order.paymentMethod, input);
     } else {
-      await onPaymentStatusChange?.(order.id, change.value);
+      await onRequestPaymentChange?.(order.id, input);
     }
   };
 

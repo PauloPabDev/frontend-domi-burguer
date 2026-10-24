@@ -13,7 +13,8 @@ import { OrderKanbanColumn, KANBAN_COLUMN_WIDTH } from '@/components/recepcion/O
 import { RecepcionOrderList } from '@/components/recepcion/RecepcionOrderList';
 import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
 import { WorkerOrderService } from '@/services/workerOrderService';
-import { OrderStatus, PaymentStatus } from '@/types/orders';
+import { OrderStatus } from '@/types/orders';
+import { PaymentChange } from '@/types/paymentChangeRequest';
 import { notify } from '@/utils/notify';
 import { cn } from '@/lib/utils';
 
@@ -40,8 +41,9 @@ export default function RecepcionPage() {
   const { filterCourierIds } = useCourierPanel();
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
   const handleRequestPaymentChange = usePaymentChangeRequest();
-  // Cambiar el método o el estado del pago es exclusivo de admin; recepción
-  // conserva el cobro normal (aprobar el pago) y para lo demás envía una solicitud.
+  // Recepción cobra como siempre (elige el método mientras el pago no esté aprobado y lo
+  // aprueba). Las correcciones (método con el pago aprobado, otros estados) las aplica un
+  // admin; recepción se las pide con una solicitud.
   const isAdmin = userProfile?.roles?.includes('admin') ?? false;
 
   // Vista simple: preferencia por navegador. Se lee tras montar para no romper la hidratación.
@@ -148,21 +150,20 @@ export default function RecepcionPage() {
     }
   };
 
-  const handlePaymentStatusChange = async (orderId: string, status: PaymentStatus) => {
+  // Los errores los muestra el modal de corrección
+  const handleAdminPaymentChange = async (orderId: string, previousMethod: string, change: PaymentChange) => {
     if (!user) return;
-    try {
-      const token = await user.getIdToken();
-      await WorkerOrderService.updatePaymentStatus(token, orderId, status);
-      notify.success('Estado del pago actualizado');
-    } catch (e) {
-      notify.error('Error al cambiar el estado del pago', e instanceof Error ? e.message : undefined);
-      throw e;
-    }
+    const token = await user.getIdToken();
+    await WorkerOrderService.adminChangePayment(token, orderId, previousMethod, change);
+    notify.success('Pago corregido', 'El cambio quedó registrado en el historial del pedido.');
   };
 
-  const paymentHandlers = isAdmin
-    ? { onPaymentMethodChange: handlePaymentMethodChange, onPaymentStatusChange: handlePaymentStatusChange }
-    : { onRequestPaymentChange: handleRequestPaymentChange };
+  const paymentHandlers = {
+    onPaymentMethodChange: handlePaymentMethodChange,
+    ...(isAdmin
+      ? { onAdminPaymentChange: handleAdminPaymentChange }
+      : { onRequestPaymentChange: handleRequestPaymentChange }),
+  };
 
   const handleDeleteOrder = async (orderId: string) => {
     if (!user) return;

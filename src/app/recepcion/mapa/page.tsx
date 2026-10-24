@@ -11,7 +11,8 @@ import { RecepcionOrderCard } from '@/components/recepcion/RecepcionOrderCard';
 import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
 import { CourierDetailPopover } from '@/components/recepcion/CourierDetailPopover';
 import { WorkerOrderService } from '@/services/workerOrderService';
-import { OrderStatus, PaymentStatus } from '@/types/orders';
+import { OrderStatus } from '@/types/orders';
+import { PaymentChange } from '@/types/paymentChangeRequest';
 import { STATUS_CONFIG } from '@/types/worker';
 import { MapPin, Bike } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -147,16 +148,19 @@ export default function RecepcionMapaPage() {
     await WorkerOrderService.markPaid(token, orderId);
   };
 
-  const handlePaymentStatusChange = async (orderId: string, status: PaymentStatus) => {
+  const handleAdminPaymentChange = async (orderId: string, previousMethod: string, change: PaymentChange) => {
     if (!user) return;
     const token = await user.getIdToken();
-    await WorkerOrderService.updatePaymentStatus(token, orderId, status);
+    await WorkerOrderService.adminChangePayment(token, orderId, previousMethod, change);
   };
 
-  // Cambiar el pago es exclusivo de admin; recepción envía una solicitud
-  const paymentHandlers = isAdmin
-    ? { onPaymentMethodChange: handlePaymentMethodChange, onPaymentStatusChange: handlePaymentStatusChange }
-    : { onRequestPaymentChange: handleRequestPaymentChange };
+  // Recepción cobra como siempre; las correcciones las aplica un admin o se le solicitan
+  const paymentHandlers = {
+    onPaymentMethodChange: handlePaymentMethodChange,
+    ...(isAdmin
+      ? { onAdminPaymentChange: handleAdminPaymentChange }
+      : { onRequestPaymentChange: handleRequestPaymentChange }),
+  };
 
   const handleDeleteOrder = async (orderId: string) => {
     if (!user) return;

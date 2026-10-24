@@ -12,7 +12,8 @@ import { AdminOrderRow } from '@/components/admin/AdminOrderRow';
 import { AdminOrderDetailModal } from '@/components/admin/AdminOrderDetailModal';
 import { WorkerOrderService } from '@/services/workerOrderService';
 import { WorkerOrder } from '@/types/worker';
-import { OrderStatus, PaymentStatus } from '@/types/orders';
+import { OrderStatus } from '@/types/orders';
+import { PaymentChange } from '@/types/paymentChangeRequest';
 import { getStartOfDay, getEndOfDay } from '@/lib/dates';
 import { normalize } from '@/lib/utils';
 import { notify } from '@/utils/notify';
@@ -156,15 +157,16 @@ export default function AdminOrdenesPage() {
     }
   };
 
-  const handlePaymentStatusChange = async (orderId: string, status: PaymentStatus) => {
+  // Corrección de admin: método aunque el pago esté aprobado y cualquier estado
+  const handleAdminPaymentChange = async (orderId: string, previousMethod: string, change: PaymentChange) => {
     if (!user) return;
     try {
       const token = await user.getIdToken();
-      await WorkerOrderService.updatePaymentStatus(token, orderId, status);
-      notify.success('Estado del pago actualizado');
+      await WorkerOrderService.adminChangePayment(token, orderId, previousMethod, change);
+      notify.success('Pago corregido', 'El cambio quedó registrado en el historial del pedido.');
       refresh();
     } catch (e) {
-      notify.error('Error al cambiar el estado del pago', e instanceof Error ? e.message : undefined);
+      notify.error('Error al corregir el pago', e instanceof Error ? e.message : undefined);
       throw e;
     }
   };
@@ -289,7 +291,7 @@ export default function AdminOrdenesPage() {
             onAssignKitchen={handleAssignKitchen}
             onPaymentMethodChange={handlePaymentMethodChange}
             onMarkPaid={handleMarkPaid}
-            onPaymentStatusChange={handlePaymentStatusChange}
+            onAdminPaymentChange={handleAdminPaymentChange}
             onDelete={handleDeleteOrder}
           />
         )}

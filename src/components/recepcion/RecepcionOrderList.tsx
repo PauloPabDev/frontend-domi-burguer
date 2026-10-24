@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { WorkerOrder, WorkerKitchen, STATUS_CONFIG } from '@/types/worker';
-import { OrderStatus, PaymentStatus } from '@/types/orders';
-import { PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
+import { OrderStatus } from '@/types/orders';
+import { PaymentChange, PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
 import { RecepcionOrderCard } from './RecepcionOrderCard';
 import { RecepcionOrderDetailModal } from './RecepcionOrderDetailModal';
 import { cn } from '@/lib/utils';
@@ -31,7 +31,7 @@ interface RecepcionOrderListProps {
   onDelete: (orderId: string) => Promise<void>;
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid?: (orderId: string) => Promise<void>;
-  onPaymentStatusChange?: (orderId: string, status: PaymentStatus) => Promise<void>;
+  onAdminPaymentChange?: (orderId: string, previousMethod: string, change: PaymentChange) => Promise<void>;
   onRequestPaymentChange?: (orderId: string, input: PaymentChangeRequestInput) => Promise<void>;
 }
 

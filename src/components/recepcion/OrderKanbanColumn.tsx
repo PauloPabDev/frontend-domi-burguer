@@ -2,8 +2,8 @@
 
 import { useRef, useCallback } from 'react';
 import { WorkerOrder, WorkerKitchen, STATUS_CONFIG } from '@/types/worker';
-import { OrderStatus, PaymentStatus } from '@/types/orders';
-import { PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
+import { OrderStatus } from '@/types/orders';
+import { PaymentChange, PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
 import { RecepcionOrderCard } from './RecepcionOrderCard';
 import { cn } from '@/lib/utils';
 
@@ -17,7 +17,7 @@ interface OrderKanbanColumnProps {
   onDelete: (orderId: string) => Promise<void>;
   onPaymentMethodChange?: (orderId: string, previousMethod: string, method: string) => Promise<void>;
   onMarkPaid?: (orderId: string) => Promise<void>;
-  onPaymentStatusChange?: (orderId: string, status: PaymentStatus) => Promise<void>;
+  onAdminPaymentChange?: (orderId: string, previousMethod: string, change: PaymentChange) => Promise<void>;
   onRequestPaymentChange?: (orderId: string, input: PaymentChangeRequestInput) => Promise<void>;
   /** Columna vacía reducida a una franja vertical (cuando el tablero no cabe a lo ancho) */
   collapsed?: boolean;
@@ -40,7 +40,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
   onDelete,
   onPaymentMethodChange,
   onMarkPaid,
-  onPaymentStatusChange,
+  onAdminPaymentChange,
   onRequestPaymentChange,
   collapsed = false,
 }) => {
@@ -120,7 +120,7 @@ export const OrderKanbanColumn: React.FC<OrderKanbanColumnProps> = ({
               onDelete={onDelete}
               onPaymentMethodChange={onPaymentMethodChange}
               onMarkPaid={onMarkPaid}
-              onPaymentStatusChange={onPaymentStatusChange}
+              onAdminPaymentChange={onAdminPaymentChange}
               onRequestPaymentChange={onRequestPaymentChange}
             />
           ))}
