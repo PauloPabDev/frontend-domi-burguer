@@ -3,6 +3,7 @@ import {
   TomateIcon,
   QuesoIcon,
   TocinetaIcon,
+  LechugaIcon,
   HamburgerIcon,
   FrenchFriesIcon,
   HuevoIcon,
@@ -11,6 +12,20 @@ import {
 import { Product } from "@/types/products";
 
 export const PRODUCTS: Product[] = [
+  {
+    id: 48,
+    name: "SÁNDUCHE ARTESANAL",
+    basePrice: 19900, // TODO: precio provisional
+    price: 19900,
+    body: "Sánduche artesanal con mermelada de tocineta, queso derretido y lechuga fresca, en pan hecho en casa.", // TODO: descripción provisional
+    bigImage: "/images/products/sandwich-large.webp",
+    image1: "/images/products/sandwich-thumbnail.webp",
+    icons: [TocinetaIcon, QuesoIcon, LechugaIcon],
+    quantity: 1,
+    complements: [],
+    allowCustomization: true,
+    customizationType: "burger",
+  },
   {
     id: 2,
     name: "HAMBURGUESA ARTESANAL",

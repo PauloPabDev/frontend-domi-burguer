@@ -69,6 +69,14 @@ export function ProductThumbnail({
 }
 
 export const PRODUCT_CARD_IMAGES: CardImageConfig[][] = [
+  // Sánduche Artesanal
+  [{
+    src: "/images/products/sandwich-card.webp",
+    alt: "Sánduche Artesanal",
+    width: 140,
+    height: 220,
+    className: "absolute top-[8px] left-[36px] lg:top-[-30px] lg:left-[70px] h-[149px] w-[94px] lg:w-[140.16px] lg:h-[220px] object-cover",
+  }],
   // Hamburguesa Artesanal
   [{
     src: "/images/products/burger-card.webp",

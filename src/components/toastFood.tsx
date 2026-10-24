@@ -60,6 +60,15 @@ export const showFoodToast = (productName: string) => {
               className="absolute top-[-5px] left-[15px] w-[67px] h-[105px] object-cover"
             />
           )}
+          {productName === "SÁNDUCHE ARTESANAL" && (
+            <Image
+              src="/images/products/sandwich-thumbnail.webp"
+              alt="Sánduche artesanal"
+              width={67}
+              height={105}
+              className="absolute top-[-5px] left-[15px] w-[67px] h-[105px] object-cover"
+            />
+          )}
           {productName === "SALSA DE AJO" && (
             <Image
               src="/images/products/sauce-thumbnail.webp"
