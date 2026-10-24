@@ -6,6 +6,7 @@ import { FrenchFriesIcon, HamburgerIcon } from "@/components/ui/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { EnableNotificationsPrompt } from "@/components/notifications/EnableNotificationsPrompt";
 
 function MyOrderLink() {
   const searchParams = useSearchParams();
@@ -46,7 +47,7 @@ export default function Thankyou() {
         </div>
 
         {/* Columna 2 */}
-        <div className="flex flex-col items-center justify-center gap-6 xlgap-14 p-[20px] py-[80px] xl:p-20 bg-accent-yellow-10 max-w-[720px] h-[371px] xl:h-[742px]  w-full mx-auto">
+        <div className="flex flex-col items-center justify-center gap-6 xlgap-14 p-[20px] py-[80px] xl:p-20 bg-accent-yellow-10 max-w-[720px] min-h-[371px] xl:min-h-[742px] w-full mx-auto">
           <div className="flex flex-col w-full items-center gap-6 ">
             <div>
               <h1 className="text-center text-[24px]!">
@@ -62,11 +63,7 @@ export default function Thankyou() {
             </p>
           </div>
 
-          <div className="flex w-full max-w-[720px] items-center justify-center gap-6">
-            <div>
-              <h1 className="font-bold! text-[28px]! md:text-[32px]! leading-[30px]! md:leading-[28px]! "></h1>
-            </div>
-          </div>
+          <EnableNotificationsPrompt />
 
           <div className="flex w-full max-w-[720px] items-center justify-center gap-6">
             <Link href={"/"}>

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged, ConfirmationResult } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { AuthService, AuthError } from '@/services/authService';
+import { NotificationService } from '@/services/notificationService';
 
 /**
  * Interface que define los datos y métodos disponibles en el contexto de autenticación
@@ -127,6 +128,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const logout = async (): Promise<void> => {
         try {
             clearError();
+            // con la sesión aún abierta, para que este dispositivo deje de recibir las notificaciones del usuario
+            if (user) await NotificationService.detachCurrentDevice(await user.getIdToken());
             await AuthService.signOut();
         } catch (error) {
             handleAuthError(error);
