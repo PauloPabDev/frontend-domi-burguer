@@ -32,4 +32,5 @@ export type Product = {
   allowCustomization: boolean;
   customizationType: CustomizationType;
   soldOut?: boolean; // Producto agotado: se muestra pero no se puede comprar
+  isNew?: boolean; // Producto nuevo: muestra la etiqueta NUEVO
 };

@@ -17,7 +17,7 @@ export const PRODUCTS: Product[] = [
     name: "SÁNDUCHE ARTESANAL",
     basePrice: 18000,
     price: 18000,
-    body: "Sánduche artesanal con mermelada de tocineta, queso derretido y lechuga fresca, en pan hecho en casa.", // TODO: descripción provisional
+    body: "Sánduche artesanal con mermelada de tocineta (con trocitos de cebolla caramelizada ), Salsa de Ajo, queso mozzarella , tomate, lechuga fresca y pan hecho en casa.", // TODO: descripción provisional
     bigImage: "/images/products/sandwich-large.webp",
     image1: "/images/products/sandwich-thumbnail.webp",
     icons: [TocinetaIcon, QuesoIcon, LechugaIcon],
@@ -25,6 +25,7 @@ export const PRODUCTS: Product[] = [
     complements: [],
     allowCustomization: true,
     customizationType: "burger",
+    isNew: true,
   },
   {
     id: 2,

@@ -45,6 +45,11 @@ export function ProductThumbnail({
             className={img.className}
           />
         ))}
+        {product.isNew && !product.soldOut && (
+          <span className="absolute z-10 top-[8px] left-[8px] lg:top-[10px] lg:left-[10px] rounded-full bg-primary-red px-2.5 py-0.5 text-[10px] lg:text-xs font-bold text-white">
+            NUEVO
+          </span>
+        )}
         {product.soldOut && (
           <span className="absolute z-10 bottom-[8px] left-1/2 -translate-x-1/2 rounded-full bg-neutral-black-80 px-3 py-1 text-xs font-bold text-white">
             AGOTADO

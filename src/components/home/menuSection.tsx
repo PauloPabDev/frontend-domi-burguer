@@ -152,6 +152,11 @@ export default function MenuSection() {
                   AGOTADO
                 </span>
               )}
+              {currentProduct.isNew && !currentProduct.soldOut && (
+                <span className="rounded-full bg-primary-red px-4 py-1 text-sm font-bold text-white">
+                  NUEVO
+                </span>
+              )}
               <h1 className="text-center">
                 {currentProduct.name.startsWith("HAMBURGUESA") ? (
                   <>

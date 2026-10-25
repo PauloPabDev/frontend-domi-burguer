@@ -37,6 +37,11 @@ export function ProductCard({
           className="object-contain p-2"
           sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
         />
+        {product.isNew && !product.soldOut && (
+          <span className="absolute top-2 left-2 rounded-full bg-primary-red px-3 py-1 text-xs font-bold text-white">
+            NUEVO
+          </span>
+        )}
         {product.soldOut && (
           <span className="absolute top-2 left-2 rounded-full bg-neutral-black-80 px-3 py-1 text-xs font-bold text-white">
             AGOTADO
