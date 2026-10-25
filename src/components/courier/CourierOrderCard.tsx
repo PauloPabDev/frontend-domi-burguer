@@ -12,7 +12,7 @@ import { OrderElapsedTime } from '@/components/ui/OrderElapsedTime';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderComment } from '@/components/ui/OrderComment';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
-import { OrderClientChip, getClientOriginKey, cardOriginColorMap } from '@/components/ui/OrderClientChips';
+import { OrderClientChip, getClientOriginKey, cardOriginColorMap, type ClientNotesTarget } from '@/components/ui/OrderClientChips';
 import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/lib/dates';
@@ -59,6 +59,10 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   const paid = order.payment?.status === 'approved';
   const itemCount = order.orderItems.reduce((acc, item) => acc + item.quantity, 0);
   const navigationUrl = getNavigationUrl(order);
+  // Las notas del cliente cuelgan del cliente de recepción o, si pidió con cuenta, del usuario de la app
+  const notesTarget: ClientNotesTarget | undefined = order.clientId
+    ? { type: 'client', id: order.clientId }
+    : order.userId ? { type: 'user', id: order.userId } : undefined;
 
   // La card es seleccionable: los controles internos no deben cambiar la selección
   const stop = (e: React.MouseEvent) => e.stopPropagation();
@@ -100,6 +104,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
               isUser={isUser}
               origin={order?.origin}
               size="sm"
+              notesTarget={notesTarget}
             />
           </div>
           {phone && (
@@ -120,6 +125,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
             address={order.deliveryAddress?.address}
             floor={order.deliveryAddress?.floor}
             compact
+            showNotes
           />
           {navigationUrl && (
             <a
