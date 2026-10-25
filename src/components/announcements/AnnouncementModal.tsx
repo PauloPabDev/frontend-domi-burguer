@@ -15,8 +15,8 @@ interface AnnouncementModalProps {
 }
 
 export function AnnouncementModal({ announcement, open, onClose, onCta }: AnnouncementModalProps) {
-  const { variant, title, body, imageUrl, cta, dismissible } = announcement;
-  const style = VARIANT_STYLES[variant];
+  const { title, body, imageUrl, cta, dismissible } = announcement;
+  // const style = VARIANT_STYLES[variant];
 
   return (
     <Modal
@@ -25,7 +25,7 @@ export function AnnouncementModal({ announcement, open, onClose, onCta }: Announ
         if (!next) onClose();
       }}
       title={title}
-      headerIcon={<style.Icon className={`h-8 w-8 ${style.icon}`} />}
+      // headerIcon={<style.Icon className={`h-8 w-8 ${style.icon}`} />}
       size="md"
       // Si no se puede descartar, solo se cierra con el botón del pie
       hideCloseButton={!dismissible}

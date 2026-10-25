@@ -24,7 +24,7 @@ export function AnnouncementCard({ announcement, onCtaClick, className }: Announ
         <img src={imageUrl} alt="" className="w-full max-h-64 object-cover" />
       )}
       <div className="p-5 flex flex-col gap-3">
-        <span
+        {/* <span
           className={cn(
             "inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1 text-xs font-bold",
             style.badge
@@ -32,7 +32,7 @@ export function AnnouncementCard({ announcement, onCtaClick, className }: Announ
         >
           <style.Icon className="w-3.5 h-3.5" />
           {style.label}
-        </span>
+        </span> */}
         <h2 className="text-lg font-extrabold text-neutral-900">{title}</h2>
         <AnnouncementMarkdown content={body} />
         {cta && <AnnouncementCtaButton cta={cta} onClick={onCtaClick} className="self-start" />}
