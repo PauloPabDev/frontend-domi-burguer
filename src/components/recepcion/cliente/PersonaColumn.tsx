@@ -5,6 +5,7 @@ import { PersonaState } from '@/hooks/recepcion/useClientePanel';
 import { PersonaSummaryCard } from './PersonaSummaryCard';
 import { PersonaLocationsSection } from './PersonaLocationsSection';
 import { PersonaOrdersSection } from './PersonaOrdersSection';
+import { NotesPanel } from '@/components/notes/NotesPanel';
 
 interface PersonaLike {
   id: string;
@@ -48,6 +49,7 @@ export function PersonaColumn<T extends PersonaLike>({
 
       {persona.status === 'found' && (
         <>
+          {persona.data?.id && <NotesPanel targetType={kind} targetId={persona.data.id} />}
           <PersonaLocationsSection locations={persona.locations} loading={persona.locationsLoading} />
           <PersonaOrdersSection orders={enrichedOrders} loading={persona.ordersLoading} />
         </>

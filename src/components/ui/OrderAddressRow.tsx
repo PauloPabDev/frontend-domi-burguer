@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Location, PropertyType } from '@/types/locations';
+import { NotesPanel } from '@/components/notes/NotesPanel';
 
 interface OrderAddressRowProps {
   location?: Location;
@@ -27,6 +28,8 @@ interface OrderAddressRowProps {
   floor?: string;
   /** Compacto: dirección en máx. 2 líneas + piso y comentario visibles (para recepción) */
   compact?: boolean;
+  /** Muestra las notas internas de la ubicación en el detalle. Solo para vistas del personal. */
+  showNotes?: boolean;
   className?: string;
 }
 
@@ -48,10 +51,12 @@ interface AddressSheetProps {
   location?: Location;
   address?: string;
   floor?: string;
+  /** Id de la ubicación cuyas notas se muestran; sin él no hay sección de notas */
+  notesLocationId?: string;
   onClose: () => void;
 }
 
-function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) {
+function AddressSheet({ location, address, floor, notesLocationId, onClose }: AddressSheetProps) {
   const [copied, setCopied] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -110,6 +115,8 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
       <div
         className={cn(
           'relative z-10 w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden transition-transform duration-250 ease-out relative z-10 w-[300px] bg-white rounded-2xl shadow-xl overflow-hidden',
+          // con notas el contenido crece: se amplía un poco y hace scroll si no cabe
+          notesLocationId && 'w-[340px] max-w-[92vw] max-h-[90vh] overflow-y-auto',
           visible ? 'translate-y-0' : 'translate-y-full',
         )}
         onClick={(e) => e.stopPropagation()}
@@ -228,20 +235,28 @@ function AddressSheet({ location, address, floor, onClose }: AddressSheetProps) 
             </div>
           </button>
 
-          <button
-            type="button"
-            disabled
-            className="flex items-center gap-3 px-5 py-3.5 text-left opacity-50 cursor-not-allowed"
-          >
-            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-black-10 shrink-0">
-              <Camera size={15} className="text-neutral-black-100" />
-            </span>
-            <div>
-              <p className="text-sm font-medium text-neutral-black-80">Fotos del lugar</p>
-              <p className="text-xs text-neutral-black-100">Próximamente</p>
-            </div>
-          </button>
+          {!notesLocationId && (
+            <button
+              type="button"
+              disabled
+              className="flex items-center gap-3 px-5 py-3.5 text-left opacity-50 cursor-not-allowed"
+            >
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-black-10 shrink-0">
+                <Camera size={15} className="text-neutral-black-100" />
+              </span>
+              <div>
+                <p className="text-sm font-medium text-neutral-black-80">Fotos del lugar</p>
+                <p className="text-xs text-neutral-black-100">Próximamente</p>
+              </div>
+            </button>
+          )}
         </div>
+
+        {notesLocationId && (
+          <div className="px-5 py-4 border-t border-neutral-black-10">
+            <NotesPanel targetType="location" targetId={notesLocationId} />
+          </div>
+        )}
 
         <div className="pb-8" />
       </div>
@@ -255,9 +270,11 @@ export function OrderAddressRow({
   address,
   floor,
   compact = false,
+  showNotes = false,
   className,
 }: OrderAddressRowProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const notesLocationId = showNotes ? location?.id : undefined;
 
   const displayAddress = location?.address ?? address ?? 'Sin dirección';
   const displayFloor = location?.floor ?? floor;
@@ -311,6 +328,7 @@ export function OrderAddressRow({
             location={location}
             address={address}
             floor={floor}
+            notesLocationId={notesLocationId}
             onClose={() => setSheetOpen(false)}
           />
         )}
@@ -376,6 +394,7 @@ export function OrderAddressRow({
           location={location}
           address={address}
           floor={floor}
+          notesLocationId={notesLocationId}
           onClose={() => setSheetOpen(false)}
         />
       )}

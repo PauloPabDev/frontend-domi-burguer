@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { Phone, UserRound, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NotesPanel } from '@/components/notes/NotesPanel';
+import type { NoteTargetType } from '@/types/notes';
 
 // Paleta cálida para avatares sin foto: cada letra cae siempre en el mismo color
 const AVATAR_COLORS = [
@@ -93,21 +95,32 @@ export function OrderNumberChip({ orderNumber, className }: OrderNumberChipProps
 
 // ─── OrderClientChip ──────────────────────────────────────────────────────────
 
+/** A quién pertenecen las notas internas que se muestran en el menú (solo para personal) */
+export interface ClientNotesTarget {
+  type: Extract<NoteTargetType, 'client' | 'user'>;
+  id: string;
+}
+
 interface ClientActionMenuProps {
   name?: string;
   phone?: string;
   clientId?: string;
   avatarSrc?: string;
+  notesTarget?: ClientNotesTarget;
   onClose: () => void;
 }
 
-function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientActionMenuProps) {
+function ClientActionMenu({ name, phone, clientId, avatarSrc, notesTarget, onClose }: ClientActionMenuProps) {
   return createPortal(
     <div className="fixed inset-0 z-500 flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
 
       <div
-        className="relative z-10 w-[300px] bg-white rounded-2xl shadow-xl overflow-hidden"
+        className={cn(
+          'relative z-10 bg-white rounded-2xl shadow-xl overflow-hidden',
+          // con notas el contenido crece: se amplía un poco y hace scroll si no cabe
+          notesTarget ? 'w-[340px] max-w-[92vw] max-h-[88vh] overflow-y-auto' : 'w-[300px]',
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
@@ -150,6 +163,12 @@ function ClientActionMenu({ name, phone, clientId, avatarSrc, onClose }: ClientA
             Ver más detalles
           </Link>
         </div>
+
+        {notesTarget && (
+          <div className="px-4 py-3 border-t border-neutral-100">
+            <NotesPanel targetType={notesTarget.type} targetId={notesTarget.id} />
+          </div>
+        )}
       </div>
     </div>,
     document.body,
@@ -198,6 +217,8 @@ interface OrderClientChipProps {
   origin?: 'public' | null;
   /** sm: fila a todo el ancho con nombre completo (card compacta de recepción) */
   size?: 'md' | 'sm';
+  /** Si se pasa, el menú muestra las notas internas de ese cliente/usuario. Solo para vistas del personal. */
+  notesTarget?: ClientNotesTarget;
 }
 
 export function OrderClientChip({
@@ -210,6 +231,7 @@ export function OrderClientChip({
   isUser = false,
   origin = null,
   size = 'md',
+  notesTarget,
 }: OrderClientChipProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -278,6 +300,7 @@ export function OrderClientChip({
           phone={phone}
           clientId={clientId}
           avatarSrc={avatarSrc}
+          notesTarget={notesTarget}
           onClose={() => setMenuOpen(false)}
         />
       )}

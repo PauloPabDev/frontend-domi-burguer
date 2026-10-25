@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { MapPin, X, Pencil, Trash2, MessageSquare, Image as ImageIcon } from 'lucide-react';
+import { MapPin, X, Pencil, Trash2 } from 'lucide-react';
 import { Location, PropertyType } from '@/types/locations';
 import { cn } from '@/lib/utils';
 import { MapComponent } from '@/components/map/map';
@@ -10,6 +10,7 @@ import { ConfirmModal } from '@/components/ui/modal';
 import { LocationService } from '@/services/locationService';
 import { useAuth } from '@/contexts/AuthContext';
 import { notify } from '@/utils/notify';
+import { NotesPanel } from '@/components/notes/NotesPanel';
 
 interface LocationCardProps {
   location: Location;
@@ -31,18 +32,6 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     <div className="flex gap-2 text-xs">
       <span className="text-neutral-400 shrink-0 w-28">{label}</span>
       <span className="text-neutral-700 break-words">{value}</span>
-    </div>
-  );
-}
-
-function NotAvailableRow({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div className="flex items-center justify-between py-2.5 px-3 rounded-lg bg-neutral-50 border border-neutral-100">
-      <div className="flex items-center gap-2 text-sm text-neutral-400">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <span className="text-xs text-neutral-300 italic">No disponible</span>
     </div>
   );
 }
@@ -92,7 +81,7 @@ function LocationDetailModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-md sm:mx-4 overflow-hidden"
+        className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-md sm:mx-4 max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle bar (mobile) */}
@@ -158,10 +147,9 @@ function LocationDetailModal({
           </button>
         </div>
 
-        {/* Not available sections */}
-        <div className="px-4 pb-5 space-y-2 mt-1">
-          <NotAvailableRow icon={<MessageSquare className="w-4 h-4" />} label="Comentarios" />
-          <NotAvailableRow icon={<ImageIcon className="w-4 h-4" />} label="Fotos" />
+        {/* Notas y fotos del personal sobre esta ubicación */}
+        <div className="px-4 pb-5 mt-2 border-t border-neutral-100 pt-3">
+          <NotesPanel targetType="location" targetId={location.id} />
         </div>
       </div>
     </div>
