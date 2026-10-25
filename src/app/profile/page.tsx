@@ -10,6 +10,7 @@ import { PointsSection } from "./PointsSection";
 import { AddressesSection } from "./AddressesSection";
 import { PhoneSection } from "./PhoneSection";
 import { NotificationsSection } from "./NotificationsSection";
+import { AnnouncementsSection } from "./AnnouncementsSection";
 import { CodesSection } from "./CodesSection";
 import { OrdersSection } from "./OrdersSection";
 import { WorkSection } from "./WorkSection";
@@ -41,6 +42,7 @@ export default function ProfilePage() {
                     <AddressesSection />
                     <PhoneSection />
                     <NotificationsSection />
+                    <AnnouncementsSection />
                     <OrdersSection />
                     <CodesSection />
                     <PointsSection />

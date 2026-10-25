@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Users, ChefHat, ShieldCheck, Package, Activity, ClipboardList } from 'lucide-react';
+import { Users, ChefHat, ShieldCheck, Package, Activity, ClipboardList, Megaphone } from 'lucide-react';
 
 const CARDS = [
   {
@@ -38,6 +38,13 @@ const CARDS = [
     title: 'Monitoreo',
     description: 'Clientes y trabajadores conectados en vivo',
     color: 'bg-emerald-50 text-emerald-600',
+  },
+  {
+    href: '/admin/avisos',
+    Icon: Megaphone,
+    title: 'Avisos',
+    description: 'Programar avisos y promociones que ven los clientes al abrir la app',
+    color: 'bg-yellow-50 text-yellow-600',
   },
 ];
 
