@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Announcement } from "@/types/announcements";
 import { AnnouncementCtaButton } from "./AnnouncementCta";
 import { AnnouncementMarkdown } from "./AnnouncementMarkdown";
-import { VARIANT_STYLES } from "./variants";
+// import { VARIANT_STYLES } from "./variants";
 
 interface AnnouncementCardProps {
   announcement: Pick<Announcement, "variant" | "title" | "body" | "imageUrl" | "cta">;
@@ -14,8 +14,8 @@ interface AnnouncementCardProps {
 
 /** Aviso completo en formato tarjeta: la página /avisos y la vista previa del admin. */
 export function AnnouncementCard({ announcement, onCtaClick, className }: AnnouncementCardProps) {
-  const { variant, title, body, imageUrl, cta } = announcement;
-  const style = VARIANT_STYLES[variant];
+  const { title, body, imageUrl, cta } = announcement;
+  // const style = VARIANT_STYLES[announcement.variant];
 
   return (
     <article className={cn("rounded-2xl border border-neutral-black-20 bg-white overflow-hidden shadow-sm", className)}>

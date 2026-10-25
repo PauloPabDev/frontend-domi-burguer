@@ -3,7 +3,7 @@
 import { Modal } from "@/components/ui/modal";
 import { Announcement } from "@/types/announcements";
 import { AnnouncementMarkdown } from "./AnnouncementMarkdown";
-import { VARIANT_STYLES } from "./variants";
+// import { VARIANT_STYLES } from "./variants";
 
 interface AnnouncementModalProps {
   announcement: Pick<Announcement, "variant" | "title" | "body" | "imageUrl" | "cta" | "dismissible">;
