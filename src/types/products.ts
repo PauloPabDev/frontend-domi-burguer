@@ -19,6 +19,7 @@ export type CustomizationType = 'burger' | 'papas' | 'none';
 
 export type Product = {
   id: number;
+  slug: string; // Ancla del home: /#productos#slug selecciona el producto
   name: string;
   price: number;
   basePrice: number;

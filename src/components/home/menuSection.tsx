@@ -23,6 +23,9 @@ const CustomizationModalSection = dynamic(
   { ssr: false },
 );
 
+// Primer segmento del hash; "products" se mantiene por los enlaces ya existentes
+const MENU_HASH_SECTIONS = ["productos", "products"];
+
 export default function MenuSection() {
   const {
     products,
@@ -88,6 +91,31 @@ export default function MenuSection() {
     }
   }, [emblaApi]);
 
+  // Enlaces rápidos acumulativos: /#productos#slug selecciona el producto y baja al menú
+  useEffect(() => {
+    const selectFromHash = () => {
+      const [section, slug] = decodeURIComponent(window.location.hash.slice(1)).split("#");
+      if (!MENU_HASH_SECTIONS.includes(section)) return;
+      const index = products.findIndex((p) => p.slug === slug);
+      if (index !== -1) handleChangeProduct(index);
+      menuSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    selectFromHash();
+    window.addEventListener("hashchange", selectFromHash);
+    return () => window.removeEventListener("hashchange", selectFromHash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Mantener el hash sincronizado con el producto elegido (sin añadir historial)
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    window.history.replaceState(null, "", `#${MENU_HASH_SECTIONS[0]}#${products[actualProduct].slug}`);
+  }, [actualProduct, products]);
+
   const handleEditProduct = () => {
     track('product_customization_opened', { product_name: currentProduct.name, product_id: currentProduct.id });
     setIsModalOpen(true);
@@ -95,7 +123,7 @@ export default function MenuSection() {
 
   return (
     <>
-      <section ref={menuSectionRef} className="grid grid-cols-1 xl:grid-cols-2 gap-0 max-w-[1440px] w-screen">
+      <section id="products" ref={menuSectionRef} className="grid grid-cols-1 xl:grid-cols-2 gap-0 max-w-[1440px] w-screen">
         {/* Columna 1 - Carrusel Principal */}
         <div className="flex flex-col items-start justify-center gap-2 bg-[linear-gradient(45deg,rgba(255,194,5,1)_0%,rgba(255,194,5,0.4)_100%)] max-w-[720px] w-full mx-auto relative overflow-hidden">
           <div className="w-full h-[30px] xl:h-[14px]" />

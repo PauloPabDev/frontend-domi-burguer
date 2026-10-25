@@ -14,6 +14,7 @@ import { Product } from "@/types/products";
 export const PRODUCTS: Product[] = [
   {
     id: 48,
+    slug: "sanduche",
     name: "SÁNDUCHE ARTESANAL",
     basePrice: 18000,
     price: 18000,
@@ -29,6 +30,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 2,
+    slug: "hamburguesa",
     name: "HAMBURGUESA ARTESANAL",
     basePrice: 23900,
     price: 23900,
@@ -43,6 +45,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 1,
+    slug: "combo",
     name: "COMBO",
     basePrice: 28900,
     price: 28900,
@@ -58,6 +61,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 38,
+    slug: "salsa-de-ajo",
     name: "SALSA DE AJO",
     basePrice: 27000,
     price: 27000,
@@ -72,6 +76,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 39,
+    slug: "papas-vaquera",
     name: "PAPAS VAQUERA",
     basePrice: 23900,
     price: 23900,
@@ -86,6 +91,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 40,
+    slug: "papas-troyana",
     name: "PAPAS TROYANA",
     basePrice: 33900,
     price: 33900,
@@ -100,6 +106,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 43,
+    slug: "cheesecake",
     name: "CHEESECAKE DE FRESA",
     basePrice: 14000,
     price: 14000,
