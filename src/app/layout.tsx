@@ -9,6 +9,7 @@ import { metadataConfig, viewportConfig } from "./metadata";
 import Script from "next/script";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 import { PushSubscriptionSync } from "@/components/pwa/PushSubscriptionSync";
+import { PushCampaignClickTracker } from "@/components/pwa/PushCampaignClickTracker";
 import { Suspense } from "react";
 import { PromoCodeDetector } from "@/components/promo/PromoCodeDetector";
 import { LayoutShell } from "@/components/LayoutShell";
@@ -42,6 +43,7 @@ export default function RootLayout({
       <body className={montserrat.variable}>
         <AuthProvider>
           <PushSubscriptionSync />
+          <PushCampaignClickTracker />
           <ProductsProvider>
           <HeroUIProvider>
             <AppToastProvider />

@@ -1,4 +1,9 @@
-import { NotificationPreferences, NotificationPublicKey } from '@/types/notifications';
+import {
+    NotificationPreferences,
+    NotificationPublicKey,
+    PushCampaign,
+    PushCampaignInput,
+} from '@/types/notifications';
 import { getApiUrl } from '@/utils/apiUrl';
 import { getPushRegistration } from '@/utils/pushSupport';
 
@@ -64,6 +69,26 @@ export class NotificationService {
 
     static getPreferences(token: string): Promise<NotificationPreferences> {
         return this.request<NotificationPreferences>('/preferences', token);
+    }
+
+    static getCampaigns(token: string): Promise<PushCampaign[]> {
+        return this.request<PushCampaign[]>('/campaigns', token);
+    }
+
+    static sendCampaign(campaign: PushCampaignInput, token: string): Promise<PushCampaign> {
+        return this.request<PushCampaign>('/campaigns', token, {
+            method: 'POST',
+            body: JSON.stringify(campaign),
+        });
+    }
+
+    /** Cuenta el clic de una promoción. No lanza errores: es solo una estadística */
+    static async trackCampaignClick(campaignId: string): Promise<void> {
+        try {
+            await this.request(`/campaigns/${encodeURIComponent(campaignId)}/click`, null, { method: 'POST' });
+        } catch (error) {
+            console.error('Error registrando el clic de la promoción:', error);
+        }
     }
 
     static updatePreferences(

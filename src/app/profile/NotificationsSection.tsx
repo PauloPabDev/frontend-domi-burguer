@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Bell, BellOff, Megaphone, Package, Smartphone } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
@@ -25,6 +26,8 @@ const CATEGORIES: {
     },
 ];
 
+const SECTION_ID = "notificaciones";
+
 const UNAVAILABLE_MESSAGES = {
     unsupported: "Este navegador no permite notificaciones push.",
     "needs-install":
@@ -45,10 +48,18 @@ export function NotificationsSection() {
         setCategory,
     } = usePushNotifications();
 
+    // El botón "No recibir promociones" de la notificación abre /profile#notificaciones, pero la sección
+    // aparece después de cargar: el navegador ya intentó saltar al ancla y no la encontró
+    useEffect(() => {
+        if (availability !== "checking" && window.location.hash === `#${SECTION_ID}`) {
+            document.getElementById(SECTION_ID)?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [availability]);
+
     if (availability === "checking") return null;
 
     return (
-        <div className="mb-8">
+        <div id={SECTION_ID} className="mb-8 scroll-mt-24">
             <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wide mb-4">
                 NOTIFICACIONES
             </h2>

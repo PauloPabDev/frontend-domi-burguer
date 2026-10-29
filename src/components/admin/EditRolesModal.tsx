@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { X, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const AVAILABLE_ROLES = [
+export const AVAILABLE_ROLES = [
   { value: 'admin',     label: 'Admin',      description: 'Acceso total al sistema' },
   { value: 'reception', label: 'Recepción',  description: 'Gestión de pedidos y clientes' },
   { value: 'cook',      label: 'Cocina',     description: 'Preparación de pedidos' },

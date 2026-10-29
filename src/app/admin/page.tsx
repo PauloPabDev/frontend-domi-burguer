@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Users, ChefHat, ShieldCheck, Package, Activity, ClipboardList, Megaphone } from 'lucide-react';
+import { Users, ChefHat, ShieldCheck, Package, Activity, ClipboardList, Megaphone, BellRing } from 'lucide-react';
 
 const CARDS = [
   {
@@ -45,6 +45,13 @@ const CARDS = [
     title: 'Avisos',
     description: 'Programar avisos y promociones que ven los clientes al abrir la app',
     color: 'bg-yellow-50 text-yellow-600',
+  },
+  {
+    href: '/admin/notificaciones',
+    Icon: BellRing,
+    title: 'Notificaciones push',
+    description: 'Enviar promociones al celular por segmento y ver sus clics',
+    color: 'bg-orange-50 text-orange-600',
   },
 ];
 
