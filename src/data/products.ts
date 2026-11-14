@@ -51,7 +51,7 @@ export const PRODUCTS: Product[] = [
     price: 28900,
     body: "Nuestra hamburguesa, acompañada de papas rizadas crocantes y nuestra coquitas de Salsa de Ajo y salsa roja.",
     bigImage: "/images/products/combo-large.webp",
-    image1: "/images/products/combo-large.webp",
+    image1: "/images/products/combo-thumbnail.webp",
     icons: [HamburgerIcon, FrenchFriesIcon],
     quantity: 1,
     complements: [],

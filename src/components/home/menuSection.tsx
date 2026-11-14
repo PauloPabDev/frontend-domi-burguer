@@ -278,7 +278,7 @@ export default function MenuSection() {
       </section>
 
       {/* Sección de miniaturas de productos */}
-      <section className="grid lg:gap-y-14 grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 items-center justify-center lg:gap-6 gap-2 gap-x-4 py-14 relative">
+      <section className="grid w-full max-w-[1440px] px-4 lg:gap-y-14 grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 items-center justify-center lg:gap-6 gap-2 gap-x-4 py-14 relative">
         {products.map((product, index) => (
           <ProductThumbnail
             key={product.id}
