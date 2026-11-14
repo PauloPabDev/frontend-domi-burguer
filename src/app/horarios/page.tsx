@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { StoreStatusBar } from "@/components/home/StoreStatusBar";
 
 export default function HorariosPage() {
     return (
@@ -11,6 +12,8 @@ export default function HorariosPage() {
                     <h2 className="text-2xl font-extrabold tracking-tight text-neutral-900 mb-6">
                         HORARIOS
                     </h2>
+
+                    <StoreStatusBar />
 
                     <p className="text-xl text-neutral-700 leading-relaxed mb-4">
                         Nuestro servicio es de lunes a sábado de 4:30 p.m a 10:00 p.m

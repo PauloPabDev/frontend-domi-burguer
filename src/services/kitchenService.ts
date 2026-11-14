@@ -1,4 +1,4 @@
-import { Kitchen } from '@/types/kitchens';
+import { Kitchen, KitchenOpenStatus } from '@/types/kitchens';
 import { getApiUrl } from '@/utils/apiUrl';
 
 interface KitchenResponse {
@@ -47,5 +47,15 @@ export class KitchenService {
       console.error('Error en findKitchenss:', error);
       throw error;
     }
+  }
+
+  static async findKitchensStatusPublic(): Promise<{ body: KitchenOpenStatus[] }> {
+    const response = await fetch(`${this.API_URL}api/v2/kitchens/public/status`);
+
+    if (!response.ok) {
+      throw new Error(`Error al cargar el estado de las cocinas: ${response.statusText}`);
+    }
+
+    return await response.json();
   }
 }

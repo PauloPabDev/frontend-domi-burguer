@@ -8,9 +8,11 @@ import { OpeningHoursResult } from "@/utils/openingHoursParser";
 interface KitchenHoursCardProps {
   parsedHours: OpeningHoursResult | null;
   isLoading?: boolean;
+  /** Muestra también las horas (4:30 pm / 10 pm) junto a los días */
+  showHours?: boolean;
 }
 
-export const KitchenHoursCard = ({ parsedHours, isLoading }: KitchenHoursCardProps) => {
+export const KitchenHoursCard = ({ parsedHours, isLoading, showHours = false }: KitchenHoursCardProps) => {
   if (isLoading) {
     return (
       <Card className="bg-[#F7F7F7] shadow-none rounded-2xl border-0">
@@ -41,7 +43,7 @@ export const KitchenHoursCard = ({ parsedHours, isLoading }: KitchenHoursCardPro
                 <Clock className="w-5 h-5 flex-shrink-0" />
                 <div className="flex items-start gap-1 flex-1">
                   <span className="flex-1 body-font">{schedule.days}</span>
-                  {/* <span className="body-font font-bold">{schedule.hours}</span> */}
+                  {showHours && <span className="body-font font-bold">{schedule.hours}</span>}
                 </div>
               </div>
             ))}
