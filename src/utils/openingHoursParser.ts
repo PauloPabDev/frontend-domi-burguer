@@ -43,6 +43,18 @@ const NOMINATIM_DATA = {
   },
 };
 
+// El horario se guarda en UTC; a la gente se le muestra en hora de Bogotá (UTC-5, sin horario de verano)
+const BOGOTA_OFFSET_MIN = -300;
+
+/** "21:30" UTC → "16:30" Bogotá, y cuántos días se corre (-1 si pasa a la víspera). */
+function utcToBogota(time: string): { time: string; dayShift: number } {
+  const [h, m] = time.split(":").map(Number);
+  const total = h * 60 + m + BOGOTA_OFFSET_MIN;
+  const local = ((total % 1440) + 1440) % 1440;
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return { time: `${pad(Math.floor(local / 60))}:${pad(local % 60)}`, dayShift: Math.floor(total / 1440) };
+}
+
 function formatTime24to12(time24: string): string {
   const [hours, minutes] = time24.split(":").map(Number);
   const period = hours >= 12 ? "pm" : "am";
@@ -121,8 +133,14 @@ export function parseOpeningHours(openingHoursStr: string): OpeningHoursResult {
     );
 
     if (match) {
-      const [, daysPart, startTime, endTime] = match;
-      const daysArray = expandDayRange(daysPart);
+      const [, daysPart, utcStart, utcEnd] = match;
+      const start = utcToBogota(utcStart);
+      const startTime = start.time;
+      const endTime = utcToBogota(utcEnd).time;
+      // Si abrir en hora local cae el día anterior, los días de la regla también se corren
+      const daysArray = expandDayRange(daysPart).map(
+        (d) => DAY_ORDER[(DAY_ORDER.indexOf(d) + start.dayShift + 7) % 7],
+      );
 
       schedules.push({
         days: formatDaysToSpanish(daysArray),
