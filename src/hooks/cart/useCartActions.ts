@@ -176,7 +176,6 @@ export const useCartActions = () => {
       basePrice: rewardElement.price ?? 0,
       quantity: rewardElement.quantity ?? 1,
       image1: catalogProduct?.image1 ?? '',
-      image2: catalogProduct?.image2 ?? null,
       complements: [],
       allowCustomization: catalogProduct?.allowCustomization ?? false,
       customizationType: catalogProduct?.customizationType ?? 'none',

@@ -23,7 +23,6 @@ export const useAddToCart = () => {
         basePrice: product.basePrice,
         quantity: 1,
         image1: product.image1,
-        image2: product.image2 || null,
         complements: product.complements.map((c) => ({ ...c })),
         allowCustomization: product.allowCustomization,
         customizationType: product.customizationType,

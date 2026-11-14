@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { CartItem } from "@/store/cartStore";
 import { Complements } from "@/components/ui/complements";
-import { CartItemImage } from "@/components/cart/CartItemImage";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { CartItemHeader } from "@/components/cart/CartItemHeader";
 import { CartItemFooter } from "@/components/cart/CartItemFooter";
 
@@ -27,11 +27,7 @@ export const CartItemCard = ({
     return (
         <Card className="flex w-full xl:h-28 items-start gap-4 pl-2 pr-3 xl:pr-4 py-2 bg-[#FFFFFF] rounded-[12px] overflow-hidden border-0">
             <CardContent className="p-0 flex w-full gap-4 items-center justify-start">
-                <CartItemImage
-                    name={item.name}
-                    image1={item.image1}
-                    image2={item.image2}
-                />
+                <ProductImage src={item.image1} alt={item.name} />
 
                 <div className="justify-center w-full max-w-[316px] gap-2 xl:gap-3 pt-1 pb-0 px-0 flex-1 grow flex flex-col items-start self-stretch">
                     <CartItemHeader

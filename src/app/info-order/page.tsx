@@ -7,7 +7,7 @@ import {
   NequiIcon,
   SpikesIcon,
 } from "@/components/ui/icons";
-import Image from "next/image";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { Separator } from "@/components/ui/separator";
 import { Product } from "@/types/products";
 import { Complements } from "@/components/ui/complements";
@@ -152,32 +152,7 @@ export default function InfoOrder() {
                       className="flex w-full items-start gap-4 pl-2 pr-3 py-3 bg-[#FFFFFF] rounded-[12px] border-0"
                     >
                       <CardContent className="p-0 flex w-full gap-3 items-start">
-                        <div className="w-24 h-24 min-w-24 min-h-24 flex-shrink-0 bg-accent-yellow-40 rounded-[7.66px] relative overflow-hidden">
-                          <Image
-                            src={item.image1}
-                            alt="Burger"
-                            width={67}
-                            height={105}
-                            className={
-                              item.name.toLowerCase().includes("salsa")
-                                ? "absolute top-[5px] left-[3px] w-[118px] h-[85px] object-cover overflow-visible"
-                                : `object-cover absolute ${
-                                    item.image2
-                                      ? "left-[5px] top-[-5px]"
-                                      : "top-[-5px] left-[15px]"
-                                  }`
-                            }
-                          />
-                          {item.image2 && (
-                            <Image
-                              src={item.image2}
-                              alt="Domiburger papitas"
-                              width={57}
-                              height={84}
-                              className="object-cover absolute top-5 left-[41px]"
-                            />
-                          )}
-                        </div>
+                        <ProductImage src={item.image1} alt={item.name} />
 
                         <div className="flex flex-col flex-1 min-w-0 gap-2 py-1">
                           <p className="font-h4 w-full">{item.name}</p>
