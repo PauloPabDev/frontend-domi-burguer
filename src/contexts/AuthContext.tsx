@@ -5,6 +5,7 @@ import { User, onAuthStateChanged, ConfirmationResult } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { AuthService, AuthError } from '@/services/authService';
 import { NotificationService } from '@/services/notificationService';
+import { writeCachedAccount } from '@/utils/cachedAccount';
 
 /**
  * Interface que define los datos y métodos disponibles en el contexto de autenticación
@@ -70,6 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
             setUser(user);
             setLoading(false);
+            writeCachedAccount(user ? { displayName: user.displayName, photoURL: user.photoURL } : null);
         });
 
         return () => unsubscribe();

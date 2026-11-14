@@ -3,6 +3,7 @@ import "./globals.css";
 import { HeroUIProvider } from "@heroui/system";
 import { AppToastProvider } from "@/components/AppToastProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ACCOUNT_BOOT_SCRIPT } from "@/utils/cachedAccount";
 import { ProductsProvider } from "@/contexts/ProductsContext";
 import { Metadata, Viewport } from "next";
 import { metadataConfig, viewportConfig } from "./metadata";
@@ -30,8 +31,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: ACCOUNT_BOOT_SCRIPT }} />
         <meta name="apple-mobile-web-app-title" content="Domi Burguer" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
