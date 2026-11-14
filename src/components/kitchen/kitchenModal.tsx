@@ -17,6 +17,8 @@ import { KitchenHoursCard } from "./KitchenHoursCard";
 import { DeliveryPriceCard } from "./DeliveryPriceCard";
 import { UserLocationSelector } from "./UserLocationSelector";
 import { MultiMarkerMap, MapMarker } from "@/components/map/MultiMarkerMap";
+import { useKitchensStatus } from "@/hooks/kitchen/useKitchensStatus";
+import { getKitchenStatusLabel } from "@/utils/kitchenStatusLabel";
 
 interface KitchenModalProps {
   isOpen: boolean;
@@ -40,6 +42,9 @@ export const KitchenModal = ({ isOpen, onClose, handleBackButton = true }: Kitch
     formattedDeliveryPrice,
     parsedHours,
   } = useKitchenModal({ isOpen });
+  const { statuses, nowMs } = useKitchensStatus();
+  const selectedStatus = statuses.find((s) => s.id === selectedKitchen?.id);
+  const statusLabel = selectedStatus ? getKitchenStatusLabel(selectedStatus, nowMs) : null;
   const mapMarkers: MapMarker[] = kitchens
     .filter(k => k.location?.coordinates?.lat && k.location?.coordinates?.lng)
     .map(k => ({
@@ -102,26 +107,30 @@ export const KitchenModal = ({ isOpen, onClose, handleBackButton = true }: Kitch
               </SelectContent>
             </Select>
 
-            {/* Indicador de estado Abierto/Cerrado */}
-            <div className="flex items-center justify-between px-4 py-2 rounded-full border border-gray-200">
-              {parsedHours?.isCurrentlyOpen ? (
-                <>
-                  <span className="text-green-600 font-medium body-font">Abierto</span>
-                  {/* {countdownText && (
-                    <span className="text-neutral-black-60 body-font">
-                      Cerramos en <span className="font-bold">{countdownText}</span>
-                    </span>
-                  )} */}
-                </>
-              ) : (
-                <span className="text-red-500 font-medium body-font">Cerrado</span>
-              )}
-            </div>
+            {/* Indicador de estado (hora del servidor): abierto, cuánto falta para cerrar o cuándo abrimos */}
+            {statusLabel && (
+              <div className="flex items-center px-4 py-2 rounded-full border border-gray-200">
+                <span
+                  className={`font-medium body-font ${
+                    statusLabel.tone === "open"
+                      ? "text-green-600"
+                      : statusLabel.tone === "warning"
+                        ? "text-amber-600"
+                        : statusLabel.tone === "closed"
+                          ? "text-red-500"
+                          : "text-neutral-black-50"
+                  }`}
+                >
+                  {statusLabel.text}
+                </span>
+              </div>
+            )}
 
             {/* Tarjeta de horarios */}
             <KitchenHoursCard
               parsedHours={parsedHours}
               isLoading={isLoadingKitchens}
+              showHours
             />
 
             {/* Tarjeta de precio de domicilio */}

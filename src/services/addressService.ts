@@ -1,5 +1,5 @@
 import { Address, Coordinates } from '@/types/address';
-import { Kitchen } from '@/types/kitchens';
+import { ClosedDelivery, Kitchen, KitchenSelectionStatus } from '@/types/kitchens';
 import { Delivery } from '@/types/orders';
 import { getApiUrl } from '@/utils/apiUrl';
 
@@ -43,7 +43,16 @@ export class AddressService {
     }
   }
   
-  static async createDelivery(addressId: string): Promise<{ delivery: Delivery; kitchen: Kitchen }> {
+  /**
+   * Con todas las cocinas cerradas `delivery` y `kitchen` vienen null: el costo estimado llega en
+   * `closedDelivery` y el estado (cuándo abrimos) en `kitchenStatus`.
+   */
+  static async createDelivery(addressId: string): Promise<{
+    delivery: Delivery | null;
+    kitchen: Kitchen | null;
+    kitchenStatus: KitchenSelectionStatus | null;
+    closedDelivery: ClosedDelivery | null;
+  }> {
     try {
       const response = await fetch(`${this.API_URL}api/v2/kitchens/selectKitchen/location?locationId=${addressId}`, {
         method: 'GET',
@@ -56,11 +65,13 @@ export class AddressService {
         throw new Error(`Error al crear el precio del domicilio: ${response.statusText}`);
       }
 
-      const data =  await response.json();
-      const delivery =  data.body.delivery as Delivery
-      const kitchen = data.body.kitchen as Kitchen
-      console.log('Respuesta de createDelivery:', {delivery, kitchen});
-      return {  delivery, kitchen  };
+      const { body } = await response.json();
+      return {
+        delivery: body.delivery ?? null,
+        kitchen: body.kitchen ?? null,
+        kitchenStatus: body.kitchenStatus ?? null,
+        closedDelivery: body.closedDelivery ?? null,
+      };
     } catch (error) {
       console.error('Error en createDeliveryPrice:', error);
       throw error;

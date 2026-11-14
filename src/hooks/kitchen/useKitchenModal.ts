@@ -149,8 +149,9 @@ export function useKitchenModal({ isOpen }: UseKitchenModalOptions): UseKitchenM
     setIsLoadingDelivery(true);
 
     try {
-      const { delivery: deliveryData } = await AddressService.createDelivery(locationId);
-      setDelivery(deliveryData);
+      const { delivery: deliveryData, closedDelivery } = await AddressService.createDelivery(locationId);
+      // Con las cocinas cerradas se muestra el domicilio estimado de la que abre primero
+      setDelivery(deliveryData ?? closedDelivery?.delivery ?? null);
     } catch (err) {
       console.error("Error calculando domicilio:", err);
       setDelivery(null);

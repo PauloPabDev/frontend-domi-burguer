@@ -1,6 +1,7 @@
 import { useGetLocationByUser } from "@/hooks/locations/useGetLocationByUser";
 import { Address } from "@/types/address";
 import { Location } from "@/types/locations";
+import { KitchenSelectionStatus } from "@/types/kitchens";
 import { getIdToken } from "firebase/auth";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
@@ -23,6 +24,8 @@ interface CheckoutFormData {
     setLocation: (location: Location | null) => void;
     isLoadingDeliveryPrice: boolean;
     deliveryError: string | null;
+    /** Estado de la cocina que atenderá (o la que abre primero si todas están cerradas) */
+    kitchenStatus: KitchenSelectionStatus | null;
     retryDeliveryPrice: () => void;
 }
 
@@ -59,10 +62,12 @@ export const CheckoutFormProvider = ({ children }: { children: React.ReactNode }
     const [location, setLocation] = useState<Location | null>(null);
     const [isLoadingDeliveryPrice, setIsLoadingDeliveryPrice] = useState(false);
     const [deliveryError, setDeliveryError] = useState<string | null>(null);
+    const [kitchenStatus, setKitchenStatus] = useState<KitchenSelectionStatus | null>(null);
 
     const fetchDeliveryPrice = async (loc: Location) => {
         setIsLoadingDeliveryPrice(true);
         setDeliveryError(null);
+        setKitchenStatus(null);
 
         // Crear address parcial con los datos de location mientras carga
         const partialAddress: Address = {
@@ -75,17 +80,24 @@ export const CheckoutFormProvider = ({ children }: { children: React.ReactNode }
 
         try {
             // Consultamos el precio del delivery
-            const { delivery } = await AddressService.createDelivery(loc.id);
-            const rta: Address = {
-                ...loc,
-                distance: delivery.distance,
-                fullAddress: loc.address,
-                deliveryPrice: delivery.price,
-            };
-            setAddressClient(rta);
+            const { delivery, closedDelivery, kitchenStatus: status } = await AddressService.createDelivery(loc.id);
+            setKitchenStatus(status);
+
+            // Con las cocinas cerradas el costo viene estimado en closedDelivery
+            const priced = delivery ?? closedDelivery?.delivery;
+            if (priced) {
+                setAddressClient({
+                    ...loc,
+                    distance: priced.distance,
+                    fullAddress: loc.address,
+                    deliveryPrice: priced.price,
+                });
+            } else if (!status) {
+                setDeliveryError("No hay cocinas disponibles por ahora, intenta más tarde");
+            }
         } catch (error) {
             console.error("Error al obtener datos de delivery:", error);
-            setDeliveryError("No hay cocinas abiertas intenta mas tarde");
+            setDeliveryError("No pudimos calcular el domicilio, intenta de nuevo");
         }
         setIsLoadingDeliveryPrice(false);
     };
@@ -102,6 +114,7 @@ export const CheckoutFormProvider = ({ children }: { children: React.ReactNode }
         } else {
             setAddressClient(null);
             setDeliveryError(null);
+            setKitchenStatus(null);
             removeAddress();
         }
     }, [location]);
@@ -149,6 +162,7 @@ export const CheckoutFormProvider = ({ children }: { children: React.ReactNode }
             location, setLocation,
             isLoadingDeliveryPrice,
             deliveryError,
+            kitchenStatus,
             retryDeliveryPrice
         }}>
             {children}

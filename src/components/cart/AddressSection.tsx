@@ -7,6 +7,8 @@ import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { ModalLocationsList } from "./ModalLocationsList";
 import { useAddressManagement } from "@/hooks/cart/useAddressManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { useServerNow } from "@/hooks/kitchen/useKitchensStatus";
+import { getKitchenStatusLabel } from "@/utils/kitchenStatusLabel";
 
 // Lazy load modal pesado
 const ModalAddress = dynamic(
@@ -25,6 +27,7 @@ export function AddressSection() {
         location,
         isLoadingDeliveryPrice,
         deliveryError,
+        kitchenStatus,
         setLocation,
         retryDeliveryPrice
     } = useCheckoutForm();
@@ -36,6 +39,9 @@ export function AddressSection() {
     } = useAddressManagement();
 
     const { user } = useAuth();
+    const nowMs = useServerNow(kitchenStatus?.serverNow);
+    // Abierto / «cerramos en N min» / «Cerrado · abrimos hoy a las X · en 1 h 20 min»
+    const statusLabel = kitchenStatus ? getKitchenStatusLabel(kitchenStatus, nowMs, { showCountdown: true }) : null;
     const [isListModalOpen, setIsListModalOpen] = useState(false);
 
     const hasMultipleLocations = listLocationsClient && listLocationsClient.length > 0;
@@ -105,6 +111,7 @@ export function AddressSection() {
                         isFavorite={location?.favorite}
                         isLoadingPrice={isLoadingDeliveryPrice}
                         deliveryError={deliveryError}
+                        statusLabel={statusLabel}
                         onDelete={handleRemoveSelection}
                         onRetry={retryDeliveryPrice}
                     />

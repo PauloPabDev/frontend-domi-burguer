@@ -6,6 +6,7 @@ import { Footer } from "@/components/footer";
 import { GoogleSignInBanner } from "@/components/auth/GoogleSignInBanner";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { AnnouncementsHost } from "@/components/announcements/AnnouncementsHost";
+import { StoreStatusAlert } from "@/components/announcements/StoreStatusAlert";
 import { ClientSocketProvider } from "@/contexts/ClientSocketContext";
 
 const DESIGN_PREFIX = "/design";
@@ -39,6 +40,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
       {showPublicChrome && <GoogleSignInBanner />}
       {showPublicChrome && <InstallBanner />}
       {showPublicChrome && <AnnouncementsHost />}
+      {showPublicChrome && <StoreStatusAlert />}
     </>
   );
 
