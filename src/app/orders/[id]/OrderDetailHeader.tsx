@@ -4,12 +4,11 @@ import { ArrowLeft } from "lucide-react";
 import { formatFullDateTime } from "@/lib/dates";
 
 interface OrderDetailHeaderProps {
-    orderNumber: string;
     createdAt: string;
     onBack: () => void;
 }
 
-export function OrderDetailHeader({ orderNumber, createdAt, onBack }: OrderDetailHeaderProps) {
+export function OrderDetailHeader({ createdAt, onBack }: OrderDetailHeaderProps) {
     return (
         <div className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
@@ -22,7 +21,7 @@ export function OrderDetailHeader({ orderNumber, createdAt, onBack }: OrderDetai
                 <h1>MI PEDIDO</h1>
             </div>
             <p className="body-font text-neutral-black-50 ml-11">
-                Pedido N° {orderNumber} · {formatFullDateTime(createdAt)}
+                {formatFullDateTime(createdAt)}
             </p>
         </div>
     );

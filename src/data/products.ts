@@ -120,3 +120,6 @@ export const PRODUCTS: Product[] = [
     soldOut: true,
   },
 ];
+
+// Foto pequeña del producto desde el catálogo local (los pedidos no guardan la foto)
+export const getProductImage = (id: string | number) => PRODUCTS.find((p) => p.id === Number(id))?.image1;
