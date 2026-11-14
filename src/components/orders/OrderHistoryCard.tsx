@@ -6,7 +6,7 @@ import { ChevronRight, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { formatCOP } from "@/components/ui/OrderItemsList";
-import { ORDER_STATUS_PRESENTATION } from "@/app/orders/[id]/utils";
+import { getStatusPresentation } from "@/app/orders/[id]/utils";
 import { getProductImage } from "@/data/products";
 import { formatDateTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
@@ -18,7 +18,7 @@ const MAX_VISIBLE = 4;
 // Tarjeta de pedido histórico: qué pidió (fotos), cuánto fue (total) y volver a pedir.
 export function OrderHistoryCard({ order }: { order: Order }) {
     const [showSoon, setShowSoon] = useState(false);
-    const status = ORDER_STATUS_PRESENTATION[order.status];
+    const status = getStatusPresentation(order.status);
     const visible = order.orderItems.slice(0, MAX_VISIBLE);
     const remaining = order.orderItems.length - MAX_VISIBLE;
 

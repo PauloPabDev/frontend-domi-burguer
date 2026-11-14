@@ -65,4 +65,23 @@ export const ORDER_STATUS_PRESENTATION: Record<OrderStatus, OrderStatusPresentat
         border: "border-neutral-black-20",
         text: "text-neutral-black-50",
     },
+    deleted: {
+        label: "Pedido eliminado",
+        message: "Este pedido ya no está disponible. Si tienes dudas, escríbenos por WhatsApp.",
+        bg: "bg-neutral-black-3",
+        border: "border-neutral-black-20",
+        text: "text-neutral-black-50",
+    },
 };
+
+// Estados que el backend envíe y no estén en el tipo no deben romper la pantalla
+const UNKNOWN_STATUS_PRESENTATION: OrderStatusPresentation = {
+    label: "Estado no disponible",
+    message: "No pudimos mostrar el estado de tu pedido. Escríbenos por WhatsApp si necesitas ayuda.",
+    bg: "bg-neutral-black-10",
+    border: "border-neutral-black-20",
+    text: "text-neutral-black-80",
+};
+
+export const getStatusPresentation = (status: string): OrderStatusPresentation =>
+    ORDER_STATUS_PRESENTATION[status as OrderStatus] ?? UNKNOWN_STATUS_PRESENTATION;

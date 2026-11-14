@@ -134,6 +134,13 @@ export class OrderService {
         bgColor: 'bg-neutral-200',
         borderColor: 'border-neutral-200',
         isButton: false
+      },
+      deleted: {
+        label: 'ELIMINADO',
+        color: 'text-neutral-600',
+        bgColor: 'bg-neutral-200',
+        borderColor: 'border-neutral-200',
+        isButton: false
       }
     };
 

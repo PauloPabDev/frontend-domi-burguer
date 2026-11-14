@@ -76,7 +76,8 @@ export type OrderStatus =
   | 'delivered'
   | 'invoiced'
   | 'pending_payment'
-  | 'cancelled';
+  | 'cancelled'
+  | 'deleted';
 
 export interface OrderStatusInfo {
   status: OrderStatus;

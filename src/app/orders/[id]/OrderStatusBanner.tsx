@@ -2,14 +2,14 @@
 
 import { OrderStatus } from "@/types/orders";
 import { cn } from "@/lib/utils";
-import { ORDER_STATUS_PRESENTATION } from "./utils";
+import { getStatusPresentation } from "./utils";
 
 interface OrderStatusBannerProps {
     status: OrderStatus;
 }
 
 export function OrderStatusBanner({ status }: OrderStatusBannerProps) {
-    const presentation = ORDER_STATUS_PRESENTATION[status];
+    const presentation = getStatusPresentation(status);
 
     return (
         <div
