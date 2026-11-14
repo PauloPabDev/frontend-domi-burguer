@@ -70,7 +70,11 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                     {!FINISHED_STATUSES.includes(order.status) && <EnableNotificationsPrompt />}
 
                     <div className="flex flex-col gap-4 w-full">
-                        {order.deliveryAddress && <OrderDeliveryCard address={order.deliveryAddress} />}
+                        {order.deliveryAddress && <OrderDeliveryCard
+                                address={order.deliveryAddress}
+                                location={order.location}
+                                isOwner={!!user && order.location?.userId === user.uid}
+                            />}
 
                         {order.comment && (
                             <div className="flex flex-col gap-2">

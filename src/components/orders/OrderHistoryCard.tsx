@@ -35,8 +35,8 @@ export function OrderHistoryCard({ order }: { order: Order }) {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                    {visible.map((item) => (
-                        <div key={item.id} className="relative">
+                    {visible.map((item, index) => (
+                        <div key={`${item.id}-${index}`} className="relative">
                             {getProductImage(item.id) ? (
                                 <ProductImage src={getProductImage(item.id)!} alt={item.name ?? ""} className="w-16 h-16" sizes="64px" />
                             ) : (

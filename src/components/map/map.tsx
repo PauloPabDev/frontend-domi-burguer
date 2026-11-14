@@ -19,6 +19,7 @@ export interface MapComponentProps {
   showMapType?: boolean;
   showFullscreen?: boolean;
   customStyles?: google.maps.MapTypeStyle[];
+  gestureHandling?: "cooperative" | "greedy";
 }
 
 export const MapComponent: React.FC<MapComponentProps> = ({
@@ -36,6 +37,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   showMapType = false,
   showFullscreen = false,
   customStyles = silverMapStyle,
+  gestureHandling,
 }) => {
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
@@ -70,6 +72,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         mapTypeControl: showMapType,
         fullscreenControl: showFullscreen,
         styles: customStyles,
+        gestureHandling,
       }}
     >
       {coordinates && (

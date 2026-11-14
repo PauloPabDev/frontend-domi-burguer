@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getIdToken } from "firebase/auth";
 import { LocationService } from "@/services/locationService";
 import { track } from "@/utils/analytics";
+import { LocationInfo } from "@/components/locations/LocationInfo";
 import { ConfirmModal } from "@/components/ui/modal/presets/ConfirmModal";
 
 interface LocationCardProps {
@@ -70,25 +71,14 @@ export const LocationCard: React.FC<LocationCardProps> = ({
         />
         <div className="flex items-start justify-between py-4 gap-4 border-b border-gray-200 last:border-b-0">
             <div className="flex-1">
-                <h3 className="font-semibold text-neutral-800 text-base">
-                    {location.name}
-                </h3>
-                <p className="text-sm text-neutral-600 mt-1">
-                    {location.address}
-                </p>
-                {location.floor && (
-                    <p className="text-sm text-neutral-600">
-                        Piso/Apto: {location.floor}
-                    </p>
-                )}
-                <p className="text-sm text-neutral-500">
-                    {location.city}{location.state ? `, ${location.state}` : ''}
-                </p>
-                {location.comment && (
-                    <p className="text-sm text-neutral-400 italic mt-1">
-                        {location.comment}
-                    </p>
-                )}
+                <LocationInfo
+                    name={location.name}
+                    address={location.address}
+                    city={location.city}
+                    state={location.state}
+                    floor={location.floor}
+                    comment={location.comment}
+                />
                 {location.coordinates?.lat && location.coordinates?.lng && (
                     <a
                         href={`https://www.google.com/maps?q=${location.coordinates.lat},${location.coordinates.lng}`}
