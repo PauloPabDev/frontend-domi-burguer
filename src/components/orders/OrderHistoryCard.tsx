@@ -22,53 +22,57 @@ export function OrderHistoryCard({ order }: { order: Order }) {
     const visible = order.orderItems.slice(0, MAX_VISIBLE);
     const remaining = order.orderItems.length - MAX_VISIBLE;
 
+    const units = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
+
     return (
-        <div className="flex flex-col gap-4 w-full bg-white rounded-2xl p-4 shadow-sm">
-            <Link href={`/orders/${order.id}`} className="flex flex-col gap-4 group">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="flex flex-col min-w-0">
-                        <h4 className="truncate">{formatDateTime(order.createdAt)}</h4>
-                    </div>
-                    <span className={cn("shrink-0 rounded-full border px-3 py-1 text-xs font-bold", status.bg, status.border, status.text)}>
+        <div className="w-full bg-white rounded-2xl p-3.5 shadow-sm flex flex-col gap-3">
+            <Link href={`/orders/${order.id}`} className="flex flex-col gap-3 group">
+                <div className="flex items-center justify-between gap-3">
+                    <h4 className="truncate">{formatDateTime(order.createdAt)}</h4>
+                    <span className={cn("shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-bold", status.bg, status.border, status.text)}>
                         {status.label}
                     </span>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                    {visible.map((item, index) => (
-                        <div key={`${item.id}-${index}`} className="relative">
-                            {getProductImage(item.id) ? (
-                                <ProductImage src={getProductImage(item.id)!} alt={item.name ?? ""} className="w-16 h-16" sizes="64px" />
-                            ) : (
-                                <div className="w-16 h-16 rounded-[7.66px] bg-accent-yellow-40 flex items-center justify-center text-neutral-black-50">
-                                    <Package className="w-6 h-6" />
-                                </div>
-                            )}
-                            {item.quantity > 1 && (
-                                <span className="absolute -top-1.5 -right-1.5 rounded-full bg-neutral-black-80 px-1.5 text-[11px] font-bold leading-5 text-white">
-                                    ×{item.quantity}
-                                </span>
-                            )}
-                        </div>
-                    ))}
-                    {remaining > 0 && (
-                        <div className="w-16 h-16 rounded-[7.66px] bg-neutral-black-10 flex items-center justify-center text-sm font-bold text-neutral-black-80">
-                            +{remaining}
-                        </div>
-                    )}
-                </div>
+                <div className="flex items-center justify-between gap-3">
+                    <div className="flex flex-wrap gap-1.5 min-w-0">
+                        {visible.map((item, index) => (
+                            <div key={`${item.id}-${index}`} className="relative">
+                                {getProductImage(item.id) ? (
+                                    <ProductImage src={getProductImage(item.id)!} alt={item.name ?? ""} className="w-12 h-12" sizes="48px" />
+                                ) : (
+                                    <div className="w-12 h-12 rounded-[7.66px] bg-accent-yellow-40 flex items-center justify-center text-neutral-black-50">
+                                        <Package className="w-5 h-5" />
+                                    </div>
+                                )}
+                                {item.quantity > 1 && (
+                                    <span className="absolute -top-1.5 -right-1.5 rounded-full bg-neutral-black-80 px-1.5 text-[11px] font-bold leading-5 text-white">
+                                        ×{item.quantity}
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+                        {remaining > 0 && (
+                            <div className="w-12 h-12 rounded-[7.66px] bg-neutral-black-10 flex items-center justify-center text-sm font-bold text-neutral-black-80">
+                                +{remaining}
+                            </div>
+                        )}
+                    </div>
 
-                <div className="flex items-center justify-between">
-                    <span className="body-font text-neutral-black-50">Total</span>
-                    <div className="flex items-center gap-1">
-                        <h3>{formatCOP(order.totalPrice ?? 0)}</h3>
+                    <div className="flex shrink-0 items-center gap-1">
+                        <div className="flex flex-col items-end leading-tight">
+                            <span className="text-xs text-neutral-black-50">Total</span>
+                            <h3>{formatCOP(order.totalPrice ?? 0)}</h3>
+                        </div>
                         <ChevronRight className="w-4 h-4 text-neutral-black-50 transition-transform group-hover:translate-x-0.5" />
                     </div>
                 </div>
             </Link>
 
-            <div className="flex items-center justify-end gap-3">
-                {showSoon && <span className="body-font text-neutral-black-50 text-sm">Próximamente</span>}
+            <div className="flex items-center justify-between gap-3 border-t border-neutral-black-10 pt-3">
+                <span className="body-font text-neutral-black-50 text-sm">
+                    {showSoon ? "Próximamente" : `${units} ${units === 1 ? "producto" : "productos"}`}
+                </span>
                 <Button
                     variant="primary"
                     size="sm"

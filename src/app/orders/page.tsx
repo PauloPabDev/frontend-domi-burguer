@@ -72,13 +72,11 @@ export default function OrdersPage() {
 
     return (
         <div className="min-h-screen mt-[130px] mb-[100px] px-4">
-            <div className="max-w-[560px] mx-auto flex flex-col gap-6 py-8">
-                <h1>MIS PEDIDOS</h1>
+            <div className="max-w-[560px] mx-auto flex flex-col gap-3 py-8">
+                <h1 className="mb-2">MIS PEDIDOS</h1>
 
                 {orders.map((order) => (
-                    <div key={order.id}>
-                        <OrderHistoryCard order={order} />
-                    </div>
+                    <OrderHistoryCard key={order.id} order={order} />
                 ))}
             </div>
         </div>
