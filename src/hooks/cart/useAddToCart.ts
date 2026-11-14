@@ -10,29 +10,25 @@ export const useAddToCart = () => {
     // Producto agotado: no se puede agregar al carrito
     if (product.soldOut) return;
 
-    // Generar ID único basado en producto y complementos
-    const uniqueId = generateCartItemId(product.id, product.complements);
-    
     // Calcular precio total con complementos
     const totalPrice = calculateTotalPrice(product.basePrice, product.complements);
-    
-    
-    // Crear item del carrito
-    const cartItem = {
-      id: uniqueId,
-      productId: product.id,
-      name: product.name,
-      price: totalPrice,
-      basePrice: product.basePrice,
-      quantity: product.quantity,
-      image1: product.image1,
-      image2: product.image2 || null,
-      complements: product.complements,
-      allowCustomization: product.allowCustomization,
-      customizationType: product.customizationType,
-    };
-    
-    addItem(cartItem);
+
+    // Una línea independiente por unidad (copias con las mismas adiciones)
+    for (let i = 0; i < product.quantity; i++) {
+      addItem({
+        id: generateCartItemId(product.id),
+        productId: product.id,
+        name: product.name,
+        price: totalPrice,
+        basePrice: product.basePrice,
+        quantity: 1,
+        image1: product.image1,
+        image2: product.image2 || null,
+        complements: product.complements.map((c) => ({ ...c })),
+        allowCustomization: product.allowCustomization,
+        customizationType: product.customizationType,
+      });
+    }
     track('product_added_to_cart', {
       product_name: product.name,
       product_id: product.id,

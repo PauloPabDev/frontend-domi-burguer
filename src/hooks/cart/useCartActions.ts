@@ -110,7 +110,7 @@ export const useCartActions = () => {
       useCartStore.getState().updateQuantity(firstItem.id, firstItem.quantity - 1);
 
       const newComplements = [...firstItem.complements, newComplement];
-      const newItemId = generateCartItemId(firstItem.productId, newComplements);
+      const newItemId = generateCartItemId(firstItem.productId);
       const newPrice = calculateTotalPrice(firstItem.basePrice, newComplements);
 
       useCartStore.getState().addItem({
@@ -256,7 +256,7 @@ export const useCartActions = () => {
       // se agrega como un ítem aparte del mismo producto, sin el complemento,
       // en vez de aumentar la cantidad de este.
       const complementsWithoutReward = item.complements.filter((c) => !c.rewardCode);
-      const newItemId = generateCartItemId(item.productId, complementsWithoutReward);
+      const newItemId = generateCartItemId(item.productId);
       const newPrice = calculateTotalPrice(item.basePrice, complementsWithoutReward);
 
       addItem({

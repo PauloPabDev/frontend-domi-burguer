@@ -30,60 +30,45 @@ export function useProductGridModal(onClose: () => void) {
 
   const getQuantityInCart = useCallback(
     (productId: number) => {
-      const cartItem = items.find((item) => item.productId === productId && item.complements.length === 0);
-      return cartItem?.quantity || 0;
+      return items
+        .filter((item) => item.productId === productId && item.complements.length === 0)
+        .reduce((sum, item) => sum + item.quantity, 0);
     },
     [items]
   );
 
+  // Cada clic en agregar crea una línea nueva e independiente (quantity 1)
   const addProductToCart = useCallback(
     (product: Product) => {
       // Producto agotado: no se puede agregar al carrito
       if (product.soldOut) return;
 
-      const existingItem = items.find(
-        (item) => item.productId === product.id && item.complements.length === 0
-      );
-
-      if (existingItem) {
-        updateCartQuantity(existingItem.id, existingItem.quantity + 1);
-      } else {
-        const productToAdd: Product = {
-          ...product,
-          quantity: 1,
-          complements: [],
-        };
-        const uniqueId = generateCartItemId(productToAdd.id, productToAdd.complements);
-        const totalPrice = calculateTotalPrice(productToAdd.basePrice, productToAdd.complements);
-
-        addItem({
-          id: uniqueId,
-          productId: productToAdd.id,
-          name: productToAdd.name,
-          price: totalPrice,
-          basePrice: productToAdd.basePrice,
-          quantity: 1,
-          image1: productToAdd.image1,
-          image2: productToAdd.image2 || null,
-          complements: [],
-          allowCustomization: productToAdd.allowCustomization,
-          customizationType: productToAdd.customizationType,
-        });
-      }
+      addItem({
+        id: generateCartItemId(product.id),
+        productId: product.id,
+        name: product.name,
+        price: calculateTotalPrice(product.basePrice, []),
+        basePrice: product.basePrice,
+        quantity: 1,
+        image1: product.image1,
+        image2: product.image2 || null,
+        complements: [],
+        allowCustomization: product.allowCustomization,
+        customizationType: product.customizationType,
+      });
     },
-    [items, addItem, updateCartQuantity]
+    [addItem]
   );
 
+  // Quita 1 unidad de la última línea simple del producto
   const removeProductFromCart = useCallback(
     (productId: number) => {
-      const existingItem = items.find(
+      const existingItem = items.findLast(
         (item) => item.productId === productId && item.complements.length === 0
       );
 
-      if (existingItem && existingItem.quantity > 1) {
+      if (existingItem) {
         updateCartQuantity(existingItem.id, existingItem.quantity - 1);
-      } else if (existingItem) {
-        updateCartQuantity(existingItem.id, 0);
       }
     },
     [items, updateCartQuantity]

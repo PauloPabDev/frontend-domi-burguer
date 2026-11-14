@@ -39,7 +39,7 @@ export default function OrdersPage() {
         }));
 
         return {
-            id: generateCartItemId(Number(item.id), complements),
+            id: generateCartItemId(Number(item.id)),
             productId: Number(item.id),
             name: item.name ?? '',
             price: item.price,

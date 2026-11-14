@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { Address } from "@/types/address";
 import { Complement, CustomizationType } from "@/types/products";
-import { generateCartItemId, calculateTotalPrice } from "@/lib/utils";
+import { calculateTotalPrice } from "@/lib/utils";
 
 export interface CartItem {
   id: string;
@@ -92,32 +92,12 @@ export const useCartStore = create<CartStore>()(
             itemToRemoveFrom.basePrice,
             updatedComplements
           );
-          const newId = itemToRemoveFrom.rewardCode
-            ? itemToRemoveFrom.id
-            : generateCartItemId(itemToRemoveFrom.productId, updatedComplements);
-
-          const existingItemIndex = state.items.findIndex(
-            (i, index) => i.id === newId && index !== itemIndex
-          );
-
           const newItems = [...state.items];
-
-          if (existingItemIndex !== -1) {
-            newItems[existingItemIndex] = {
-              ...newItems[existingItemIndex],
-              quantity:
-                newItems[existingItemIndex].quantity +
-                itemToRemoveFrom.quantity,
-            };
-            newItems.splice(itemIndex, 1);
-          } else {
-            newItems[itemIndex] = {
-              ...itemToRemoveFrom,
-              id: newId,
-              complements: updatedComplements,
-              price: newPrice,
-            };
-          }
+          newItems[itemIndex] = {
+            ...itemToRemoveFrom,
+            complements: updatedComplements,
+            price: newPrice,
+          };
 
           return { items: newItems };
         }),
@@ -130,33 +110,12 @@ export const useCartStore = create<CartStore>()(
 
           const item = state.items[itemIndex];
           const newPrice = calculateTotalPrice(item.basePrice, newComplements);
-          const newId = item.rewardCode
-            ? item.id
-            : generateCartItemId(item.productId, newComplements);
-
-          // Verificar si ya existe un item con los mismos complementos
-          const existingItemIndex = state.items.findIndex(
-            (i, index) => i.id === newId && index !== itemIndex
-          );
-
           const newItems = [...state.items];
-
-          if (existingItemIndex !== -1 && newId !== itemId) {
-            // Si ya existe, combinar cantidades
-            newItems[existingItemIndex] = {
-              ...newItems[existingItemIndex],
-              quantity: newItems[existingItemIndex].quantity + item.quantity,
-            };
-            newItems.splice(itemIndex, 1);
-          } else {
-            // Si no existe, actualizar el item actual
-            newItems[itemIndex] = {
-              ...item,
-              id: newId,
-              complements: newComplements,
-              price: newPrice,
-            };
-          }
+          newItems[itemIndex] = {
+            ...item,
+            complements: newComplements,
+            price: newPrice,
+          };
 
           return { items: newItems };
         }),

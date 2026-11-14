@@ -10,22 +10,9 @@ export function cn(...inputs: ClassValue[]) {
 export const normalize = (s?: string) =>
   (s ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-export const generateCartItemId = (
-  productId: number,
-  complements: Complement[]
-): string => {
-  if (complements.length === 0) {
-    return `product-${productId}`;
-  }
-
-  // Crear un string único ordenando complementos por ID
-  const complementsSignature = complements
-    .sort((a, b) => String(a.id).localeCompare(String(b.id)))
-    .map((c) => `${c.id}:${c.quantity}`)
-    .join("|");
-
-  return `product-${productId}-complements-${complementsSignature}`;
-};
+// Cada línea del carrito es independiente: el id es único por línea (no se agrupan por producto/adiciones).
+export const generateCartItemId = (productId: number): string =>
+  `product-${productId}-${crypto.randomUUID()}`;
 
 export const calculateTotalPrice = (
   basePrice: number,
