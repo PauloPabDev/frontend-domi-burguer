@@ -57,7 +57,6 @@ export default function OrderPreviewPage() {
             <div className="flex h-full w-full pb-10 max-w-[500px]">
                 <div className="flex flex-col h-full gap-6 w-full mt-5">
                     <OrderDetailHeader
-                        orderNumber={mockOrder.orderNumber}
                         createdAt={mockOrder.createdAt}
                         onBack={() => {}}
                     />

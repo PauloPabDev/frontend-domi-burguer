@@ -61,7 +61,6 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
             <div className="flex h-full w-full pb-10 max-w-[500px]">
                 <div className="flex flex-col h-full gap-6 w-full mt-5">
                     <OrderDetailHeader
-                        orderNumber={order.orderNumber}
                         createdAt={order.createdAt}
                         onBack={() => router.back()}
                     />

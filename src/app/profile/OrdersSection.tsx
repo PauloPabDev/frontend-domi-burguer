@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2, ChevronDown } from "lucide-react";
 import { useProfileOrders } from "@/hooks/useProfileOrders";
-import { ProfileOrderCard } from "./ProfileOrderCard";
+import { OrderHistoryCard } from "@/components/orders/OrderHistoryCard";
 
 const INITIAL_VISIBLE = 2
 const PAGE_SIZE = 3;
@@ -53,7 +53,7 @@ export function OrdersSection() {
       ) : (
         <div className="space-y-3">
           {visibleOrders.map((order) => (
-            <ProfileOrderCard key={order.id} order={order} />
+            <OrderHistoryCard key={order.id} order={order} />
           ))}
 
           {showMoreButton && (
