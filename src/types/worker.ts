@@ -75,6 +75,7 @@ export const STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
   pending_payment: { label: 'Pago pendiente', color: 'text-red-800', bg: 'bg-red-100', dotColor: 'bg-red-700', hex: '#b91c1c' },
   invoiced: { label: 'Facturación', color: 'text-emerald-700', bg: 'bg-emerald-100', dotColor: 'bg-emerald-500', hex: '#10b981' },
   cancelled: { label: 'Cancelado', color: 'text-neutral-500', bg: 'bg-neutral-100', dotColor: 'bg-neutral-400', hex: '#a3a3a3' },
+  deleted: { label: 'Eliminado', color: 'text-neutral-500', bg: 'bg-neutral-100', dotColor: 'bg-neutral-400', hex: '#a3a3a3' },
 };
 
 export const PAYMENT_LABELS: Record<string, string> = {
