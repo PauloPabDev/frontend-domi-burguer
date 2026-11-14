@@ -26,7 +26,6 @@ export type Product = {
   body: string;
   bigImage: string;
   image1: string;
-  image2?: string | null;
   quantity: number;
   icons: React.FC<LogoProps>[];
   complements: Complement[];

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { Modal } from "@/components/ui/modal/Modal";
 import { ProductCard } from "./ProductCard";
 import { useProductGridModal } from "./useProductGridModal";
@@ -11,24 +10,15 @@ interface ProductGridModalProps {
 }
 
 export function ProductGridModal({ isOpen, onClose }: ProductGridModalProps) {
-  const { products, getQuantityInCart, addProductToCart, removeProductFromCart, saveSnapshot, handleCancel, handleSave } =
-    useProductGridModal(onClose);
-
-  useEffect(() => {
-    if (isOpen) saveSnapshot();
-  }, [isOpen, saveSnapshot]);
+  const { products, getQuantityInCart, addProductToCart, removeProductFromCart } = useProductGridModal();
 
   return (
     <Modal
       open={isOpen}
-      onOpenChange={(open) => !open && handleCancel()}
+      onOpenChange={(open) => !open && onClose()}
       title="Agregar Productos"
       size="xl"
-      hideCloseButton={true}
-      footer={{
-        // cancel: { label: "Cancelar", onClick: handleCancel },
-        confirm: { label: "Guardar", onClick: handleSave },
-      }}
+      footer={{ confirm: { label: "Cerrar", onClick: onClose } }}
     >
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
         {products.map((product) => (

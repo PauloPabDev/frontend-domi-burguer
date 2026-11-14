@@ -25,7 +25,6 @@ export interface OrderItem {
   price: number;
   quantity: number;
   image1?: string;
-  image2?: string;
   colorPrimary?: string;
   colorSecondary?: string;
   complements?: OrderItem[];

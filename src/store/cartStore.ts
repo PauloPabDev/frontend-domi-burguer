@@ -12,7 +12,6 @@ export interface CartItem {
   basePrice: number;
   quantity: number;
   image1: string;
-  image2?: string | null;
   complements: Complement[];
   allowCustomization: boolean;
   customizationType: CustomizationType;

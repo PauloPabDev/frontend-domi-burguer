@@ -14,7 +14,7 @@ import { useAddToCart } from "@/hooks/cart/useAddToCart";
 import { ComplementsLarge } from "../ui/complementsLarge";
 import { track } from "@/utils/analytics";
 import { useTrackSectionView } from "@/hooks/useTrackSectionView";
-import { ProductThumbnail, PRODUCT_CARD_IMAGES } from "./ProductThumbnail";
+import { ProductThumbnail } from "./ProductThumbnail";
 
 // Lazy load modal pesado
 const CustomizationModalSection = dynamic(
@@ -253,7 +253,7 @@ export default function MenuSection() {
                 className="w-[199px] transition-all hover:scale-105 active:scale-95"
                 onClick={() => {
                   handleAddToCart(currentProduct);
-                  showFoodToast(currentProduct.name);
+                  showFoodToast(currentProduct);
                   resetCurrentProduct();
                 }}
               >
@@ -266,7 +266,7 @@ export default function MenuSection() {
               className="w-[215px] transition-all hover:scale-105 active:scale-95"
               onClick={() => {
                 handleAddToCart(currentProduct);
-                showFoodToast(currentProduct.name);
+                showFoodToast(currentProduct);
                 resetCurrentProduct();
               }}
             >
@@ -292,7 +292,6 @@ export default function MenuSection() {
               handleAddToCart(p);
               resetCurrentProduct();
             }}
-            images={PRODUCT_CARD_IMAGES[index] ?? []}
           />
         ))}
       </section>
