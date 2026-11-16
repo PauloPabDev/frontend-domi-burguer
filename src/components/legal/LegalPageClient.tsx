@@ -44,7 +44,7 @@ export default function LegalPageClient({
                             LEGAL
                         </h1>
                         <p className="body-font">
-                            En Domi Burger, creemos que la confianza también se cocina a fuego
+                            En Domi Burguer, creemos que la confianza también se cocina a fuego
                             lento. Por eso, esta página está hecha para contarte de forma
                             clara y sin rodeos cómo usamos tu información, qué derechos tienes
                             como usuario y bajo qué reglas jugamos.

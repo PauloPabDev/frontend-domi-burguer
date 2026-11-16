@@ -125,7 +125,7 @@ export const Footer = () => {
             </Button>
           </Link>
           <Link
-            href={`https://wa.me/573506186772?text=${encodeURIComponent("Hola, estaba en la pagina de Domi Burger y quiero más información")}`}
+            href={`https://wa.me/573506186772?text=${encodeURIComponent("Hola, estaba en la página de Domi Burguer y quiero más información")}`}
             target="_blank"
             rel="noopener noreferrer"
             data-umami-event="footer_whatsapp_clicked"
