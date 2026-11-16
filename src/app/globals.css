@@ -341,4 +341,20 @@ h4 {
 html[data-account] .acc-guest-label { display: none; }
 html[data-account] .acc-user-label { display: inline; }
 html[data-account="photo"] .acc-icon { display: none; }
-html[data-account="photo"] .acc-photo { display: block; }
+/* Con foto: --acc-inset es el aire a la izquierda, arriba y abajo de la foto; la foto ocupa el resto del alto.
+   Propuesta A (foto grande): 4px y 4px. Propuesta B (foto compacta): 6px y 8px. */
+html[data-account="photo"] .acc-btn {
+  --acc-inset: 4px;
+  padding: 0 12px 0 var(--acc-inset);
+}
+@media (min-width: 1024px) {
+  html[data-account="photo"] .acc-btn {
+    --acc-inset: 4px;
+    padding-right: 20px;
+  }
+}
+html[data-account="photo"] .acc-photo {
+  display: block;
+  height: calc(100% - 2 * var(--acc-inset));
+  aspect-ratio: 1;
+}

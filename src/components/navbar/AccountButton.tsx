@@ -33,12 +33,12 @@ export const AccountButton = ({ isModalOpen, onOpenModal }: AccountButtonProps) 
       onClick={handleClick}
       variant="yellow"
       size="md"
-      className={`rounded-full p-2  lg:h-12 lg:px-5 ${isModalOpen ? "bg-neutral-black-10" : ""}`}
+      className={`acc-btn rounded-full p-2  lg:h-12 lg:px-5 ${isModalOpen ? "bg-neutral-black-10" : ""}`}
     >
       <UserIcon className="acc-icon w-5 h-5 md:w-6 md:h-6" />
       <span
         aria-hidden
-        className="acc-photo w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-full bg-primary-red bg-cover bg-center"
+        className="acc-photo shrink-0 rounded-full bg-primary-red bg-cover bg-center"
         style={{ backgroundImage: "var(--account-photo)" }}
       />
       <span className="text-neutrosblack-80 font-label text-xs md:text-sm">

@@ -18,6 +18,8 @@ export const LogoDesktop: React.FC<LogoProps> = ({
       height={height}
       className={className}
       viewBox="0 0 170 91"
+      role="img"
+      aria-label="Domi Burguer"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -124,6 +126,8 @@ export const LogoDesktopWhite: React.FC<LogoProps> = ({
       height={height}
       className={className}
       viewBox="0 0 170 91"
+      role="img"
+      aria-label="Domi Burguer"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -230,6 +234,8 @@ export const LogoMobile: React.FC<LogoProps> = ({
       height={height}
       className={className}
       viewBox="0 0 65 91"
+      role="img"
+      aria-label="Domi Burguer"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -314,6 +320,8 @@ export const LogoMobileRed: React.FC<LogoProps> = ({
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 51 72"
+      role="img"
+      aria-label="Domi Burguer"
       fill="none"
       width={width}
       height={height}
