@@ -148,7 +148,7 @@ export const Footer = () => {
             className="relative w-fit mt-[-1.00px] font-semibold text-base tracking-[0] leading-5 whitespace-nowrap cursor-default select-none"
             onClick={handleYearClick}
           >
-            2025, Todos los derechos reservados
+            {new Date().getFullYear()}, Todos los derechos reservados
           </div>
           {showAdminLink && (
             <Link
