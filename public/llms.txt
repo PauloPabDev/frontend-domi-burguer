@@ -65,6 +65,7 @@ Entrega a domicilio en zonas seleccionadas de Medellín, Colombia. Consulta el m
 - [Inicio y menú](https://domiburguer.com/) — Página principal con productos destacados y menú completo.
 - [Zonas de cobertura](https://domiburguer.com/cobertura) — Mapa interactivo de entrega.
 - [Horarios](https://domiburguer.com/horarios) — Horarios de atención.
+- [Código de referido](https://domiburguer.com/referidos) — Cómo obtener, compartir y usar el código de referido en 3 pasos.
 - [Ubicaciones](https://domiburguer.com/locations) — Información de ubicación.
 - [Legal](https://domiburguer.com/legal) — Términos de servicio y política de privacidad.
 

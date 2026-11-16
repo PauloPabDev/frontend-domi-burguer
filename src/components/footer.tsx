@@ -37,6 +37,7 @@ export const Footer = () => {
     { name: "MENU", link: "/#products" },
     { name: "HORARIOS", link: "/horarios" },
     { name: "CÓDIGOS", link: "/codes" },
+    { name: "REFERIDOS", link: "/referidos" },
     { name: "AVISOS", link: "/avisos" },
   ];
 
@@ -63,7 +64,7 @@ export const Footer = () => {
         height={306}
         sizes="100vw"
       />
-      <div className=" lg:items-start relative flex flex-col lg:flex-row justify-between px-6 py-16 lg:p-16 lg:px-10 lg:space-x-3 lg:20 self-stretch w-full bg-primary-red border-b border-solid border-[#fff9e6] h-[522px] lg:h-auto">
+      <div className=" lg:items-start relative flex flex-col lg:flex-row justify-between px-6 py-16 lg:p-16 lg:px-10 lg:space-x-3 lg:20 self-stretch w-full bg-primary-red border-b border-solid border-[#fff9e6] h-[554px] lg:h-auto">
         <div
           className="relative lg:w-[170px] h-[90px] flex items-center justify-center w-full cursor-pointer"
           onClick={handleLogoClick}
