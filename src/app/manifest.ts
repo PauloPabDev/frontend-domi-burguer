@@ -14,7 +14,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     scope: '/',
     display: 'standalone',
-    background_color: '#ffffff',
+    background_color: '#e73533', // fondo de la pantalla de arranque: el mismo rojo del icono
     theme_color: '#e73533',
     icons: [
       { src: '/icons/icon-72x72.png', sizes: '72x72', type: 'image/png', purpose: 'any' },
