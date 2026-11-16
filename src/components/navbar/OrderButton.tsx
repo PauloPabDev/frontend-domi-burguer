@@ -21,6 +21,7 @@ export const OrderButton = () => {
             <HamburgerIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
           }
           badge={itemsCount}
+          aria-label={`Ordenar, ${itemsCount} ${itemsCount === 1 ? "producto" : "productos"}`}
           className="h-10 lg:h-12 ps-3 pe-2 lg:pl-5 lg:pr-3 text-sm lg:text-base"
         >
           ORDENAR
