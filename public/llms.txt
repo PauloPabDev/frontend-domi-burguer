@@ -20,10 +20,6 @@ Domi Burguer es una plataforma de pedidos online de hamburguesas artesanales con
 
 - **Salsa de Ajo** — $27.000 COP: Receta familiar cremosa, intensa y perfectamente balanceada. El secreto que se queda en tu memoria.
 
-### Postres
-
-- **Cheesecake de Fresa** — $14.000 COP: Cremoso con base crocante y cobertura de fresas frescas. (Agotado)
-
 ## Horarios de atención
 
 - Lunes a sábado: 4:30 p.m. – 10:00 p.m.

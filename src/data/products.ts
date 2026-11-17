@@ -3,7 +3,7 @@ import {
   TomateIcon,
   QuesoIcon,
   TocinetaIcon,
-  LechugaIcon,
+  // LechugaIcon, // solo lo usa el sánduche retirado
   HamburgerIcon,
   FrenchFriesIcon,
   HuevoIcon,
@@ -12,22 +12,6 @@ import {
 import { Product } from "@/types/products";
 
 export const PRODUCTS: Product[] = [
-  {
-    id: 48,
-    slug: "sanduche",
-    name: "SÁNDUCHE ARTESANAL",
-    basePrice: 18000,
-    price: 18000,
-    body: "Sánduche artesanal con mermelada de tocineta (con trocitos de cebolla caramelizada ), Salsa de Ajo, queso mozzarella , tomate, lechuga fresca y pan hecho en casa.", // TODO: descripción provisional
-    bigImage: "/images/products/sandwich-large.webp",
-    image1: "/images/products/sandwich-thumbnail.webp",
-    icons: [TocinetaIcon, QuesoIcon, LechugaIcon],
-    quantity: 1,
-    complements: [],
-    allowCustomization: true,
-    customizationType: "burger",
-    isNew: true,
-  },
   {
     id: 2,
     slug: "hamburguesa",
@@ -103,22 +87,45 @@ export const PRODUCTS: Product[] = [
     allowCustomization: true,
     customizationType: "papas",
   },
-  {
-    id: 43,
-    slug: "cheesecake",
-    name: "CHEESECAKE DE FRESA",
-    basePrice: 14000,
-    price: 14000,
-    body: "Nuestro delicioso Cheesecake de fresa cremoso con base crocante y cobertura de fresas, un deleite para tu paladar.",
-    bigImage: "/images/products/cheesecake-large.webp",
-    image1: "/images/products/cheesecake-card.webp",
-    icons: [],
-    quantity: 1,
-    complements: [],
-    allowCustomization: true,
-    customizationType: "burger",
-    soldOut: true,
-  },
+  // ───────────────────────────────────────────────────────────────
+  // PRODUCTOS RETIRADOS TEMPORALMENTE (hasta nuevo aviso)
+  // Para reactivarlos: descomentar el bloque, volver a importar LechugaIcon
+  // y moverlo a su posición en la lista. Las imágenes siguen en /public/images/products.
+  // ───────────────────────────────────────────────────────────────
+
+  // {
+  //   id: 48,
+  //   slug: "sanduche",
+  //   name: "SÁNDUCHE ARTESANAL",
+  //   basePrice: 18000,
+  //   price: 18000,
+  //   body: "Sánduche artesanal con mermelada de tocineta (con trocitos de cebolla caramelizada ), Salsa de Ajo, queso mozzarella , tomate, lechuga fresca y pan hecho en casa.", // TODO: descripción provisional
+  //   bigImage: "/images/products/sandwich-large.webp",
+  //   image1: "/images/products/sandwich-thumbnail.webp",
+  //   icons: [TocinetaIcon, QuesoIcon, LechugaIcon],
+  //   quantity: 1,
+  //   complements: [],
+  //   allowCustomization: true,
+  //   customizationType: "burger",
+  //   isNew: true,
+  // },
+
+  // {
+  //   id: 43,
+  //   slug: "cheesecake",
+  //   name: "CHEESECAKE DE FRESA",
+  //   basePrice: 14000,
+  //   price: 14000,
+  //   body: "Nuestro delicioso Cheesecake de fresa cremoso con base crocante y cobertura de fresas, un deleite para tu paladar.",
+  //   bigImage: "/images/products/cheesecake-large.webp",
+  //   image1: "/images/products/cheesecake-card.webp",
+  //   icons: [],
+  //   quantity: 1,
+  //   complements: [],
+  //   allowCustomization: true,
+  //   customizationType: "burger",
+  //   soldOut: true,
+  // },
 ];
 
 // Foto pequeña del producto desde el catálogo local (los pedidos no guardan la foto)
