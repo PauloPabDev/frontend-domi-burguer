@@ -105,5 +105,8 @@ export const useUserDetail = (userId: string) => {
     setUserDetail(body);
   };
 
-  return { userDetail, loading, error, refetch: fetchUser, updateRoles, updateKitchens };
+  const addPointsToBalance = (points: number) =>
+    setUserDetail((u) => (u ? { ...u, pointsBalance: (u.pointsBalance ?? 0) + points } : u));
+
+  return { userDetail, loading, error, refetch: fetchUser, updateRoles, updateKitchens, addPointsToBalance };
 };

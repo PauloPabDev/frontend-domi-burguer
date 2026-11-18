@@ -100,11 +100,17 @@ export function useClientePanel() {
     }
   }, [user, loadClientExtras, loadUserExtras]);
 
+  const addUserPoints = useCallback((points: number) => {
+    setUserState((s) =>
+      s.data ? { ...s, data: { ...s.data, pointsBalance: (s.data.pointsBalance ?? 0) + points } } : s
+    );
+  }, []);
+
   const reset = useCallback(() => {
     setPhone('');
     setClientState(emptyPersonaState());
     setUserState(emptyPersonaState());
   }, []);
 
-  return { phone, search, reset, clientState, userState };
+  return { phone, search, reset, addUserPoints, clientState, userState };
 }

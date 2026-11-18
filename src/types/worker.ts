@@ -104,5 +104,5 @@ export interface WorkerUser {
   photoURL?: string;
   roles: string[];
   assignedKitchens?: string[];
-  points?: number;
+  pointsBalance?: number;
 }
