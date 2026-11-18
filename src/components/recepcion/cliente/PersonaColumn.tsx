@@ -21,6 +21,8 @@ interface PersonaColumnProps<T extends PersonaLike> {
   icon: React.ReactNode;
   persona: PersonaState<T>;
   meta?: (data: T) => string | undefined;
+  /** Acciones bajo el resumen; solo se muestran si la persona fue encontrada */
+  actions?: (data: T) => React.ReactNode;
 }
 
 export function PersonaColumn<T extends PersonaLike>({
@@ -29,6 +31,7 @@ export function PersonaColumn<T extends PersonaLike>({
   icon,
   persona,
   meta,
+  actions,
 }: PersonaColumnProps<T>) {
   const enrichedOrders = useEnrichedOrders(persona.orders);
 
@@ -49,6 +52,7 @@ export function PersonaColumn<T extends PersonaLike>({
 
       {persona.status === 'found' && (
         <>
+          {persona.data && actions?.(persona.data)}
           {persona.data?.id && <NotesPanel targetType={kind} targetId={persona.data.id} />}
           <PersonaLocationsSection locations={persona.locations} loading={persona.locationsLoading} />
           <PersonaOrdersSection orders={enrichedOrders} loading={persona.ordersLoading} />

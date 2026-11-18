@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Pencil, ChefHat, ShieldCheck, Loader2, Phone, Mail } from 'lucide-react';
+import { ChevronLeft, Pencil, ChefHat, ShieldCheck, Loader2, Phone, Mail, Star } from 'lucide-react';
 import { useUserDetail } from '@/hooks/admin/useUsers';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
 import { EditRolesModal } from '@/components/admin/EditRolesModal';
 import { EditKitchensModal } from '@/components/admin/EditKitchensModal';
+import { UserPointsPanel } from '@/components/recepcion/cliente/UserPointsPanel';
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   admin:     { label: 'Admin',     color: 'text-red-700',    bg: 'bg-red-100' },
@@ -20,7 +21,7 @@ const ROLE_CONFIG: Record<string, { label: string; color: string; bg: string }> 
 export default function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const { userDetail, loading, error, updateRoles, updateKitchens } = useUserDetail(id);
+  const { userDetail, loading, error, updateRoles, updateKitchens, addPointsToBalance } = useUserDetail(id);
   const { kitchens } = useKitchenSelector();
   const [showRolesModal, setShowRolesModal] = useState(false);
   const [showKitchensModal, setShowKitchensModal] = useState(false);
@@ -109,6 +110,16 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
             <span className="text-xs text-neutral-black-50">Sin roles asignados</span>
           )}
         </div>
+      </div>
+
+      {/* Points */}
+      <div className="rounded-2xl border border-neutral-black-20 bg-white p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Star size={15} className="text-primary-red" />
+          <h3 className="font-bold text-sm text-neutral-black-80">Puntos</h3>
+          <span className="text-sm text-neutral-black-50">{userDetail.pointsBalance ?? 0} pts</span>
+        </div>
+        <UserPointsPanel userId={userDetail.id} userName={userDetail.name} onAdded={addPointsToBalance} />
       </div>
 
       {/* Kitchens */}

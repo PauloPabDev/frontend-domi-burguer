@@ -16,6 +16,7 @@ import {
   SocketAck,
   SocketMessage,
 } from '@/types/paymentChangeRequest';
+import { PointsGrantRequest, PointsGrantRequestInput, PointsGrantRequestResult } from '@/types/pointsGrantRequest';
 import { useAuth } from '@/contexts/AuthContext';
 import { normalizeSocketOrder, normalizeSocketOrders } from '@/utils/normalizeSocketOrder';
 import {
@@ -45,6 +46,12 @@ interface SocketContextType {
   ) => Promise<{ requestId: string; adminsOnline: number }>;
   /** Admin aprueba (el backend aplica el cambio) o rechaza una solicitud */
   resolvePaymentRequest: (requestId: string, resolution: PaymentChangeResolution) => Promise<void>;
+  /** Solicitudes de puntos sobre el tope diario de recepción pendientes. Solo les llegan a los admins. */
+  pointsRequests: PointsGrantRequest[];
+  /** Recepción le pide a un admin aprobar puntos por encima de su tope diario */
+  requestPointsGrant: (input: PointsGrantRequestInput) => Promise<{ requestId: string; adminsOnline: number }>;
+  /** Admin aprueba (el backend suma los puntos) o rechaza una solicitud de puntos */
+  resolvePointsRequest: (requestId: string, resolution: PaymentChangeResolution) => Promise<void>;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -84,6 +91,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('IDLE');
   const [courierLocations, setCourierLocations] = useState<CourierLocation[]>([]);
   const [paymentRequests, setPaymentRequests] = useState<PaymentChangeRequest[]>([]);
+  const [pointsRequests, setPointsRequests] = useState<PointsGrantRequest[]>([]);
   const orderIdsRef = useRef<Set<string>>(new Set());
   const courierAssignedIdsRef = useRef<Set<string>>(new Set());
 
@@ -95,9 +103,13 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     if (!socketRef.current?.connected || !user) return;
     const token = await user.getIdToken();
     const kId = overrideKitchenId !== undefined ? overrideKitchenId : kitchenIdRef.current;
+    // Recepción sin cocina elegida: el servidor rechazaría el login y cerraría el socket, y
+    // las solicitudes (que traen su propio token) se quedarían sin conexión. Se omite hasta elegir cocina.
+    if (role === 'reception' && !kId) return;
     // Al entrar, el servidor reenvía las solicitudes que siguen pendientes; se
     // vacía la bandeja para no conservar las que se resolvieron estando desconectado.
     setPaymentRequests([]);
+    setPointsRequests([]);
     socketRef.current.emit('login', { token, role, kitchenId: kId, page: pathnameRef.current });
   }, [user, role]);
 
@@ -128,6 +140,20 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     async (requestId: string, resolution: PaymentChangeResolution) => {
       await emitWithAck('order/paymentChangeRequest/resolve', { requestId, resolution });
       setPaymentRequests((prev) => prev.filter((r) => r.id !== requestId));
+    },
+    [emitWithAck]
+  );
+
+  const requestPointsGrant = useCallback(
+    (input: PointsGrantRequestInput) =>
+      emitWithAck<{ requestId: string; adminsOnline: number }>('points/grantRequest', { ...input }),
+    [emitWithAck]
+  );
+
+  const resolvePointsRequest = useCallback(
+    async (requestId: string, resolution: PaymentChangeResolution) => {
+      await emitWithAck('points/grantRequest/resolve', { requestId, resolution });
+      setPointsRequests((prev) => prev.filter((r) => r.id !== requestId));
     },
     [emitWithAck]
   );
@@ -332,9 +358,30 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
         return;
       }
 
-      // Respuesta a una solicitud que hizo este usuario
-      if (msg.type === 'paymentChangeRequestResult') {
-        const approved = (msg.data as PaymentChangeRequestResult).resolution === 'approve';
+      if (msg.type === 'pointsGrantRequest') {
+        const request = msg.data as PointsGrantRequest;
+        setPointsRequests((prev) => (prev.some((r) => r.id === request.id) ? prev : [...prev, request]));
+        if (!request.replay) {
+          playOrderNotification();
+          addToast({
+            title: `Solicitud de puntos · ${request.userName}`,
+            description: msg.message,
+            color: 'warning',
+            timeout: 8000,
+          });
+        }
+        return;
+      }
+
+      if (msg.type === 'pointsGrantRequestResolved') {
+        const { requestId } = msg.data as PointsGrantRequestResult;
+        setPointsRequests((prev) => prev.filter((r) => r.id !== requestId));
+        return;
+      }
+
+      // Respuesta a una solicitud (de pago o de puntos) que hizo este usuario
+      if (msg.type === 'paymentChangeRequestResult' || msg.type === 'pointsGrantRequestResult') {
+        const approved = (msg.data as PaymentChangeRequestResult | PointsGrantRequestResult).resolution === 'approve';
         if (approved) playSuccessNotification();
         else playAlertNotification();
         addToast({
@@ -419,6 +466,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
         paymentRequests,
         requestPaymentChange,
         resolvePaymentRequest,
+        pointsRequests,
+        requestPointsGrant,
+        resolvePointsRequest,
       }}
     >
       {children}

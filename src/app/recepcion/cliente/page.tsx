@@ -7,6 +7,7 @@ import { useClientePanel } from '@/hooks/recepcion/useClientePanel';
 import { useChatwootBus } from '@/hooks/recepcion/useChatwootBus';
 import { ClientePhoneSearchBar } from '@/components/recepcion/cliente/ClientePhoneSearchBar';
 import { PersonaColumn } from '@/components/recepcion/cliente/PersonaColumn';
+import { UserPointsPanel } from '@/components/recepcion/cliente/UserPointsPanel';
 
 function formatMemberSince(dateStr?: string) {
   if (!dateStr) return undefined;
@@ -17,7 +18,7 @@ function formatMemberSince(dateStr?: string) {
 
 function ClientePageContent() {
   const searchParams = useSearchParams();
-  const { phone, search, clientState, userState } = useClientePanel();
+  const { phone, search, addUserPoints, clientState, userState } = useClientePanel();
   const [phoneInput, setPhoneInput] = useState('');
 
   const loading = clientState.status === 'loading' || userState.status === 'loading';
@@ -72,6 +73,9 @@ function ClientePageContent() {
               const points = `${data.pointsBalance ?? 0} pts`;
               return since ? `${points} · desde ${since}` : points;
             }}
+            actions={(data) => (
+              <UserPointsPanel userId={data.id} userName={data.name} onAdded={addUserPoints} />
+            )}
           />
         </div>
       )}
