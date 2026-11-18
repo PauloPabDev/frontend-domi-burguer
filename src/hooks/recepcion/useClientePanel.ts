@@ -83,16 +83,16 @@ export function useClientePanel() {
       UserService.findByPhone(searchPhone, token),
     ]);
 
-    if (clientResult.status === 'fulfilled') {
-      const client = clientResult.value.body;
+    const client = clientResult.status === 'fulfilled' ? clientResult.value.body : null;
+    if (client) {
       setClientState((s) => ({ ...s, data: client, status: 'found' }));
       loadClientExtras(client.id, token);
     } else {
       setClientState((s) => ({ ...s, status: 'not_found' }));
     }
 
-    if (userResult.status === 'fulfilled') {
-      const foundUser = userResult.value.body;
+    const foundUser = userResult.status === 'fulfilled' ? userResult.value.body : null;
+    if (foundUser) {
       setUserState((s) => ({ ...s, data: foundUser, status: 'found' }));
       loadUserExtras(foundUser.id, token);
     } else {
