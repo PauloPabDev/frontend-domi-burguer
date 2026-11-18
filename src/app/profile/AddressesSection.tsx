@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { Loader2, Plus, CheckCircle } from "lucide-react";
+import { Loader2, Plus, CheckCircle, ChevronDown } from "lucide-react";
 import { Location } from "@/types/locations";
 import { Address } from "@/types/address";
 import { LocationService } from "@/services/locationService";
@@ -22,6 +22,7 @@ export function AddressesSection() {
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [addressToEdit, setAddressToEdit] = useState<Address | null>(null);
+    const [showAll, setShowAll] = useState(false);
 
     const fetchAddresses = async () => {
         if (!user) return;
@@ -104,7 +105,7 @@ export function AddressesSection() {
                     </div>
                 ) : (
                     <div className="mb-4">
-                        {locations.map((location) => (
+                        {(showAll ? locations : locations.slice(0, 1)).map((location) => (
                             <LocationCard
                                 key={location.id}
                                 location={location}
@@ -112,6 +113,16 @@ export function AddressesSection() {
                                 onRefresh={handleRefresh}
                             />
                         ))}
+                        {locations.length > 1 && (
+                            <button
+                                onClick={() => setShowAll((v) => !v)}
+                                aria-expanded={showAll}
+                                className="w-full mt-2 py-3 flex items-center justify-center gap-2 text-sm font-medium text-neutral-700 hover:text-primary-red transition-colors"
+                            >
+                                {showAll ? "Ver menos" : "Ver todas mis direcciones"}
+                                <ChevronDown className={`w-4 h-4 transition-transform ${showAll ? "rotate-180" : ""}`} />
+                            </button>
+                        )}
                     </div>
                 )}
 
