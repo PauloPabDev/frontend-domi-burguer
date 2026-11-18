@@ -7,6 +7,7 @@ import { Phone, UserRound, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NotesPanel } from '@/components/notes/NotesPanel';
 import type { NoteTargetType } from '@/types/notes';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 // Paleta cálida para avatares sin foto: cada letra cae siempre en el mismo color
 const AVATAR_COLORS = [
@@ -104,13 +105,16 @@ export interface ClientNotesTarget {
 interface ClientActionMenuProps {
   name?: string;
   phone?: string;
-  clientId?: string;
   avatarSrc?: string;
   notesTarget?: ClientNotesTarget;
   onClose: () => void;
 }
 
-function ClientActionMenu({ name, phone, clientId, avatarSrc, notesTarget, onClose }: ClientActionMenuProps) {
+function ClientActionMenu({ name, phone, avatarSrc, notesTarget, onClose }: ClientActionMenuProps) {
+  const { userProfile } = useUserProfile();
+  // La ficha de cliente es de recepción y admin: cocina y domicilio no tienen acceso, así que no ven el enlace
+  const canOpenClientPanel = userProfile?.roles?.some((role) => role === 'reception' || role === 'admin') ?? false;
+
   return createPortal(
     <div className="fixed inset-0 z-500 flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
@@ -152,16 +156,19 @@ function ClientActionMenu({ name, phone, clientId, avatarSrc, notesTarget, onClo
             </a>
           )}
 
-          <Link
-            href={clientId ? `/clientes/${clientId}` : '#'}
-            onClick={onClose}
-            className="flex items-center gap-3 px-4 py-3.5 text-sm font-medium text-neutral-black-80 hover:bg-neutral-50 transition-colors"
-          >
-            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 shrink-0">
-              <UserRound size={15} className="text-blue-600" />
-            </span>
-            Ver más detalles
-          </Link>
+          {canOpenClientPanel && phone && (
+            // la ficha busca por teléfono y muestra a la vez el cliente de recepción y el usuario de la app
+            <Link
+              href={`/recepcion/cliente?phone=${encodeURIComponent(phone)}`}
+              onClick={onClose}
+              className="flex items-center gap-3 px-4 py-3.5 text-sm font-medium text-neutral-black-80 hover:bg-neutral-50 transition-colors"
+            >
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 shrink-0">
+                <UserRound size={15} className="text-blue-600" />
+              </span>
+              Ver más detalles
+            </Link>
+          )}
         </div>
 
         {notesTarget && (
@@ -209,6 +216,7 @@ const chipColorMap = {
 interface OrderClientChipProps {
   name?: string;
   phone?: string;
+  /** Ya no se usa (el enlace de detalles va por teléfono); se conserva para no tocar a todos los llamadores */
   clientId?: string;
   avatarSrc?: string;
   className?: string;
@@ -224,7 +232,6 @@ interface OrderClientChipProps {
 export function OrderClientChip({
   name,
   phone,
-  clientId,
   avatarSrc,
   className,
   phoneVisible = false,
@@ -298,7 +305,6 @@ export function OrderClientChip({
         <ClientActionMenu
           name={name}
           phone={phone}
-          clientId={clientId}
           avatarSrc={avatarSrc}
           notesTarget={notesTarget}
           onClose={() => setMenuOpen(false)}
