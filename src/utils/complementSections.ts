@@ -14,6 +14,7 @@ import {
 
 } from "@/components/ui/icons";
 import { Complement } from "@/types/products";
+import { priceOf } from "@/data/products";
 import { CupSoda } from "lucide-react";
 const iconMap: { [key: string]: React.FC<LogoProps> } = {
   CarneIcon,
@@ -86,7 +87,7 @@ const otrosData: Complement[] = [
   {
     id: 1002,
     name: "Carne",
-    price: 6500,
+    price: priceOf(4),
     icon: "CarneIcon",
     quantity: 1,
     type: "special",
@@ -97,7 +98,7 @@ const otrosData: Complement[] = [
   {
     id: 244,
     name: "Queso americano",
-    price: 3000,
+    price: priceOf(5),
     icon: "QuesoIcon",
     quantity: 1,
     type: "special",
@@ -108,7 +109,7 @@ const otrosData: Complement[] = [
   {
     id: 666,
     name: "Tocineta",
-    price: 4000,
+    price: priceOf(6),
     icon: "TocinetaIcon",
     quantity: 1,
     type: "special",
@@ -119,7 +120,7 @@ const otrosData: Complement[] = [
   {
     id: 7,
     name: "Papas rizadas",
-    price: 6000,
+    price: priceOf(7),
     icon: "FrenchFriesIcon",
     quantity: 0,
     type: "addable",
@@ -189,7 +190,7 @@ const gaseosasData: Complement[] = [
   {
     id: 10,
     name: "Coca-Cola personal",
-    price: 4000,
+    price: priceOf(10),
     icon: "CupSoda",
     quantity: 0,
     type: "addable",
@@ -199,7 +200,7 @@ const gaseosasData: Complement[] = [
   {
     id: 9,
     name: "Coca-Cola 1/ litro",
-    price: 9000,
+    price: priceOf(9),
     icon: "CupSoda",
     quantity: 0,
     type: "addable",
@@ -212,7 +213,7 @@ const salsasData: Complement[] = [
   {
     id: 71,
     name: "1 oz Salsa de Ajo",
-    price: 2000,
+    price: priceOf(3),
     icon: "AjoIcon",
     quantity: 0,
     type: "addable",
@@ -222,7 +223,7 @@ const salsasData: Complement[] = [
   {
     id: 72,
     name: "1 oz salsa roja",
-    price: 1500,
+    price: priceOf(8),
     icon: "TomateIcon",
     quantity: 0,
     type: "addable",
@@ -302,7 +303,7 @@ const salsasPapasData: Complement[] = [
   {
     id: 71,
     name: "1 oz Salsa de Ajo",
-    price: 2000,
+    price: priceOf(3),
     icon: "AjoIcon",
     quantity: 0,
     type: "addable",
@@ -312,7 +313,7 @@ const salsasPapasData: Complement[] = [
   {
     id: 72,
     name: "1 oz salsa roja",
-    price: 1500,
+    price: priceOf(8),
     icon: "TomateIcon",
     quantity: 0,
     type: "addable",

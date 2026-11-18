@@ -8,6 +8,7 @@ import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { AnnouncementsHost } from "@/components/announcements/AnnouncementsHost";
 import { StoreStatusAlert } from "@/components/announcements/StoreStatusAlert";
 import { ClientSocketProvider } from "@/contexts/ClientSocketContext";
+import { USING_MOCK_PRICES } from "@/data/products";
 
 const DESIGN_PREFIX = "/design";
 const COURIER_PREFIXES = ["/domiciliario", "/cocina", "/recepcion", "/admin"];
@@ -41,6 +42,11 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
       {showPublicChrome && <InstallBanner />}
       {showPublicChrome && <AnnouncementsHost />}
       {showPublicChrome && <StoreStatusAlert />}
+      {USING_MOCK_PRICES && (
+        <div role="status" className="pointer-events-none fixed bottom-2 left-2 z-[9999] rounded-md bg-yellow-300 px-2 py-1 text-xs font-semibold text-black shadow">
+          Usando datos de prueba
+        </div>
+      )}
     </>
   );
 
