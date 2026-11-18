@@ -122,8 +122,20 @@ export function AddressSection() {
                         onClick={handleOpenModal}
                     >
                         <Plus className="w-4 h-4" />
-                        CAMBIAR DIRECCIÓN
+                        CREAR NUEVA DIRECCIÓN
                     </Button>
+                    {user && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="rounded-[30px] flex items-center gap-2 h-[40px] w-full label-font border-[1.5px] border-solid border-[#313131]"
+                            // Sin direcciones guardadas no hay nada que listar: va directo a crear
+                            onClick={hasMultipleLocations ? () => setIsListModalOpen(true) : handleOpenModal}
+                        >
+                            <List className="w-4 h-4" />
+                            CAMBIAR A OTRA DIRECCIÓN GUARDADA
+                        </Button>
+                    )}
                 </div>
             )}
 
