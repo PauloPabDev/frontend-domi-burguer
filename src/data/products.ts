@@ -10,14 +10,21 @@ import {
   AjoIcon,
 } from "@/components/ui/icons";
 import { Product } from "@/types/products";
+import generated from "./prices.generated.json";
+
+// Precios consultados a la API al compilar (scripts/sync-products.mjs); la clave es el id del producto en la API
+const prices: Record<string, number> = generated.prices;
+export const priceOf = (id: number | string) => prices[id];
+// true solo en desarrollo, cuando el servidor de pruebas no respondió y se usó el mock
+export const USING_MOCK_PRICES = generated.source === "mock";
 
 export const PRODUCTS: Product[] = [
   {
     id: 2,
     slug: "hamburguesa",
     name: "HAMBURGUESA ARTESANAL",
-    basePrice: 23900,
-    price: 23900,
+    basePrice: priceOf(2),
+    price: priceOf(2),
     body: "Pan artesanal hecho en casa, carne jugosa, tocineta crocante, queso mozzarella lechuga fresca, tomate , pepinos, cebolla y el toque de nuestra Salsa de Ajo.",
     bigImage: "/images/products/burger-large.webp",
     image1: "/images/products/burger-thumbnail.webp",
@@ -31,8 +38,8 @@ export const PRODUCTS: Product[] = [
     id: 1,
     slug: "combo",
     name: "COMBO",
-    basePrice: 28900,
-    price: 28900,
+    basePrice: priceOf(1),
+    price: priceOf(1),
     body: "Nuestra hamburguesa, acompañada de papas rizadas crocantes y nuestra coquitas de Salsa de Ajo y salsa roja.",
     bigImage: "/images/products/combo-large.webp",
     image1: "/images/products/combo-thumbnail.webp",
@@ -46,8 +53,8 @@ export const PRODUCTS: Product[] = [
     id: 38,
     slug: "salsa-de-ajo",
     name: "SALSA DE AJO",
-    basePrice: 27000,
-    price: 27000,
+    basePrice: priceOf(38),
+    price: priceOf(38),
     body: "Cremosa, intensa y perfectamente balanceada, nuestra receta familiar de Salsa de Ajo. Es el secreto que se queda en tu memoria.",
     bigImage: "/images/products/garlic-sauce-large.webp",
     image1: "/images/products/sauce-thumbnail.webp",
@@ -61,8 +68,8 @@ export const PRODUCTS: Product[] = [
     id: 39,
     slug: "papas-vaquera",
     name: "PAPAS VAQUERA",
-    basePrice: 23900,
-    price: 23900,
+    basePrice: priceOf(39),
+    price: priceOf(39),
     body: "Nuestras deliciosas papas con el toque especial de la casa, crujientes por fuera y suaves por dentro.",
     bigImage: "/images/products/vaquera-large.webp",
     image1: "/images/products/vaquera-card.webp",
@@ -76,8 +83,8 @@ export const PRODUCTS: Product[] = [
     id: 40,
     slug: "papas-troyana",
     name: "PAPAS TROYANA",
-    basePrice: 33900,
-    price: 33900,
+    basePrice: priceOf(40),
+    price: priceOf(40),
     body: "Papas premium cargadas con todos los ingredientes, una explosión de sabor en cada bocado.",
     bigImage: "/images/products/troyana-large.webp",
     image1: "/images/products/troyana-card.webp",
@@ -91,6 +98,7 @@ export const PRODUCTS: Product[] = [
   // PRODUCTOS RETIRADOS TEMPORALMENTE (hasta nuevo aviso)
   // Para reactivarlos: descomentar el bloque, volver a importar LechugaIcon
   // y moverlo a su posición en la lista. Las imágenes siguen en /public/images/products.
+  // Al reactivarlos hay que añadir su id a src/data/prices.mock.json y usar priceOf(id).
   // ───────────────────────────────────────────────────────────────
 
   // {

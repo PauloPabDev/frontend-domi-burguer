@@ -50,3 +50,6 @@ public/swe-worker-*.js
 public/swe-worker-*.js.map
 
 /graphify-out
+
+# precios generados desde la API (scripts/sync-products.mjs)
+/src/data/prices.generated.json
