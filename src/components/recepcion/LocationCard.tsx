@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { MapPin, X, Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { MapPin, Pencil, Trash2 } from 'lucide-react';
 import { Location, PropertyType } from '@/types/locations';
 import { cn } from '@/lib/utils';
 import { MapComponent } from '@/components/map/map';
-import { ConfirmModal } from '@/components/ui/modal';
+import { ConfirmModal, Modal, ModalHeader } from '@/components/ui/modal';
 import { LocationService } from '@/services/locationService';
 import { useAuth } from '@/contexts/AuthContext';
 import { notify } from '@/utils/notify';
@@ -49,12 +48,6 @@ function LocationDetailModal({
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [onClose]);
-
   const handleDelete = async () => {
     if (!user) {
       notify.error('No autenticado', 'Inicia sesión de nuevo para eliminar la ubicación.');
@@ -74,36 +67,22 @@ function LocationDetailModal({
     }
   };
 
-  return createPortal(
-    <>
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-md sm:mx-4 max-h-[92vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Handle bar (mobile) */}
-        <div className="flex justify-center pt-2 pb-1 sm:hidden">
-          <div className="w-10 h-1 rounded-full bg-neutral-200" />
-        </div>
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-          <div className="flex items-center gap-2">
+  return (
+    // `contents`: el wrapper no afecta el layout; frena que los clics suban a la card clicable que contiene el modal
+    <div className="contents" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open
+        onOpenChange={(open) => { if (!open) onClose(); }}
+        size="md"
+        ariaLabel={location.name}
+        bodyClassName="p-0 sm:p-0"
+        customHeader={
+          <ModalHeader className="flex-row items-center gap-2 pb-3 pr-14 border-b border-neutral-100">
             <MapPin className="w-4 h-4 text-green-500" />
             <span className="font-semibold text-sm text-neutral-800">{location.name}</span>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 rounded-full hover:bg-neutral-100 transition-colors"
-          >
-            <X className="w-4 h-4 text-neutral-500" />
-          </button>
-        </div>
-
+          </ModalHeader>
+        }
+      >
         {/* Map */}
         <div className="h-44 w-full overflow-hidden">
           <MapComponent
@@ -151,22 +130,20 @@ function LocationDetailModal({
         <div className="px-4 pb-5 mt-2 border-t border-neutral-100 pt-3">
           <NotesPanel targetType="location" targetId={location.id} />
         </div>
-      </div>
-    </div>
+      </Modal>
 
-    <ConfirmModal
-      open={showConfirmDelete}
-      onOpenChange={setShowConfirmDelete}
-      title="¿Eliminar esta dirección?"
-      message={`Esta acción no se puede deshacer. Se eliminará "${location.name}" (${location.address}).`}
-      cancelText="Cancelar"
-      confirmText="Sí, eliminar"
-      destructive
-      loading={deleting}
-      onConfirm={handleDelete}
-    />
-    </>,
-    document.body
+      <ConfirmModal
+        open={showConfirmDelete}
+        onOpenChange={setShowConfirmDelete}
+        title="¿Eliminar esta dirección?"
+        message={`Esta acción no se puede deshacer. Se eliminará "${location.name}" (${location.address}).`}
+        cancelText="Cancelar"
+        confirmText="Sí, eliminar"
+        destructive
+        loading={deleting}
+        onConfirm={handleDelete}
+      />
+    </div>
   );
 }
 

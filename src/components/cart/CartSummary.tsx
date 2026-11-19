@@ -21,13 +21,7 @@ import { ProductGridModal } from "@/components/cart/ProductGridModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { track } from "@/utils/analytics";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Modal } from "@/components/ui/modal";
 
 export const CartSummary = ({ }) => {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -246,52 +240,53 @@ export const CartSummary = ({ }) => {
         onClose={() => setIsProductModalOpen(false)}
       />
 
-      <Dialog open={showPromoDialog} onOpenChange={setShowPromoDialog}>
-        <DialogContent onOpenChange={setShowPromoDialog}>
-          <DialogHeader>
-            <div className="flex flex-col items-center gap-3 text-center pb-2">
-              <span className="text-5xl">🎁</span>
-              <DialogTitle className="text-xl font-bold text-neutral-black-80">
-                ¡No uses tu código sin registrarte!
-              </DialogTitle>
-              <DialogDescription className="text-neutral-black-60 text-sm leading-relaxed">
-                Tienes el código{" "}
-                <strong className="text-neutral-black-80 font-bold">
-                  {pendingPromoCode}
-                </strong>{" "}
-                listo para aplicar. Si continúas sin cuenta, perderás este beneficio.
-              </DialogDescription>
+      {/* `contents`: no afecta el layout; frena que los clics del modal suban a ancestros clicables */}
+      <div className="contents" onClick={(e) => e.stopPropagation()}>
+        <Modal
+          open={showPromoDialog}
+          onOpenChange={setShowPromoDialog}
+          variant="alert"
+          size="sm"
+          headerIcon={<span className="text-3xl">🎁</span>}
+          title="¡No uses tu código sin registrarte!"
+          footer={
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                onClick={() => {
+                  setShowPromoDialog(false);
+                  router.push("/login");
+                }}
+              >
+                REGISTRARME Y USAR EL CÓDIGO
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
+                fullWidth
+                onClick={() => {
+                  setShowPromoDialog(false);
+                  // Enviar el formulario sin código
+                  const form = document.querySelector("form");
+                  form?.requestSubmit();
+                }}
+              >
+                Continuar sin el código
+              </Button>
             </div>
-          </DialogHeader>
-
-          <div className="flex flex-col gap-3 px-4 pb-6">
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              onClick={() => {
-                setShowPromoDialog(false);
-                router.push("/login");
-              }}
-            >
-              REGISTRARME Y USAR EL CÓDIGO
-            </Button>
-            <Button
-              variant="ghost"
-              size="lg"
-              fullWidth
-              onClick={() => {
-                setShowPromoDialog(false);
-                // Enviar el formulario sin código
-                const form = document.querySelector("form");
-                form?.requestSubmit();
-              }}
-            >
-              Continuar sin el código
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          }
+        >
+          <p className="text-center text-neutral-black-60 text-sm leading-relaxed">
+            Tienes el código{" "}
+            <strong className="text-neutral-black-80 font-bold">
+              {pendingPromoCode}
+            </strong>{" "}
+            listo para aplicar. Si continúas sin cuenta, perderás este beneficio.
+          </p>
+        </Modal>
+      </div>
     </div>
   );
 };

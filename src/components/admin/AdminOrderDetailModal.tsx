@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { Bike, ChefHat, CreditCard, Loader2, ShieldCheck, Trash2, X } from 'lucide-react';
+import { Bike, ChefHat, CreditCard, Loader2, ShieldCheck, Trash2 } from 'lucide-react';
+import { Modal, ModalHeader } from '@/components/ui/modal';
 import { WorkerOrder, WorkerKitchen } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
 import { PaymentChange, PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
@@ -80,34 +80,30 @@ export function AdminOrderDetailModal({
     }
   };
 
-  return createPortal(
-    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-      <div
-        className="relative z-10 w-full max-w-xl max-h-[90vh] bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-start justify-between px-5 py-3 border-b border-neutral-100 shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <ShieldCheck size={16} className="text-primary-red shrink-0" />
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold text-neutral-black-50 uppercase tracking-wide">
-                Pedido · {formatDateTime(order.createdAt)}
-              </p>
-              <p className="text-2xl font-bold text-neutral-black-80 leading-none">#{order.dailyOrderNumber}</p>
+  return (
+    // `contents`: el wrapper no afecta el layout; frena que los clics suban a la fila clicable que abre el detalle
+    <div className="contents" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open
+        onOpenChange={(open) => { if (!open) onClose(); }}
+        size="lg"
+        ariaLabel={`Pedido #${order.dailyOrderNumber}`}
+        bodyClassName="p-0 sm:p-0"
+        customHeader={
+          <ModalHeader className="pb-3 pr-14 border-b border-neutral-100">
+            <div className="flex items-center gap-2 min-w-0">
+              <ShieldCheck size={16} className="text-primary-red shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold text-neutral-black-50 uppercase tracking-wide">
+                  Pedido · {formatDateTime(order.createdAt)}
+                </p>
+                <p className="text-2xl font-bold text-neutral-black-80 leading-none">#{order.dailyOrderNumber}</p>
+              </div>
             </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="shrink-0 p-1 rounded-full hover:bg-neutral-100 transition-colors"
-          >
-            <X size={16} className="text-neutral-black-50" />
-          </button>
-        </div>
-
-        <div className="overflow-y-auto">
+          </ModalHeader>
+        }
+      >
+        <div>
           <OrderStatusStrip status={order.status} />
 
           <OrderStatusTimeline status={order.status} timeLapseStatus={order.timeLapseStatus} />
@@ -230,7 +226,6 @@ export function AdminOrderDetailModal({
             )}
           </div>
         </div>
-      </div>
 
       {showCourierPopover && (
         <AssignCourierPopover
@@ -258,7 +253,7 @@ export function AdminOrderDetailModal({
           onClose={() => setShowPaymentModal(false)}
         />
       )}
-    </div>,
-    document.body,
+      </Modal>
+    </div>
   );
 }

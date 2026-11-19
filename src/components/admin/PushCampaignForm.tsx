@@ -6,13 +6,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AdminService } from '@/services/adminService';
 import { UserService } from '@/services/userService';
 import { AVAILABLE_ROLES } from '@/components/admin/EditRolesModal';
+import { FIELD_CLASS } from '@/components/admin/fieldClass';
 import { Button } from '@/components/ui/button';
 import { ConfirmModal } from '@/components/ui/modal';
 import { cn } from '@/lib/utils';
 import { notify } from '@/utils/notify';
 import { CampaignAudienceType, PushCampaignInput } from '@/types/notifications';
 
-const FIELD_CLASS = "w-full px-3 py-2 text-sm rounded-xl border border-neutral-black-20 focus:outline-none focus:border-primary-red transition-colors bg-white";
 const LABEL_CLASS = "block text-xs font-semibold text-neutral-black-50 mb-1";
 const HINT_CLASS = "text-[11px] text-neutral-black-40 mt-1";
 

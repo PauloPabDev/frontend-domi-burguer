@@ -34,7 +34,7 @@ export function AdminOrderRow({ order, onOpen }: AdminOrderRowProps) {
       className="w-full flex items-center gap-3 px-4 py-3 bg-white border border-neutral-black-10 rounded-2xl shadow-sm hover:shadow-md transition-shadow border-l-4 text-left cursor-pointer"
       style={{ borderLeftColor: statusColor }}
     >
-      <OrderNumberChip orderNumber={order.dailyOrderNumber} />
+      <OrderNumberChip orderNumber={order.dailyOrderNumber} order={order} />
 
       <OrderClientChip
         name={order.client?.name ?? order.user?.name}

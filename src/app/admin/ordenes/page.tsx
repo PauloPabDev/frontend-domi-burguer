@@ -10,6 +10,7 @@ import { CourierPanelProvider } from '@/contexts/CourierPanelContext';
 import { AdminOrdersFilterBar } from '@/components/admin/AdminOrdersFilterBar';
 import { AdminOrderRow } from '@/components/admin/AdminOrderRow';
 import { AdminOrderDetailModal } from '@/components/admin/AdminOrderDetailModal';
+import { OrderStatusPie } from '@/components/ui/OrderStatusPie';
 import { WorkerOrderService } from '@/services/workerOrderService';
 import { WorkerOrder } from '@/types/worker';
 import { OrderStatus } from '@/types/orders';
@@ -280,6 +281,9 @@ export default function AdminOrdenesPage() {
             )}
           </div>
         )}
+
+        {/* Todas las órdenes del período: con un filtro de estado la dona sería de un solo color */}
+        <OrderStatusPie orders={allOrders} />
 
         {selectedOrder && (
           <AdminOrderDetailModal

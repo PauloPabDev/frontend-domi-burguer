@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { X, Pencil, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
+import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 
 interface EditClientNameModalProps {
@@ -31,19 +31,28 @@ export function EditClientNameModal({ currentName, onSave, onClose }: EditClient
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-black-10">
-          <div className="flex items-center gap-2">
-            <Pencil size={16} className="text-primary-red" />
-            <h3 className="font-bold text-sm text-neutral-black-80">Modificar nombre</h3>
-          </div>
-          <button onClick={onClose} className="p-1 text-neutral-black-50 hover:text-neutral-black-80">
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="p-5 flex flex-col gap-3">
+    // `contents`: frena que los clics del portal suban a la fila/card clicable que contiene el modal
+    <div className="contents" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open
+        onOpenChange={(o) => { if (!o) onClose(); }}
+        size="sm"
+        title="Modificar nombre"
+        headerIcon={<Pencil size={16} className="text-primary-red" />}
+        dirty={name !== currentName}
+        footer={{
+          cancel: false,
+          confirm: {
+            label: 'Modificar nombre',
+            variant: 'default',
+            onClick: handleSave,
+            loading: saving,
+            disabled: !name.trim(),
+            className: 'w-full',
+          },
+        }}
+      >
+        <div className="flex flex-col gap-3">
           <Input
             placeholder="Nombre del cliente"
             value={name}
@@ -53,16 +62,8 @@ export function EditClientNameModal({ currentName, onSave, onClose }: EditClient
             autoFocus
           />
           {error && <p className="text-xs text-red-500">{error}</p>}
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={saving || !name.trim()}
-            className="w-full h-11 font-bold"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Modificar nombre'}
-          </Button>
         </div>
-      </div>
+      </Modal>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { usePaymentChangeRequest } from '@/hooks/reception/usePaymentChangeReque
 import { OrderKanbanColumn, KANBAN_COLUMN_WIDTH } from '@/components/recepcion/OrderKanbanColumn';
 import { RecepcionOrderList } from '@/components/recepcion/RecepcionOrderList';
 import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
+import { OrderStatusPie } from '@/components/ui/OrderStatusPie';
 import { WorkerOrderService } from '@/services/workerOrderService';
 import { OrderStatus } from '@/types/orders';
 import { PaymentChange } from '@/types/paymentChangeRequest';
@@ -235,6 +236,7 @@ export default function RecepcionPage() {
           </div>
         </div>
       )}
+      <OrderStatusPie orders={filteredOrders} />
     </div>
   );
 }

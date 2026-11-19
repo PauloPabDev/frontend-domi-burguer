@@ -87,6 +87,8 @@ export interface ModalProps {
   // === Comportamiento ===
   /** Cerrar al hacer click fuera */
   closeOnOutsideClick?: boolean;
+  /** Hay cambios sin guardar: tocar fuera ya NO cierra (Esc, X y botones sí). Para modales operativos con formulario. */
+  dirty?: boolean;
   /** Cerrar con tecla Escape */
   closeOnEscape?: boolean;
   /** Manejar boton back del navegador */

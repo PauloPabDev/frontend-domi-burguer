@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { Phone, UserRound, X } from 'lucide-react';
+import { Phone, UserRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NotesPanel } from '@/components/notes/NotesPanel';
 import type { NoteTargetType } from '@/types/notes';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import type { WorkerOrder } from '@/types/worker';
+import { OrderNumberMenu } from '@/components/ui/OrderNumberMenu';
+import { Modal, ModalHeader } from '@/components/ui/modal';
 
 // Paleta cálida para avatares sin foto: cada letra cae siempre en el mismo color
 const AVATAR_COLORS = [
@@ -84,13 +86,32 @@ export function ClientAvatar({ src, name, size, className, onClick }: ClientAvat
 interface OrderNumberChipProps {
   orderNumber: number;
   className?: string;
+  /** Con la orden, el chip es un botón que abre su menú (línea de tiempo + copiar ID) para cualquier rol */
+  order?: WorkerOrder;
 }
 
-export function OrderNumberChip({ orderNumber, className }: OrderNumberChipProps) {
+export function OrderNumberChip({ orderNumber, className, order }: OrderNumberChipProps) {
+  const [open, setOpen] = useState(false);
+  const base = cn('flex items-center bg-primary-red rounded-full px-3.5 py-1.5 shrink-0', className);
+  if (!order) {
+    return (
+      <div className={base}>
+        <span className="text-base font-bold text-white">{orderNumber}</span>
+      </div>
+    );
+  }
   return (
-    <div className={cn('flex items-center bg-primary-red rounded-full px-3.5 py-1.5 shrink-0', className)}>
-      <span className="text-base font-bold text-white">{orderNumber}</span>
-    </div>
+    <>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+        aria-label={`Opciones de orden #${orderNumber}`}
+        className={cn(base, 'hover:opacity-80 transition-opacity')}
+      >
+        <span className="text-base font-bold text-white">{orderNumber}</span>
+      </button>
+      {open && <OrderNumberMenu order={order} onClose={() => setOpen(false)} />}
+    </>
   );
 }
 
@@ -115,33 +136,26 @@ function ClientActionMenu({ name, phone, avatarSrc, notesTarget, onClose }: Clie
   // La ficha de cliente es de recepción y admin: cocina y domicilio no tienen acceso, así que no ven el enlace
   const canOpenClientPanel = userProfile?.roles?.some((role) => role === 'reception' || role === 'admin') ?? false;
 
-  return createPortal(
-    <div className="fixed inset-0 z-500 flex items-center justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-
-      <div
-        className={cn(
-          'relative z-10 bg-white rounded-2xl shadow-xl overflow-hidden',
-          // con notas el contenido crece: se amplía un poco y hace scroll si no cabe
-          notesTarget ? 'w-[340px] max-w-[92vw] max-h-[88vh] overflow-y-auto' : 'w-[300px]',
-        )}
-        onClick={(e) => e.stopPropagation()}
+  return (
+    // `contents`: el wrapper no afecta el layout; frena que los clics suban a la card clicable que contiene el menú
+    <div className="contents" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open
+        onOpenChange={(open) => { if (!open) onClose(); }}
+        // con notas el contenido crece: se amplía un poco (el scroll lo pone el base)
+        size={notesTarget ? 'md' : 'sm'}
+        ariaLabel={name ?? 'Cliente'}
+        bodyClassName="p-0 sm:p-0"
+        customHeader={
+          <ModalHeader className="flex-row items-center gap-3 pb-3 pr-14 border-b border-neutral-100">
+            <ClientAvatar src={avatarSrc} name={name} size={40} />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-neutral-black-80 truncate">{name ?? 'Cliente'}</p>
+              {phone && <p className="text-xs text-neutral-black-100">{phone}</p>}
+            </div>
+          </ModalHeader>
+        }
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
-          <ClientAvatar src={avatarSrc} name={name} size={40} />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold text-neutral-black-80 truncate">{name ?? 'Cliente'}</p>
-            {phone && <p className="text-xs text-neutral-black-100">{phone}</p>}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="shrink-0 p-1 rounded-full hover:bg-neutral-100 transition-colors"
-          >
-            <X size={16} className="text-neutral-black-100" />
-          </button>
-        </div>
-
         <div className="flex flex-col divide-y divide-neutral-100">
           {phone && (
             <a
@@ -176,9 +190,8 @@ function ClientActionMenu({ name, phone, avatarSrc, notesTarget, onClose }: Clie
             <NotesPanel targetType={notesTarget.type} targetId={notesTarget.id} />
           </div>
         )}
-      </div>
-    </div>,
-    document.body,
+      </Modal>
+    </div>
   );
 }
 

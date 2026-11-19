@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useState } from 'react';
 import Image from 'next/image';
-import { Check, Clock, CreditCard, Send, X, XCircle, type LucideIcon } from 'lucide-react';
+import { Check, Clock, CreditCard, Send, XCircle, type LucideIcon } from 'lucide-react';
 import { WorkerOrder, PAYMENT_LABELS, PAYMENT_STATUS_LABELS } from '@/types/worker';
 import { PaymentMethod, PaymentStatus } from '@/types/orders';
 import { PaymentChangeRequestInput, PaymentChangeType } from '@/types/paymentChangeRequest';
 import { PAYMENT_LOGOS, PAYMENT_METHODS } from '@/components/ui/OrderPaymentRow';
-import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
 import { cn } from '@/lib/utils';
 
 const PAYMENT_STATUSES: PaymentStatus[] = ['approved', 'pending', 'failed'];
@@ -34,7 +33,6 @@ interface PaymentChangeModalProps {
 /**
  * Cambio del método o del estado del pago de una orden. El mismo formulario sirve
  * para que un admin aplique el cambio y para que recepción lo solicite (con motivo).
- * z-[510]: por encima del menú de la orden y del detalle de admin (z-[500]).
  */
 export function PaymentChangeModal({ order, mode, onSubmit, onClose }: PaymentChangeModalProps) {
   const isRequest = mode === 'request';
@@ -47,14 +45,6 @@ export function PaymentChangeModal({ order, mode, onSubmit, onClose }: PaymentCh
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !loading) onClose();
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [onClose, loading]);
 
   const selected = type === 'paymentMethod' ? method : status;
   const trimmedReason = reason.trim();
@@ -85,46 +75,42 @@ export function PaymentChangeModal({ order, mode, onSubmit, onClose }: PaymentCh
   ];
   const activeTab = tabs.find((t) => t.key === type)!;
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[510] flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !loading) onClose();
-      }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={isRequest ? 'Solicitar cambio de pago' : 'Cambiar pago'}
-        className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-black-10">
-          <div className="flex items-center gap-2 min-w-0">
-            {isRequest ? (
-              <Send size={16} className="text-primary-red shrink-0" />
-            ) : (
-              <CreditCard size={16} className="text-primary-red shrink-0" />
-            )}
-            <div className="min-w-0">
-              <h3 className="font-bold text-sm text-neutral-black-80">
-                {isRequest ? 'Solicitar cambio de pago' : 'Cambiar pago'}
-              </h3>
-              <p className="text-[11px] text-neutral-black-50">Pedido #{order.dailyOrderNumber}</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            aria-label="Cerrar"
-            className="p-1 text-neutral-black-50 hover:text-neutral-black-80 disabled:opacity-50"
-          >
-            <X size={16} />
-          </button>
-        </div>
+  const title = isRequest ? 'Solicitar cambio de pago' : 'Cambiar pago';
 
-        <div className="p-4 space-y-3">
+  return (
+    // `contents`: frena que los clics del portal suban a la card/detalle clicable que contiene el modal
+    <div className="contents" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open
+        onOpenChange={(o) => { if (!o && !loading) onClose(); }}
+        size="sm"
+        title={title}
+        description={`Pedido #${order.dailyOrderNumber}`}
+        headerIcon={
+          isRequest ? <Send size={16} className="text-primary-red" /> : <CreditCard size={16} className="text-primary-red" />
+        }
+        // Mientras se envía no se puede cerrar (Esc, fuera ni X)
+        closeOnEscape={!loading}
+        closeOnOutsideClick={!loading}
+        onBeforeClose={() => !loading}
+        // Con algo elegido o escrito, tocar fuera no cierra
+        dirty={method !== null || status !== null || reason.trim() !== ''}
+        // z-[510]: por encima del menú de la orden y del detalle de admin (z-[500])
+        overlayClassName="z-[510]"
+        contentClassName="z-[510]"
+        footer={{
+          cancel: false,
+          confirm: {
+            label: isRequest ? 'Enviar solicitud' : 'Aplicar cambio',
+            onClick: handleSubmit,
+            loading,
+            loadingText: isRequest ? 'Enviando...' : 'Aplicando...',
+            disabled: !canSubmit,
+            className: 'w-full',
+          },
+        }}
+      >
+        <div className="space-y-3">
           {/* Qué se cambia */}
           <div role="tablist" className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-neutral-black-5">
             {tabs.map((tab) => (
@@ -242,21 +228,7 @@ export function PaymentChangeModal({ order, mode, onSubmit, onClose }: PaymentCh
             </p>
           )}
         </div>
-
-        <div className="px-4 pb-4">
-          <Button
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            loading={loading}
-            loadingText={isRequest ? 'Enviando...' : 'Aplicando...'}
-            fullWidth
-            variant="primary"
-          >
-            {isRequest ? 'Enviar solicitud' : 'Aplicar cambio'}
-          </Button>
-        </div>
-      </div>
-    </div>,
-    document.body
+      </Modal>
+    </div>
   );
 }

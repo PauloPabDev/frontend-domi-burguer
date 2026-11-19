@@ -132,7 +132,7 @@ export function OrderRow({ order, onOpen }: { order: WorkerOrder; onOpen: (order
     >
 
       {/* Número de orden */}
-      <OrderNumberChip orderNumber={order.dailyOrderNumber} />
+      <OrderNumberChip orderNumber={order.dailyOrderNumber} order={order} />
 
       {/* Cliente */}
       <OrderClientChip

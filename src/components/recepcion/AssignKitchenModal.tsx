@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { X, ChefHat } from 'lucide-react';
+import { ChefHat } from 'lucide-react';
 import { WorkerKitchen } from '@/types/worker';
-import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
 
 interface AssignKitchenModalProps {
   kitchens: WorkerKitchen[];
@@ -33,19 +33,31 @@ export const AssignKitchenModal: React.FC<AssignKitchenModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-black-10">
-          <div className="flex items-center gap-2">
-            <ChefHat size={16} className="text-primary-red" />
-            <h3 className="font-bold text-sm text-neutral-black-80">Asignar cocina</h3>
-          </div>
-          <button onClick={onClose} className="p-1 text-neutral-black-50 hover:text-neutral-black-80">
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="max-h-64 overflow-y-auto p-3 space-y-1">
+    // `contents`: frena que los clics del portal suban a la card clicable que contiene el modal
+    <div className="contents" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open
+        onOpenChange={(o) => { if (!o) onClose(); }}
+        size="sm"
+        title="Asignar cocina"
+        headerIcon={<ChefHat size={16} className="text-primary-red" />}
+        dirty={selected !== (currentKitchenId ?? null)}
+        // z-[510]: por encima del detalle de orden de admin (z-[500])
+        overlayClassName="z-[510]"
+        contentClassName="z-[510]"
+        footer={{
+          cancel: false,
+          confirm: {
+            label: 'Confirmar cocina',
+            onClick: handleAssign,
+            loading,
+            loadingText: 'Asignando...',
+            disabled: !selected,
+            className: 'w-full',
+          },
+        }}
+      >
+        <div className="max-h-64 overflow-y-auto space-y-1">
           {kitchens.map((kitchen) => (
             <button
               key={kitchen.id}
@@ -70,19 +82,7 @@ export const AssignKitchenModal: React.FC<AssignKitchenModalProps> = ({
           ))}
         </div>
 
-        <div className="px-5 pb-5 pt-3 border-t border-neutral-black-10">
-          <Button
-            onClick={handleAssign}
-            disabled={!selected}
-            loading={loading}
-            loadingText="Asignando..."
-            fullWidth
-            variant="primary"
-          >
-            Confirmar cocina
-          </Button>
-        </div>
-      </div>
+      </Modal>
     </div>
   );
 };

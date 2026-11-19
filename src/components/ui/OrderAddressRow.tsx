@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useState } from 'react';
 import {
   MapPin,
   MoreHorizontal,
@@ -9,7 +8,6 @@ import {
   Navigation2,
   Copy,
   Check,
-  X,
   Home,
   Building2,
   Trees,
@@ -21,6 +19,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Location, PropertyType } from '@/types/locations';
 import { NotesPanel } from '@/components/notes/NotesPanel';
+import { Modal, ModalHeader } from '@/components/ui/modal';
 
 interface OrderAddressRowProps {
   location?: Location;
@@ -58,17 +57,6 @@ interface AddressSheetProps {
 
 function AddressSheet({ location, address, floor, notesLocationId, onClose }: AddressSheetProps) {
   const [copied, setCopied] = useState(false);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setVisible(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  const handleClose = () => {
-    setVisible(false);
-    setTimeout(onClose, 250);
-  };
 
   const displayAddress = location?.address ?? address ?? 'Sin dirección';
   const displayFloor = location?.floor ?? floor;
@@ -102,29 +90,18 @@ function AddressSheet({ location, address, floor, notesLocationId, onClose }: Ad
       '_blank',
     );
   };
-  return createPortal(
-    <div
-      className={cn(
-        'fixed inset-0 z-500 flex items-center justify-center transition-opacity duration-250',
-        visible ? 'opacity-100' : 'opacity-0',
-      )}
-      onClick={handleClose}
-    >
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-
-      <div
-        className={cn(
-          'relative z-10 w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden transition-transform duration-250 ease-out relative z-10 w-[300px] bg-white rounded-2xl shadow-xl overflow-hidden',
-          // con notas el contenido crece: se amplía un poco y hace scroll si no cabe
-          notesLocationId && 'w-[340px] max-w-[92vw] max-h-[90vh] overflow-y-auto',
-          visible ? 'translate-y-0' : 'translate-y-full',
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
-
-        {/* Header */}
-        <div className="flex items-start justify-between px-5 pt-3 pb-4 border-b border-neutral-black-10">
-          <div className="flex-1 min-w-0">
+  return (
+    // `contents`: el wrapper no afecta el layout; frena que los clics suban a la card clicable que contiene la hoja
+    <div className="contents" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open
+        onOpenChange={(open) => { if (!open) onClose(); }}
+        // con notas el contenido crece: se amplía un poco (el scroll lo pone el base)
+        size={notesLocationId ? 'md' : 'sm'}
+        ariaLabel={location?.name ?? 'Dirección de entrega'}
+        bodyClassName="p-0 sm:p-0"
+        customHeader={
+          <ModalHeader className="pb-3 pr-14 border-b border-neutral-black-10">
             <p className="text-sm font-bold text-neutral-black-80 truncate">
               {location?.name ?? 'Dirección de entrega'}
             </p>
@@ -138,16 +115,9 @@ function AddressSheet({ location, address, floor, notesLocationId, onClose }: Ad
                 </span>
               </div>
             )}
-          </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            className="p-1.5 rounded-full hover:bg-neutral-black-10 transition-colors shrink-0 ml-3"
-          >
-            <X size={16} className="text-neutral-black-100" />
-          </button>
-        </div>
-
+          </ModalHeader>
+        }
+      >
         {/* Detalle de dirección */}
         <div className="px-5 py-4 space-y-3.5">
           {/* Dirección + piso */}
@@ -257,11 +227,8 @@ function AddressSheet({ location, address, floor, notesLocationId, onClose }: Ad
             <NotesPanel targetType="location" targetId={notesLocationId} />
           </div>
         )}
-
-        <div className="pb-8" />
-      </div>
-    </div>,
-    document.body,
+      </Modal>
+    </div>
   );
 }
 
