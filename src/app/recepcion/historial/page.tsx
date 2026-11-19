@@ -4,6 +4,7 @@ import { MapPin, Clock, CreditCard, RefreshCw, TrendingUp, ShoppingBag, Bike } f
 import { useReceptionHistory } from '@/hooks/reception/useReceptionHistory';
 import { PAYMENT_LABELS, STATUS_CONFIG } from '@/types/worker';
 import { Button } from '@/components/ui/button';
+import { OrderStatusPie } from '@/components/ui/OrderStatusPie';
 
 export default function RecepcionHistorialPage() {
   const { orders, loading, error, refetch, totalRevenue, totalDeliveryRevenue } = useReceptionHistory();
@@ -137,6 +138,7 @@ export default function RecepcionHistorialPage() {
           </div>
         )}
       </div>
+      <OrderStatusPie orders={orders} />
     </div>
   );
 }

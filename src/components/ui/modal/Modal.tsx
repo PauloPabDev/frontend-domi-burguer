@@ -93,6 +93,7 @@ export function Modal({
 
   // Comportamiento
   closeOnOutsideClick = true,
+  dirty = false,
   closeOnEscape = true,
   handleBackButton = true,
   historyStateId,
@@ -183,7 +184,7 @@ export function Modal({
   // Handler para click fuera
   const handleInteractOutside = React.useCallback(
     (event: Event) => {
-      if (!closeOnOutsideClick) {
+      if (!closeOnOutsideClick || dirty) {
         event.preventDefault();
         return;
       }
@@ -198,7 +199,7 @@ export function Modal({
         }
       }
     },
-    [closeOnOutsideClick, preventCloseSelectors]
+    [closeOnOutsideClick, dirty, preventCloseSelectors]
   );
 
   // Context value

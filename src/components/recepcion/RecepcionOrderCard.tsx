@@ -14,7 +14,7 @@ import { OrderComment } from '@/components/ui/OrderComment';
 import { OrderItemsCompactList, OrderItemsSummary, OrderPriceBreakdown } from '@/components/ui/OrderItemsCompactList';
 import { OrderElapsedTime } from '@/components/ui/OrderElapsedTime';
 import { OrderClientChip, getClientOriginKey, cardOriginColorMap } from '@/components/ui/OrderClientChips';
-import { OrderNumberMenu } from './OrderNumberMenu';
+import { OrderNumberMenu } from '@/components/ui/OrderNumberMenu';
 import { AssignCourierPopover } from './AssignCourierPopover';
 import { AssignKitchenModal } from './AssignKitchenModal';
 import { PaymentChangeModal } from './PaymentChangeModal';
@@ -203,7 +203,6 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           <button
             type="button"
             onClick={() => setShowOrderMenu(true)}
-            disabled={readOnly}
             className="shrink-0 min-w-9 h-9 px-1.5 flex items-center justify-center bg-primary-red hover:opacity-80 rounded-full text-sm font-bold text-white transition-opacity"
             aria-label={`Opciones de orden #${order.dailyOrderNumber}`}
           >
@@ -267,7 +266,6 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowOrderMenu(true)}
-            disabled={readOnly}
                 className="shrink-0 min-w-7 h-7 px-1.5 flex items-center justify-center bg-primary-red hover:opacity-80 rounded-full text-sm font-bold text-white transition-opacity"
                 aria-label={`Opciones de orden #${order.dailyOrderNumber}`}
               >
@@ -435,9 +433,10 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
         <OrderNumberMenu
           order={order}
           onClose={() => setShowOrderMenu(false)}
-          onOpenKitchenModal={() => setShowKitchenModal(true)}
-          onDelete={() => onDelete(order.id)}
-          paymentChangeMode={paymentChangeMode}
+          // En solo lectura el menú queda con línea de tiempo y copiar ID
+          onOpenKitchenModal={readOnly ? undefined : () => setShowKitchenModal(true)}
+          onDelete={readOnly ? undefined : () => onDelete(order.id)}
+          paymentChangeMode={readOnly ? undefined : paymentChangeMode}
           onOpenPaymentChange={() => setShowPaymentModal(true)}
         />
       )}

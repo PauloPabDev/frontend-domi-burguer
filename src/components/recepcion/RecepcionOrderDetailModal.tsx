@@ -1,56 +1,60 @@
 "use client";
 
-import { useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { Modal, ModalHeader } from '@/components/ui/modal';
 import { RecepcionOrderCard } from './RecepcionOrderCard';
 
-type RecepcionOrderDetailModalProps = Omit<React.ComponentProps<typeof RecepcionOrderCard>, 'compact' | 'onOpenDetail'> & {
-  onClose: () => void;
-};
+type CardProps = React.ComponentProps<typeof RecepcionOrderCard>;
+type Handlers = 'onStatusChange' | 'onAssignCourier' | 'onAssignKitchen' | 'onDelete';
+
+// En solo lectura (contabilidad) no hace falta pasar los handlers
+type RecepcionOrderDetailModalProps = Omit<CardProps, 'compact' | 'onOpenDetail' | Handlers> &
+  Partial<Pick<CardProps, Handlers>> & {
+    onClose: () => void;
+  };
+
+const noop = async () => {};
 
 /**
- * Detalle de una orden desde la vista simple: muestra la card completa de
- * recepción (dirección, comentario, productos, desglose, pago, acciones).
- * z-[45]: por encima del nav (z-40) y por debajo de los popovers de la card
- * (domiciliario z-50, menú de la orden z-[500]), que se abren desde aquí.
+ * Detalle de una orden: muestra la card completa de recepción (dirección, comentario,
+ * productos, desglose, pago, acciones). Lo usan la vista simple de recepción y,
+ * con `readOnly`, contabilidad.
+ *
+ * Todo lo que abre la card (menú de orden, cocina, pago, domiciliarios) es Radix
+ * y se apila sobre este modal.
  */
-export const RecepcionOrderDetailModal: React.FC<RecepcionOrderDetailModalProps> = ({ onClose, ...cardProps }) => {
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [onClose]);
+export const RecepcionOrderDetailModal: React.FC<RecepcionOrderDetailModalProps> = ({
+  onClose,
+  onStatusChange = noop,
+  onAssignCourier = noop,
+  onAssignKitchen = noop,
+  onDelete = noop,
+  ...cardProps
+}) => {
+  const label = `Orden #${cardProps.order.dailyOrderNumber}`;
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[45] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Orden #${cardProps.order.dailyOrderNumber}`}
-        className="w-full max-w-[360px] max-h-[calc(100dvh-2rem)] flex flex-col gap-2"
+  return (
+    // `contents`: el wrapper no afecta el layout; frena que los clics suban a la fila clicable que abre el detalle
+    <div className="contents" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open
+        onOpenChange={(open) => { if (!open) onClose(); }}
+        size="sm"
+        ariaLabel={label}
+        bodyClassName="p-3 sm:p-3"
+        customHeader={
+          <ModalHeader className="pb-2 pr-14">
+            <p className="text-lg font-bold text-neutral-black-80">{label}</p>
+          </ModalHeader>
+        }
       >
-        {/* Cerrar fuera de la card para no tapar la hora de la fila superior */}
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Cerrar"
-          className="self-end shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-neutral-black-20 text-neutral-black-80 hover:text-primary-red transition-colors"
-        >
-          <X size={16} />
-        </button>
-        <div className="min-h-0 overflow-y-auto rounded-[20px]">
-          <RecepcionOrderCard {...cardProps} />
-        </div>
-      </div>
-    </div>,
-    document.body
+        <RecepcionOrderCard
+          {...cardProps}
+          onStatusChange={onStatusChange}
+          onAssignCourier={onAssignCourier}
+          onAssignKitchen={onAssignKitchen}
+          onDelete={onDelete}
+        />
+      </Modal>
+    </div>
   );
 };

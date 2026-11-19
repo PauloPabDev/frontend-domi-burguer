@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { X, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck } from 'lucide-react';
+import { Modal } from '@/components/ui/modal';
 
 export const AVAILABLE_ROLES = [
   { value: 'admin',     label: 'Admin',      description: 'Acceso total al sistema' },
@@ -33,20 +33,23 @@ export const EditRolesModal: React.FC<EditRolesModalProps> = ({ currentRoles, on
     finally { setLoading(false); }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-black-10">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={16} className="text-primary-red" />
-            <h3 className="font-bold text-sm text-neutral-black-80">Editar roles</h3>
-          </div>
-          <button onClick={onClose} className="p-1 text-neutral-black-50 hover:text-neutral-black-80">
-            <X size={16} />
-          </button>
-        </div>
+  const dirty = selected.length !== currentRoles.length || selected.some((r) => !currentRoles.includes(r));
 
-        <div className="p-4 space-y-2">
+  return (
+    <div className="contents" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open
+        onOpenChange={(o) => { if (!o) onClose(); }}
+        size="sm"
+        title="Editar roles"
+        headerIcon={<ShieldCheck size={16} className="text-primary-red" />}
+        dirty={dirty}
+        footer={{
+          cancel: false,
+          confirm: { label: 'Guardar roles', onClick: handleSave, loading, loadingText: 'Guardando...', className: 'w-full' },
+        }}
+      >
+        <div className="space-y-2">
           {AVAILABLE_ROLES.map(({ value, label, description }) => (
             <label
               key={value}
@@ -68,12 +71,7 @@ export const EditRolesModal: React.FC<EditRolesModalProps> = ({ currentRoles, on
           ))}
         </div>
 
-        <div className="px-5 pb-5 pt-1 border-t border-neutral-black-10">
-          <Button onClick={handleSave} loading={loading} loadingText="Guardando..." fullWidth variant="primary">
-            Guardar roles
-          </Button>
-        </div>
-      </div>
+      </Modal>
     </div>
   );
 };

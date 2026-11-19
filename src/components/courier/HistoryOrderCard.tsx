@@ -27,7 +27,7 @@ export function HistoryOrderCard({ order }: HistoryOrderCardProps) {
     <div className="rounded-2xl border border-neutral-black-20 bg-white shadow-sm overflow-hidden">
       {/* Header: número + cliente + hora */}
       <div className="p-4 flex items-center gap-2">
-        <OrderNumberChip orderNumber={order.dailyOrderNumber} />
+        <OrderNumberChip orderNumber={order.dailyOrderNumber} order={order} />
         <OrderClientChip
           name={order.client?.name}
           phone={order.client?.phone}

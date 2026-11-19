@@ -12,7 +12,7 @@ import { OrderElapsedTime } from '@/components/ui/OrderElapsedTime';
 import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderComment } from '@/components/ui/OrderComment';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
-import { OrderClientChip, getClientOriginKey, cardOriginColorMap, type ClientNotesTarget } from '@/components/ui/OrderClientChips';
+import { OrderNumberChip, OrderClientChip, getClientOriginKey, cardOriginColorMap, type ClientNotesTarget } from '@/components/ui/OrderClientChips';
 import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/lib/dates';
@@ -81,9 +81,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
       <div className="px-4 py-3 space-y-2.5">
         {/* 1. Identificación: número · estado · hora · tiempo transcurrido */}
         <div className="flex items-center gap-2 min-w-0">
-          <span className="shrink-0 min-w-8 h-8 px-2 flex items-center justify-center bg-primary-red rounded-full text-base font-bold text-white">
-            {order.dailyOrderNumber}
-          </span>
+          <OrderNumberChip orderNumber={order.dailyOrderNumber} order={order} className="min-w-8 h-8 px-2 py-0 justify-center" />
           {statusConfig && (
             <span className={cn('text-xs font-semibold truncate', statusConfig.color)}>{statusConfig.label}</span>
           )}

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { X, ChefHat } from 'lucide-react';
+import { ChefHat } from 'lucide-react';
 import { WorkerKitchen } from '@/types/worker';
-import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
 
 interface EditKitchensModalProps {
   kitchens: WorkerKitchen[];
@@ -31,20 +31,23 @@ export const EditKitchensModal: React.FC<EditKitchensModalProps> = ({
     finally { setLoading(false); }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-black-10">
-          <div className="flex items-center gap-2">
-            <ChefHat size={16} className="text-primary-red" />
-            <h3 className="font-bold text-sm text-neutral-black-80">Cocinas asignadas</h3>
-          </div>
-          <button onClick={onClose} className="p-1 text-neutral-black-50 hover:text-neutral-black-80">
-            <X size={16} />
-          </button>
-        </div>
+  const dirty = selected.length !== currentKitchenIds.length || selected.some((id) => !currentKitchenIds.includes(id));
 
-        <div className="max-h-64 overflow-y-auto p-4 space-y-2">
+  return (
+    <div className="contents" onClick={(e) => e.stopPropagation()}>
+      <Modal
+        open
+        onOpenChange={(o) => { if (!o) onClose(); }}
+        size="sm"
+        title="Cocinas asignadas"
+        headerIcon={<ChefHat size={16} className="text-primary-red" />}
+        dirty={dirty}
+        footer={{
+          cancel: false,
+          confirm: { label: 'Guardar cocinas', onClick: handleSave, loading, loadingText: 'Guardando...', className: 'w-full' },
+        }}
+      >
+        <div className="max-h-64 overflow-y-auto space-y-2">
           {kitchens.length === 0 ? (
             <p className="text-sm text-center text-neutral-black-50 py-4">No hay cocinas disponibles</p>
           ) : (
@@ -70,12 +73,7 @@ export const EditKitchensModal: React.FC<EditKitchensModalProps> = ({
           )}
         </div>
 
-        <div className="px-5 pb-5 pt-1 border-t border-neutral-black-10">
-          <Button onClick={handleSave} loading={loading} loadingText="Guardando..." fullWidth variant="primary">
-            Guardar cocinas
-          </Button>
-        </div>
-      </div>
+      </Modal>
     </div>
   );
 };

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from 'react';
-import { X, Megaphone, Eye } from 'lucide-react';
+import { Megaphone, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
+import { FIELD_CLASS } from './fieldClass';
 import { AnnouncementCard } from '@/components/announcements/AnnouncementCard';
 import { AnnouncementModal } from '@/components/announcements/AnnouncementModal';
 import { showAnnouncementToast } from '@/components/announcements/showAnnouncementToast';
@@ -16,7 +18,6 @@ import {
 } from '@/types/announcements';
 import { cn } from '@/lib/utils';
 
-const FIELD_CLASS = "w-full px-3 py-2 text-sm rounded-xl border border-neutral-black-20 focus:outline-none focus:border-primary-red transition-colors bg-white";
 const LABEL_CLASS = "block text-xs font-semibold text-neutral-black-50 mb-1";
 const HINT_CLASS = "text-[11px] text-neutral-black-40 mt-1";
 
@@ -119,6 +120,9 @@ export const EditAnnouncementModal: React.FC<EditAnnouncementModalProps> = ({
     endsAt: toLocalInput(source?.endsAt),
     republish: false,
   });
+  // Foto de los valores con que se abrió: el modal se monta ya abierto, así que no hay que reiniciarla
+  const [initialForm] = useState(() => JSON.stringify(form));
+  const dirty = JSON.stringify(form) !== initialForm;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewModal, setPreviewModal] = useState(false);
@@ -197,210 +201,200 @@ export const EditAnnouncementModal: React.FC<EditAnnouncementModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-black-10 shrink-0">
-          <div className="flex items-center gap-2">
-            <Megaphone size={16} className="text-primary-red" />
-            <h3 className="font-bold text-sm text-neutral-black-80">
-              {isCreating ? 'Nuevo aviso' : 'Editar aviso'}
-            </h3>
-          </div>
-          <button onClick={onClose} className="p-1 text-neutral-black-50 hover:text-neutral-black-80" aria-label="Cerrar">
-            <X size={16} />
-          </button>
+    <Modal
+      open
+      onOpenChange={(o) => { if (!o && !loading) onClose(); }}
+      size="md"
+      dirty={dirty}
+      title={isCreating ? 'Nuevo aviso' : 'Editar aviso'}
+      headerIcon={<Megaphone size={20} className="text-primary-red" />}
+      footer={{
+        cancel: { label: 'CANCELAR', disabled: loading },
+        confirm: {
+          label: isCreating ? 'CREAR AVISO' : 'GUARDAR CAMBIOS',
+          onClick: handleSave,
+          loading,
+          loadingText: 'Guardando...',
+        },
+      }}
+    >
+      <div className="space-y-4">
+        <div>
+          <label className={LABEL_CLASS}>Título</label>
+          <input
+            type="text"
+            value={form.title}
+            maxLength={120}
+            onChange={e => set('title', e.target.value)}
+            className={FIELD_CLASS}
+            placeholder="¡2x1 en hamburguesas este viernes!"
+          />
         </div>
 
-        {/* Body */}
-        <div className="p-5 space-y-4 overflow-y-auto flex-1">
+        <div>
+          <label className={LABEL_CLASS}>Texto (acepta markdown)</label>
+          <textarea
+            value={form.body}
+            maxLength={3000}
+            rows={5}
+            onChange={e => set('body', e.target.value)}
+            className={`${FIELD_CLASS} resize-y font-mono text-xs`}
+            placeholder={'Escribe el aviso. Puedes usar **negrita**, listas con "-" y [enlaces](https://…)'}
+          />
+        </div>
+
+        <div>
+          <label className={LABEL_CLASS}>Imagen (URL, opcional)</label>
+          <input
+            type="url"
+            value={form.imageUrl}
+            onChange={e => set('imageUrl', e.target.value)}
+            className={FIELD_CLASS}
+            placeholder="https://…"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={LABEL_CLASS}>Título</label>
+            <label className={LABEL_CLASS}>Botón: texto (opcional)</label>
             <input
               type="text"
-              value={form.title}
-              maxLength={120}
-              onChange={e => set('title', e.target.value)}
+              value={form.ctaLabel}
+              maxLength={40}
+              onChange={e => set('ctaLabel', e.target.value)}
               className={FIELD_CLASS}
-              placeholder="¡2x1 en hamburguesas este viernes!"
+              placeholder="Pedir ahora"
             />
           </div>
-
           <div>
-            <label className={LABEL_CLASS}>Texto (acepta markdown)</label>
-            <textarea
-              value={form.body}
-              maxLength={3000}
-              rows={5}
-              onChange={e => set('body', e.target.value)}
-              className={`${FIELD_CLASS} resize-y font-mono text-xs`}
-              placeholder={'Escribe el aviso. Puedes usar **negrita**, listas con "-" y [enlaces](https://…)'}
-            />
-          </div>
-
-          <div>
-            <label className={LABEL_CLASS}>Imagen (URL, opcional)</label>
+            <label className={LABEL_CLASS}>Botón: enlace</label>
             <input
-              type="url"
-              value={form.imageUrl}
-              onChange={e => set('imageUrl', e.target.value)}
+              type="text"
+              value={form.ctaHref}
+              onChange={e => set('ctaHref', e.target.value)}
               className={FIELD_CLASS}
-              placeholder="https://…"
+              placeholder="/#products"
             />
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={LABEL_CLASS}>Botón: texto (opcional)</label>
-              <input
-                type="text"
-                value={form.ctaLabel}
-                maxLength={40}
-                onChange={e => set('ctaLabel', e.target.value)}
-                className={FIELD_CLASS}
-                placeholder="Pedir ahora"
-              />
-            </div>
-            <div>
-              <label className={LABEL_CLASS}>Botón: enlace</label>
-              <input
-                type="text"
-                value={form.ctaHref}
-                onChange={e => set('ctaHref', e.target.value)}
-                className={FIELD_CLASS}
-                placeholder="/#products"
-              />
-            </div>
-          </div>
+        <div>
+          <label className={LABEL_CLASS}>Cómo se muestra</label>
+          <SegmentedControl value={form.display} options={DISPLAY_OPTIONS} onChange={v => set('display', v)} />
+        </div>
 
+        <div>
+          <label className={LABEL_CLASS}>Estilo</label>
+          <SegmentedControl value={form.variant} options={VARIANT_OPTIONS} onChange={v => set('variant', v)} />
+        </div>
+
+        <div>
+          <label className={LABEL_CLASS}>Audiencia</label>
+          <SegmentedControl value={form.audience} options={AUDIENCE_OPTIONS} onChange={v => set('audience', v)} />
+        </div>
+
+        <div>
+          <label className={LABEL_CLASS}>Estado</label>
+          <SegmentedControl value={form.status} options={STATUS_OPTIONS} onChange={v => set('status', v)} />
+          <p className={HINT_CLASS}>Solo los avisos &quot;Activo&quot; se muestran, dentro de su rango de fechas.</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={LABEL_CLASS}>Cómo se muestra</label>
-            <SegmentedControl value={form.display} options={DISPLAY_OPTIONS} onChange={v => set('display', v)} />
-          </div>
-
-          <div>
-            <label className={LABEL_CLASS}>Estilo</label>
-            <SegmentedControl value={form.variant} options={VARIANT_OPTIONS} onChange={v => set('variant', v)} />
-          </div>
-
-          <div>
-            <label className={LABEL_CLASS}>Audiencia</label>
-            <SegmentedControl value={form.audience} options={AUDIENCE_OPTIONS} onChange={v => set('audience', v)} />
-          </div>
-
-          <div>
-            <label className={LABEL_CLASS}>Estado</label>
-            <SegmentedControl value={form.status} options={STATUS_OPTIONS} onChange={v => set('status', v)} />
-            <p className={HINT_CLASS}>Solo los avisos &quot;Activo&quot; se muestran, dentro de su rango de fechas.</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={LABEL_CLASS}>Inicia (opcional)</label>
-              <input
-                type="datetime-local"
-                value={form.startsAt}
-                onChange={e => set('startsAt', e.target.value)}
-                className={FIELD_CLASS}
-              />
-            </div>
-            <div>
-              <label className={LABEL_CLASS}>Termina (opcional)</label>
-              <input
-                type="datetime-local"
-                value={form.endsAt}
-                onChange={e => set('endsAt', e.target.value)}
-                className={FIELD_CLASS}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={LABEL_CLASS}>Prioridad</label>
-              <input
-                type="number"
-                min={0}
-                max={1000}
-                value={form.priority}
-                onChange={e => set('priority', Math.max(0, Math.round(Number(e.target.value) || 0)))}
-                className={FIELD_CLASS}
-              />
-              <p className={HINT_CLASS}>Mayor número = sale primero.</p>
-            </div>
-            <div className="flex items-center gap-2 pt-5">
-              <input
-                id="announcement-dismissible"
-                type="checkbox"
-                checked={form.dismissible}
-                onChange={e => set('dismissible', e.target.checked)}
-                className="w-4 h-4 accent-primary-red"
-              />
-              <label htmlFor="announcement-dismissible" className="text-sm text-neutral-black-80">
-                Se puede cerrar
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className={LABEL_CLASS}>Páginas donde sale (opcional)</label>
-            <textarea
-              value={form.routes}
-              rows={2}
-              onChange={e => set('routes', e.target.value)}
-              className={`${FIELD_CLASS} resize-y font-mono text-xs`}
-              placeholder={'/\n/cart'}
+            <label className={LABEL_CLASS}>Inicia (opcional)</label>
+            <input
+              type="datetime-local"
+              value={form.startsAt}
+              onChange={e => set('startsAt', e.target.value)}
+              className={FIELD_CLASS}
             />
-            <p className={HINT_CLASS}>Una por línea. Vacío = todas las páginas públicas.</p>
           </div>
+          <div>
+            <label className={LABEL_CLASS}>Termina (opcional)</label>
+            <input
+              type="datetime-local"
+              value={form.endsAt}
+              onChange={e => set('endsAt', e.target.value)}
+              className={FIELD_CLASS}
+            />
+          </div>
+        </div>
 
-          {!isCreating && (
-            <label className="flex items-start gap-2 rounded-xl bg-accent-yellow-10 px-3 py-2.5 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.republish}
-                onChange={e => set('republish', e.target.checked)}
-                className="w-4 h-4 mt-0.5 accent-primary-red"
-              />
-              <span className="text-sm text-neutral-black-80">
-                <span className="font-semibold">Volver a mostrar</span> a quienes ya lo vieron
-                <span className="block text-[11px] text-neutral-black-50">
-                  Hoy está en la versión {announcement.version}; subirá a la {announcement.version + 1}.
-                </span>
-              </span>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={LABEL_CLASS}>Prioridad</label>
+            <input
+              type="number"
+              min={0}
+              max={1000}
+              value={form.priority}
+              onChange={e => set('priority', Math.max(0, Math.round(Number(e.target.value) || 0)))}
+              className={FIELD_CLASS}
+            />
+            <p className={HINT_CLASS}>Mayor número = sale primero.</p>
+          </div>
+          <div className="flex items-center gap-2 pt-5">
+            <input
+              id="announcement-dismissible"
+              type="checkbox"
+              checked={form.dismissible}
+              onChange={e => set('dismissible', e.target.checked)}
+              className="w-4 h-4 accent-primary-red"
+            />
+            <label htmlFor="announcement-dismissible" className="text-sm text-neutral-black-80">
+              Se puede cerrar
             </label>
-          )}
-
-          {/* Vista previa */}
-          <div className="pt-1">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-neutral-black-50 flex items-center gap-1.5">
-                <Eye size={13} /> Vista previa
-              </span>
-              <div className="flex gap-2">
-                <Button type="button" variant="light-outline" size="sm" onClick={() => setPreviewModal(true)}>
-                  Probar modal
-                </Button>
-                <Button type="button" variant="light-outline" size="sm" onClick={() => showAnnouncementToast(draft)}>
-                  Probar toast
-                </Button>
-              </div>
-            </div>
-            <AnnouncementCard announcement={draft} />
           </div>
-
-          {error && <p className="text-xs text-red-500">{error}</p>}
         </div>
 
-        {/* Footer */}
-        <div className="flex gap-2 justify-end px-5 py-4 border-t border-neutral-black-10 shrink-0">
-          <Button variant="outline" size="sm" onClick={onClose} disabled={loading}>
-            Cancelar
-          </Button>
-          <Button variant="primary" size="sm" onClick={handleSave} loading={loading}>
-            {isCreating ? 'Crear aviso' : 'Guardar cambios'}
-          </Button>
+        <div>
+          <label className={LABEL_CLASS}>Páginas donde sale (opcional)</label>
+          <textarea
+            value={form.routes}
+            rows={2}
+            onChange={e => set('routes', e.target.value)}
+            className={`${FIELD_CLASS} resize-y font-mono text-xs`}
+            placeholder={'/\n/cart'}
+          />
+          <p className={HINT_CLASS}>Una por línea. Vacío = todas las páginas públicas.</p>
         </div>
+
+        {!isCreating && (
+          <label className="flex items-start gap-2 rounded-xl bg-accent-yellow-10 px-3 py-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.republish}
+              onChange={e => set('republish', e.target.checked)}
+              className="w-4 h-4 mt-0.5 accent-primary-red"
+            />
+            <span className="text-sm text-neutral-black-80">
+              <span className="font-semibold">Volver a mostrar</span> a quienes ya lo vieron
+              <span className="block text-[11px] text-neutral-black-50">
+                Hoy está en la versión {announcement.version}; subirá a la {announcement.version + 1}.
+              </span>
+            </span>
+          </label>
+        )}
+
+        {/* Vista previa */}
+        <div className="pt-1">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-neutral-black-50 flex items-center gap-1.5">
+              <Eye size={13} /> Vista previa
+            </span>
+            <div className="flex gap-2">
+              <Button type="button" variant="light-outline" size="sm" onClick={() => setPreviewModal(true)}>
+                Probar modal
+              </Button>
+              <Button type="button" variant="light-outline" size="sm" onClick={() => showAnnouncementToast(draft)}>
+                Probar toast
+              </Button>
+            </div>
+          </div>
+          <AnnouncementCard announcement={draft} />
+        </div>
+
+        {error && <p className="text-xs text-red-500">{error}</p>}
       </div>
 
       {previewModal && (
@@ -411,6 +405,6 @@ export const EditAnnouncementModal: React.FC<EditAnnouncementModalProps> = ({
           onCta={() => setPreviewModal(false)}
         />
       )}
-    </div>
+    </Modal>
   );
 };

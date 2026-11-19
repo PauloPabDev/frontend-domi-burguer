@@ -11,7 +11,8 @@ import { getStartOfDay, getEndOfDay, normalize } from './utils';
 import { FilterPanel } from './components/FilterPanel';
 import { StatsSection } from './components/StatsSection';
 import { OrderRow } from './components/OrderRow';
-import { ContabilidadOrderDetailModal } from '@/components/recepcion/ContabilidadOrderDetailModal';
+import { OrderStatusPie } from '@/components/ui/OrderStatusPie';
+import { RecepcionOrderDetailModal } from '@/components/recepcion/RecepcionOrderDetailModal';
 
 export default function ContabilidadPage() {
   const { orders: rawOrders, loading, error, fetchOrders } = useContabilidad();
@@ -221,10 +222,13 @@ export default function ContabilidadPage() {
         </div>
       )}
 
+      <OrderStatusPie orders={allOrders} />
+
       {selectedOrder && (
-        <ContabilidadOrderDetailModal
+        <RecepcionOrderDetailModal
           order={selectedOrder}
           kitchens={kitchens}
+          readOnly
           onClose={() => setSelectedOrderId(null)}
         />
       )}
