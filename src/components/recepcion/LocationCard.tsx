@@ -19,7 +19,7 @@ interface LocationCardProps {
   onDeleted?: (id: string) => void;
 }
 
-const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
+export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
   house: 'Casa',
   building: 'Edificio',
   urbanization: 'Urbanización',
@@ -35,7 +35,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function LocationDetailModal({
+export function LocationDetailModal({
   location,
   onClose,
   onDeleted,

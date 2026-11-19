@@ -312,6 +312,37 @@ export function useNuevaOrden() {
     return newItem;
   }, []);
 
+  // Reemplaza los complementos de una línea sin pasar por el modal (chips en línea de la página guiada).
+  const updateItemComplements = useCallback((itemId: number, complements: Complement[]) => {
+    setOrderItems((prev) => prev.map((i) => (i.itemId === itemId ? { ...i, complements } : i)));
+  }, []);
+
+  // Repite un pedido anterior: cada línea se empareja con el menú actual por id de producto.
+  // Devuelve cuántas líneas no se pudieron repetir (producto retirado del menú).
+  const addItemsFromOrder = useCallback((order: WorkerOrder): number => {
+    let skipped = 0;
+    const lines: OrderItem[] = [];
+    order.orderItems.forEach((oi) => {
+      const product = PRODUCTS.find((p) => String(p.id) === String(oi.id));
+      if (!product) { skipped += 1; return; }
+      itemIdCounterRef.current += 1;
+      lines.push({
+        itemId: itemIdCounterRef.current,
+        product,
+        quantity: oi.quantity || 1,
+        complements: (oi.complements ?? []).map((c) => ({
+          id: c.id,
+          name: c.name,
+          price: c.price || null,
+          quantity: c.quantity || 1,
+          minusComplement: false,
+        })),
+      });
+    });
+    if (lines.length > 0) setOrderItems((prev) => [...prev, ...lines]);
+    return skipped;
+  }, []);
+
   const confirmComplements = useCallback((complements: Complement[]) => {
     if (!editingItem) return;
     setOrderItems((prev) =>
@@ -413,6 +444,7 @@ export function useNuevaOrden() {
     orderItems, addProduct, removeProduct, changeQuantity,
     editingItem, showComplementModal, setShowComplementModal,
     openComplementEditor, addProductAndEdit, confirmComplements,
+    updateItemComplements, addItemsFromOrder,
     // Complementos (buscador contra API)
     allComplements, complementsLoading,
     // Form
