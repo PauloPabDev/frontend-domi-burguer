@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { ElementType } from 'react';
-import { ClipboardList, Map, PlusCircle, Bike, BarChart3, IdCard, BookOpen } from 'lucide-react';
+import { ClipboardList, Map, PlusCircle, Bike, BarChart3, IdCard, BookOpen, ListChecks } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
 import { WorkerKitchen } from '@/types/worker';
 import { useNavShadow } from '@/components/navbar/useNavShadow';
@@ -68,6 +68,7 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
       badge: activeOrders.length > 0 ? activeOrders.length : undefined,
     },
     { key: 'crear', label: 'Crear pedido', Icon: PlusCircle, href: '/recepcion/nueva-orden' },
+    { key: 'crear-guiado', label: 'Crear pedido (guiado)', Icon: ListChecks, href: '/recepcion/nueva-orden-guiada' },
     { key: 'cliente', label: 'Cliente', Icon: IdCard, href: '/recepcion/cliente' },
     { key: 'mapa', label: 'Mapa', Icon: Map, href: '/recepcion/mapa' },
     { key: 'contabilidad', label: 'Contabilidad', Icon: BarChart3, href: '/recepcion/contabilidad' },
@@ -91,7 +92,7 @@ export const RecepcionNavbar: React.FC<RecepcionNavbarProps> = ({
 
   const toDropdownItem = (item: NavItem) => ({ ...item, isActive: isItemActive(item) });
 
-  const SECONDARY_KEYS = new Set(['cliente', 'documentos', 'motos']);
+  const SECONDARY_KEYS = new Set(['crear-guiado', 'cliente', 'documentos', 'motos']);
   const directItems = navItems.filter((item) => !SECONDARY_KEYS.has(item.key));
   const secondaryItems = navItems.filter((item) => SECONDARY_KEYS.has(item.key));
 
