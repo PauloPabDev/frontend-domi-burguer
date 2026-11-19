@@ -39,14 +39,13 @@ export default function ProfilePage() {
                 <div className="max-w-2xl mx-auto">
                     <ProfileHeader />
                     <WorkSection />
+                    <OrdersSection />
+                    <PointsSection />
+                    <CodesSection />
                     <AddressesSection />
                     <PhoneSection />
-                    <NotificationsSection />
                     <AnnouncementsSection />
-                    <OrdersSection />
-                    <CodesSection />
-                    <PointsSection />
-
+                    <NotificationsSection />
                 </div>
             </div>
         </CheckoutFormProvider>
