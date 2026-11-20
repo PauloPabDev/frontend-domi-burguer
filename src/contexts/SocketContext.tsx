@@ -32,6 +32,8 @@ const ACK_TIMEOUT_MS = 10_000;
 
 interface SocketContextType {
   orders: WorkerOrder[];
+  /** true cuando ya llegó la primera lista de pedidos (distingue "cargando" de "sin pedidos") */
+  ordersReady: boolean;
   connectionStatus: ConnectionStatus;
   reconnect: () => void;
   changeKitchen: (kitchenId: string | null) => void;
@@ -88,6 +90,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const hasSkippedInitialPageEffect = useRef(false);
 
   const [orders, setOrders] = useState<WorkerOrder[]>([]);
+  const [ordersReady, setOrdersReady] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('IDLE');
   const [courierLocations, setCourierLocations] = useState<CourierLocation[]>([]);
   const [paymentRequests, setPaymentRequests] = useState<PaymentChangeRequest[]>([]);
@@ -208,6 +211,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       orderIdsRef.current = new Set(normalized.map((o) => o.id));
       courierAssignedIdsRef.current = new Set(normalized.filter((o) => o.courierId).map((o) => o.id));
       setOrders(sortOrders(normalized));
+      setOrdersReady(true);
     });
 
     // Ubicación en vivo de domiciliarios (Traccar) — solo llega para recepción/admin
@@ -459,6 +463,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     <SocketContext.Provider
       value={{
         orders,
+        ordersReady,
         connectionStatus,
         reconnect,
         changeKitchen,

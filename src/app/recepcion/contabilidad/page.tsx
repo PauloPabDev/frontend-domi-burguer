@@ -11,6 +11,7 @@ import { getStartOfDay, getEndOfDay, normalize } from './utils';
 import { FilterPanel } from './components/FilterPanel';
 import { StatsSection } from './components/StatsSection';
 import { OrderRow } from './components/OrderRow';
+import { ContabilidadSkeleton } from './components/ContabilidadSkeleton';
 import { OrderStatusPie } from '@/components/ui/OrderStatusPie';
 import { RecepcionOrderDetailModal } from '@/components/recepcion/RecepcionOrderDetailModal';
 
@@ -151,12 +152,7 @@ export default function ContabilidadPage() {
       )}
 
       {/* Cargando */}
-      {loading && (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-neutral-black-50">
-          <div className="w-8 h-8 border-4 border-primary-red border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm">Cargando pedidos...</p>
-        </div>
-      )}
+      {loading && <ContabilidadSkeleton />}
 
       {/* Contenido */}
       {!loading && allOrders.length > 0 && (

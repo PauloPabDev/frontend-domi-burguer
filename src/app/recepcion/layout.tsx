@@ -7,6 +7,8 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { SocketProvider } from '@/contexts/SocketContext';
 import { CourierPanelProvider } from '@/contexts/CourierPanelContext';
 import { RecepcionNavbar } from '@/components/recepcion/RecepcionNavbar';
+import { RecepcionKanbanSkeleton } from '@/components/recepcion/RecepcionBoardSkeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { CourierManagerPanel } from '@/components/recepcion/CourierManagerPanel';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
 
@@ -43,10 +45,18 @@ export default function RecepcionLayout({ children }: { children: React.ReactNod
   }, [user, userProfile, loading, router]);
 
   if (loading) {
+    // Mismo chrome que RecepcionLayoutInner: barra superior (pill del navbar) + main
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary-red border-t-transparent rounded-full animate-spin" />
-      </div>
+      <>
+        <nav className="fixed top-0 left-0 z-40 w-full px-4">
+          <Skeleton className="max-w-[828px] md:h-[80px] h-[62px] mt-[20px] mb-[10px] rounded-[60px] w-full mx-auto" />
+        </nav>
+        <main className="w-full px-4 mt-[100px] py-4">
+          <div className="-mb-4 h-[calc(100dvh-116px)] overflow-x-auto overflow-y-hidden">
+            <RecepcionKanbanSkeleton />
+          </div>
+        </main>
+      </>
     );
   }
 

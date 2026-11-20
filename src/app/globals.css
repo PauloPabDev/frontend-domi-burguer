@@ -334,7 +334,32 @@ h4 {
 
 .animate-card-vibrate {
   animation: card-vibrate 1s ease-in-out infinite;
-} 
+}
+
+/* Skeleton: franja de brillo que cruza el bloque (solo transform, sin repintar) */
+@keyframes skeleton-shimmer {
+  to { transform: translateX(100%); }
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.65), transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton-shimmer::after {
+    animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  }
+}
+
 /* Botón de cuenta del navbar: lo decide <html data-account>, que fija un script antes del primer pintado */
 .acc-photo,
 .acc-user-label { display: none; }

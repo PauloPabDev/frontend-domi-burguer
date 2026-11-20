@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CheckoutFormProvider } from "@/contexts/CheckoutFormContext";
 import { ProfileHeader } from "./ProfileHeader";
@@ -14,6 +13,7 @@ import { AnnouncementsSection } from "./AnnouncementsSection";
 import { CodesSection } from "./CodesSection";
 import { OrdersSection } from "./OrdersSection";
 import { WorkSection } from "./WorkSection";
+import { ProfileSkeleton } from "./ProfileSkeleton";
 
 export default function ProfilePage() {
     const { user, loading } = useAuth();
@@ -26,11 +26,7 @@ export default function ProfilePage() {
     }, [user, loading, router]);
 
     if (loading || !user) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-white">
-                <Loader2 className="animate-spin text-primary-red" size={70} />
-            </div>
-        );
+        return <ProfileSkeleton />;
     }
 
     return (
