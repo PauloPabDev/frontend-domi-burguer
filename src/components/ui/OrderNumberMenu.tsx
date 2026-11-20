@@ -92,7 +92,7 @@ export function OrderNumberMenu({
           </ModalHeader>
         }
       >
-        <OrderStatusTimeline status={order.status} timeLapseStatus={order.timeLapseStatus} />
+        <OrderStatusTimeline status={order.status} timeLapseStatus={order.timeLapseStatus} createdAt={order.createdAt} />
 
         <div className="flex flex-col divide-y divide-neutral-100">
           <ActionRow
