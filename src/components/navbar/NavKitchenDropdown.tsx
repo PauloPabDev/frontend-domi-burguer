@@ -15,6 +15,8 @@ interface NavKitchenDropdownProps {
   variant?: 'pill' | 'inline';
   /** En variant 'pill': por debajo de lg oculta el nombre de la cocina, dejando solo el ícono (el nombre sigue disponible en la lista desplegable). */
   compact?: boolean;
+  /** Lado del que sale el panel: 'right' cuando el botón está junto al borde derecho. */
+  align?: 'left' | 'right';
 }
 
 export const NavKitchenDropdown: React.FC<NavKitchenDropdownProps> = ({
@@ -23,6 +25,7 @@ export const NavKitchenDropdown: React.FC<NavKitchenDropdownProps> = ({
   onKitchenChange,
   variant = 'pill',
   compact = false,
+  align = 'left',
 }) => {
   const { changeKitchen } = useSocket();
   const [isOpen, setIsOpen] = useState(false);
@@ -83,7 +86,8 @@ export const NavKitchenDropdown: React.FC<NavKitchenDropdownProps> = ({
       {isOpen && (
         <div
           className={cn(
-            'absolute top-full left-0 bg-white border border-neutral-black-20 shadow-lg z-50',
+            'absolute top-full bg-white border border-neutral-black-20 shadow-lg z-50',
+            align === 'right' ? 'right-0' : 'left-0',
             variant === 'pill' ? 'mt-2 w-52 rounded-2xl py-1.5' : 'mt-1 w-52 rounded-xl py-1',
           )}
         >
