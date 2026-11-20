@@ -23,7 +23,7 @@ function RecepcionLayoutInner({ children }: { children: React.ReactNode }) {
           selectedKitchen={selectedKitchen}
           onKitchenChange={selectKitchen}
         />
-        <main className="w-full px-4 mt-[100px] py-4">{children}</main>
+        <main className="w-full px-4 mt-[100px] pt-4 pb-28 md:pb-4">{children}</main>
         <CourierManagerPanel />
       </CourierPanelProvider>
     </SocketProvider>

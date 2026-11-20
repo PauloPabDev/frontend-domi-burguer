@@ -169,7 +169,7 @@ export default function RecepcionMapaPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-106px)] flex flex-col lg:flex-row gap-3 -mb-4">
+    <div className="h-[calc(100vh-106px-6rem)] md:h-[calc(100vh-106px)] flex flex-col lg:flex-row gap-3 -mb-4">
       {/* Map */}
       <div className="rounded-2xl overflow-hidden shadow-sm border border-neutral-black-20 h-[45%] shrink-0 lg:h-full lg:flex-1">
         <MultiMarkerMap

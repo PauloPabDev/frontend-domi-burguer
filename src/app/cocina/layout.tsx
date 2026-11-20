@@ -10,7 +10,7 @@ import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
 import { cn } from '@/lib/utils';
 
 function KitchenLayoutInner({ children }: { children: React.ReactNode }) {
-  const { kitchens, selectedKitchenId, selectedKitchen, selectKitchen, loading } = useKitchenSelector();
+  const { kitchens, selectedKitchenId, selectedKitchen, selectKitchen } = useKitchenSelector();
   // En el panel de órdenes el nav va colapsado en un botón flotante, no reserva espacio arriba
   const navCollapsed = usePathname() === '/cocina';
 
@@ -20,9 +20,8 @@ function KitchenLayoutInner({ children }: { children: React.ReactNode }) {
         kitchens={kitchens}
         selectedKitchen={selectedKitchen}
         onKitchenChange={selectKitchen}
-        loadingKitchens={loading}
       />
-      <main className={cn('w-full px-4', navCollapsed ? 'mt-4 pb-24' : 'mt-[100px] pb-6')}>
+      <main className={cn('w-full px-4', navCollapsed ? 'mt-4 pb-24' : 'mt-[100px] pb-28 md:pb-6')}>
         {children}
       </main>
     </SocketProvider>

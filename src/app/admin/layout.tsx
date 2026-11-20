@@ -34,7 +34,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <SocketProvider role="admin">
       <AdminNavbar />
-      <main className="max-w-screen-xl mx-auto px-4 mt-[100px] py-6">{children}</main>
+      <main className="max-w-screen-xl mx-auto px-4 mt-[100px] pt-6 pb-28 md:pb-6">{children}</main>
     </SocketProvider>
   );
 }
