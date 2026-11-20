@@ -3,8 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { useOrders } from "@/hooks/useOrders";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Package } from "lucide-react";
+import { Package } from "lucide-react";
 import { OrderHistoryCard } from "@/components/orders/OrderHistoryCard";
+import { OrdersSkeleton } from "./OrdersSkeleton";
 import { useRouter } from "next/navigation";
 
 export default function OrdersPage() {
@@ -29,14 +30,7 @@ export default function OrdersPage() {
     }
 
     if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center mt-[130px]">
-                <div className="text-center">
-                    <Loader2 className="animate-spin h-8 w-8 mx-auto mb-3 text-primary-red" />
-                    <p className="body-font text-neutral-black-50">Cargando tus pedidos...</p>
-                </div>
-            </div>
-        );
+        return <OrdersSkeleton />;
     }
 
     if (error) {

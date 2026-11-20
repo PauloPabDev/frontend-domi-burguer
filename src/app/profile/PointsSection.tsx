@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Star, ChevronDown, ChevronRight, Plus, Minus, Trophy, Check, Copy } from "lucide-react";
+import { Star, ChevronDown, ChevronRight, Plus, Minus, Trophy, Check, Copy } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserPoints } from "@/hooks/useUserPoints";
 import { POINT_FLOW_TYPES, Point } from "@/types/points";
@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getIdToken } from "firebase/auth";
 import { CodesService } from "@/services/codesService";
 import { Code } from "@/types/codes";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Modal } from "@/components/ui/modal";
 import { addToast } from "@heroui/toast";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -69,13 +70,13 @@ export function PointsSection() {
                         <div className="flex items-center gap-4">
                             <Star className="w-5 h-5 text-neutral-500" />
                             <div>
-                                <p className="font-medium text-neutral-800">
+                                <div className="font-medium text-neutral-800">
                                     {loading ? (
-                                        <Loader2 className="animate-spin w-5 h-5 text-neutral-400" />
+                                        <Skeleton className="h-5 w-20" />
                                     ) : (
                                         <>{balance} puntos</>
                                     )}
-                                </p>
+                                </div>
                                 <p className="text-xs text-neutral-500">
                                     Pronto podrás canjear tus puntos por premios
                                 </p>

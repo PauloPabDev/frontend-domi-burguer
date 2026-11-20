@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { CourierOrderCard } from '@/components/courier/CourierOrderCard';
+import { CourierOrderCardSkeletonSlots } from '@/components/courier/CourierOrderCardSkeleton';
 import { MultiMarkerMap, MapMarker } from '@/components/map/MultiMarkerMap';
 import { CourierService } from '@/services/courierService';
 import { OrderStatus } from '@/types/orders';
@@ -13,7 +14,7 @@ import { Bike } from 'lucide-react';
 
 export default function DomiciliarioPage() {
   const { user } = useAuth();
-  const { orders, connectionStatus } = useSocket();
+  const { orders, connectionStatus, ordersReady } = useSocket();
   const enrichedOrders = useEnrichedOrders(orders);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -70,6 +71,8 @@ export default function DomiciliarioPage() {
   };
 
   const isEmpty = enrichedOrders.length === 0;
+  // Con la conexión caída no se deja el skeleton para siempre
+  const showSkeleton = !ordersReady && connectionStatus !== 'DISCONNECTED' && connectionStatus !== 'OFFLINE';
 
   return (
     <div className="h-full flex flex-col lg:flex-row py-3 gap-3">
@@ -88,11 +91,7 @@ export default function DomiciliarioPage() {
 
       {/* Orders — carousel on mobile, vertical list on desktop */}
       <div className="flex-1 min-h-0 flex flex-col lg:w-[360px] lg:flex-none">
-        {connectionStatus === 'CONNECTING' && (
-          <p className="text-sm text-center text-neutral-black-50 animate-pulse py-4">Conectando...</p>
-        )}
-
-        {isEmpty && connectionStatus === 'CONNECTED' ? (
+        {ordersReady && isEmpty ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-neutral-black-50">
             <Bike size={40} className="opacity-30" />
             <p className="text-sm">No tienes pedidos asignados</p>
@@ -103,6 +102,7 @@ export default function DomiciliarioPage() {
             className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 px-1 h-full items-start lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden lg:snap-none lg:pb-2 lg:px-0 lg:items-stretch"
             style={{ scrollbarWidth: 'none' }}
           >
+            {showSkeleton && <CourierOrderCardSkeletonSlots />}
             {enrichedOrders.map((order) => (
               <div
                 key={order.id}

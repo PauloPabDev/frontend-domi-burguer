@@ -11,6 +11,7 @@ import { useCourierPanel } from '@/contexts/CourierPanelContext';
 import { usePaymentChangeRequest } from '@/hooks/reception/usePaymentChangeRequest';
 import { OrderKanbanColumn, KANBAN_COLUMN_WIDTH } from '@/components/recepcion/OrderKanbanColumn';
 import { RecepcionOrderList } from '@/components/recepcion/RecepcionOrderList';
+import { RecepcionKanbanSkeleton, RecepcionListSkeleton } from '@/components/recepcion/RecepcionBoardSkeleton';
 import { CourierFilterPanel } from '@/components/recepcion/CourierFilterPanel';
 import { OrderStatusPie } from '@/components/ui/OrderStatusPie';
 import { WorkerOrderService } from '@/services/workerOrderService';
@@ -37,7 +38,7 @@ const KANBAN_FULL_WIDTH =
 export default function RecepcionPage() {
   const { user } = useAuth();
   const { userProfile } = useUserProfile();
-  const { orders } = useSocket();
+  const { orders, ordersReady, connectionStatus } = useSocket();
   const { kitchens } = useKitchenSelector();
   const { filterCourierIds } = useCourierPanel();
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
@@ -85,6 +86,8 @@ export default function RecepcionPage() {
     observer.observe(el);
     boardObserver.current = observer;
   }, []);
+  // Sin conexión no se deja el skeleton para siempre: se muestra el tablero vacío
+  const loadingOrders = !ordersReady && connectionStatus !== 'DISCONNECTED' && connectionStatus !== 'OFFLINE';
   const collapseEmptyColumns = boardWidth !== null && boardWidth < KANBAN_FULL_WIDTH;
 
   const ordersByStatus = KANBAN_STATUSES.reduce<Record<string, typeof enrichedOrders>>(
@@ -204,36 +207,44 @@ export default function RecepcionPage() {
       {compactView ? (
         // Vista simple: una sola lista (sin columnas) que aprovecha todo el ancho
         <div className="flex-1 min-h-0">
-          <RecepcionOrderList
-            orders={filteredOrders}
-            kitchens={kitchens}
-            onStatusChange={handleStatusChange}
-            onAssignCourier={handleAssignCourier}
-            onAssignKitchen={handleAssignKitchen}
-            onDelete={handleDeleteOrder}
-            onMarkPaid={handleMarkPaid}
-            {...paymentHandlers}
-          />
+          {loadingOrders ? (
+            <RecepcionListSkeleton />
+          ) : (
+            <RecepcionOrderList
+              orders={filteredOrders}
+              kitchens={kitchens}
+              onStatusChange={handleStatusChange}
+              onAssignCourier={handleAssignCourier}
+              onAssignKitchen={handleAssignKitchen}
+              onDelete={handleDeleteOrder}
+              onMarkPaid={handleMarkPaid}
+              {...paymentHandlers}
+            />
+          )}
         </div>
       ) : (
         <div ref={boardRef} className="flex-1 overflow-x-auto overflow-y-hidden min-h-0">
-          <div className="flex gap-2 min-w-max h-full">
-            {KANBAN_STATUSES.map((status) => (
-              <OrderKanbanColumn
-                key={status}
-                status={status}
-                orders={ordersByStatus[status] ?? []}
-                kitchens={kitchens}
-                onStatusChange={handleStatusChange}
-                onAssignCourier={handleAssignCourier}
-                onAssignKitchen={handleAssignKitchen}
-                onDelete={handleDeleteOrder}
-                onMarkPaid={handleMarkPaid}
-                {...paymentHandlers}
-                collapsed={collapseEmptyColumns}
-              />
-            ))}
-          </div>
+          {loadingOrders ? (
+            <RecepcionKanbanSkeleton />
+          ) : (
+            <div className="flex gap-2 min-w-max h-full">
+              {KANBAN_STATUSES.map((status) => (
+                <OrderKanbanColumn
+                  key={status}
+                  status={status}
+                  orders={ordersByStatus[status] ?? []}
+                  kitchens={kitchens}
+                  onStatusChange={handleStatusChange}
+                  onAssignCourier={handleAssignCourier}
+                  onAssignKitchen={handleAssignKitchen}
+                  onDelete={handleDeleteOrder}
+                  onMarkPaid={handleMarkPaid}
+                  {...paymentHandlers}
+                  collapsed={collapseEmptyColumns}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
       <OrderStatusPie orders={filteredOrders} />

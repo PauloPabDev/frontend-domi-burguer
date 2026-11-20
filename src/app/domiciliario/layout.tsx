@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { SocketProvider } from '@/contexts/SocketContext';
 import { CourierNavbar } from '@/components/courier/CourierNavbar';
+import { DomiciliarioSkeleton } from './DomiciliarioSkeleton';
 
 export default function DomiciliarioLayout({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
@@ -27,11 +28,7 @@ export default function DomiciliarioLayout({ children }: { children: React.React
   }, [user, userProfile, loading, router]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary-red border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <DomiciliarioSkeleton />;
   }
 
   if (!user || (userProfile && !userProfile.roles?.includes('courier'))) {

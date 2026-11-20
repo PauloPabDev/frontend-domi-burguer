@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader2, ChevronDown } from "lucide-react";
 import { useProfileOrders } from "@/hooks/useProfileOrders";
 import { OrderHistoryCard } from "@/components/orders/OrderHistoryCard";
+import { OrderHistoryCardSkeleton } from "@/components/orders/OrderHistoryCardSkeleton";
 
 const INITIAL_VISIBLE = 2
 const PAGE_SIZE = 3;
@@ -11,7 +12,6 @@ const PAGE_SIZE = 3;
 export function OrdersSection() {
   const { orders, loading, loadingMore, error, hasMore, loadMore } = useProfileOrders(PAGE_SIZE);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
-  console.log("OrdersSection render", { orders, loading, loadingMore, error, hasMore, visibleCount });
   const visibleOrders = orders.slice(0, visibleCount);
   const canExpandLocally = visibleCount < orders.length;
   const canLoadMore = visibleCount >= orders.length && hasMore;
@@ -35,8 +35,9 @@ export function OrdersSection() {
       </h2>
 
       {loading ? (
-        <div className="flex justify-center py-6">
-          <Loader2 className="animate-spin text-primary-red" size={32} />
+        <div className="space-y-3">
+          <OrderHistoryCardSkeleton />
+          <OrderHistoryCardSkeleton />
         </div>
       ) : error ? (
         <div className="border border-gray-200 rounded-xl p-4">
