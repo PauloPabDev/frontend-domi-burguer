@@ -106,7 +106,7 @@ export function AdminOrderDetailModal({
         <div>
           <OrderStatusStrip status={order.status} />
 
-          <OrderStatusTimeline status={order.status} timeLapseStatus={order.timeLapseStatus} />
+          <OrderStatusTimeline status={order.status} timeLapseStatus={order.timeLapseStatus} createdAt={order.createdAt} />
 
           {/* Cliente */}
           <div className={SECTION}>

@@ -38,4 +38,4 @@ const formatLocalDateTime = (date: Date) => {
     return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 };
 
-export { formatTime, formatDateTime, formatFullDateTime, getStartOfDay, getEndOfDay, formatLocalDateTime };
+export { toDate, formatTime, formatDateTime, formatFullDateTime, getStartOfDay, getEndOfDay, formatLocalDateTime };
