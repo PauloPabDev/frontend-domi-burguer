@@ -90,7 +90,7 @@ export default function CodesPage() {
     }
 
     return (
-        <div className="mt-[130px] min-h-screen bg-white py-8 px-4">
+        <div className="mt-8 lg:mt-[130px] min-h-screen bg-white py-8 px-4">
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-xl font-bold text-neutral-800 mb-6 uppercase">
                     Gestión de Códigos

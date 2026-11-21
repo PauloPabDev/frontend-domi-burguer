@@ -33,7 +33,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
 
     if (authLoading || isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center mt-[130px]">
+            <div className="min-h-screen flex items-center justify-center mt-8 lg:mt-[130px]">
                 <div className="text-center">
                     <Loader2 className="animate-spin h-8 w-8 mx-auto mb-3 text-primary-red" />
                     <p className="body-font text-neutral-black-50">Cargando detalles del pedido...</p>
@@ -44,7 +44,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
 
     if (error || !order) {
         return (
-            <div className="min-h-screen flex items-center justify-center mt-[130px] px-4">
+            <div className="min-h-screen flex items-center justify-center mt-8 lg:mt-[130px] px-4">
                 <div className="w-full max-w-md text-center flex flex-col items-center gap-4">
                     <p className="text-primary-red font-bold">Error</p>
                     <p className="body-font text-neutral-black-50">{error ?? "Pedido no encontrado"}</p>
@@ -57,7 +57,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
     }
 
     return (
-        <div className="flex flex-col xl:flex-row w-full xl:justify-around items-center xl:items-start gap-5 mt-[130px] mb-[100px] px-4">
+        <div className="flex flex-col xl:flex-row w-full xl:justify-around items-center xl:items-start gap-5 mt-8 lg:mt-[130px] mb-[100px] px-4">
             <div className="flex h-full w-full pb-10 max-w-[500px]">
                 <div className="flex flex-col h-full gap-6 w-full mt-5">
                     <OrderDetailHeader

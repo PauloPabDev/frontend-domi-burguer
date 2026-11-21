@@ -52,7 +52,7 @@ export default function Cart() {
       <form onSubmit={handleSubmitWithValidation}>
         <LoadingOverlay isLoading={isSubmitting} />
 
-        <div className="flex flex-col xl:flex-row w-full xl:justify-around items-center xl:items-start gap-5 mt-[130px] lg:mt-[130px] mb-[100px]">
+        <div className="flex flex-col xl:flex-row w-full xl:justify-around items-center xl:items-start gap-5 mt-8 lg:mt-[130px] mb-[100px]">
           {/* Formulario de checkout */}
           <CheckoutForm />
 

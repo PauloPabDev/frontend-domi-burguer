@@ -15,7 +15,7 @@ export default function OrdersPage() {
 
     if (!user) {
         return (
-            <div className="min-h-screen flex items-center justify-center mt-[130px] px-4">
+            <div className="min-h-screen flex items-center justify-center mt-8 lg:mt-[130px] px-4">
                 <div className="w-full max-w-md text-center flex flex-col items-center gap-4">
                     <h1>Inicia sesión</h1>
                     <p className="body-font text-neutral-black-50">
@@ -35,7 +35,7 @@ export default function OrdersPage() {
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center mt-[130px] px-4">
+            <div className="min-h-screen flex items-center justify-center mt-8 lg:mt-[130px] px-4">
                 <div className="w-full max-w-md text-center flex flex-col items-center gap-4">
                     <h1 className="text-primary-red">Error</h1>
                     <p className="body-font text-neutral-black-50">{error}</p>
@@ -49,7 +49,7 @@ export default function OrdersPage() {
 
     if (orders.length === 0) {
         return (
-            <div className="min-h-screen mt-[130px] px-4">
+            <div className="min-h-screen mt-8 lg:mt-[130px] px-4">
                 <div className="max-w-md mx-auto py-16 text-center flex flex-col items-center gap-4">
                     <Package className="w-16 h-16 text-neutral-black-30" />
                     <h1>Aún no tienes pedidos</h1>
@@ -65,7 +65,7 @@ export default function OrdersPage() {
     }
 
     return (
-        <div className="min-h-screen mt-[130px] mb-[100px] px-4">
+        <div className="min-h-screen mt-8 lg:mt-[130px] mb-[100px] px-4">
             <div className="max-w-[560px] mx-auto flex flex-col gap-3 py-8">
                 <h1 className="mb-2">MIS PEDIDOS</h1>
 

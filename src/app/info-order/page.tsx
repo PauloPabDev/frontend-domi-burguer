@@ -53,7 +53,7 @@ export default function InfoOrder() {
   );
 
   return lastOrder ? (
-    <div className="flex flex-col xl:flex-row w-full xl:justify-around items-center xl:items-start gap-5 mt-[130px] lg:mt-[130px] mb-[100px]">
+    <div className="flex flex-col xl:flex-row w-full xl:justify-around items-center xl:items-start gap-5 mt-8 lg:mt-[130px] mb-[100px]">
       <div className="flex h-full w-full pb-10 max-w-[500px]">
         <div className="flex flex-col h-full gap-6 w-full mt-5">
           <div className="flex-col">

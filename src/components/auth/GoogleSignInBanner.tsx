@@ -71,7 +71,7 @@ export function GoogleSignInBanner() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-[500] mx-auto max-w-md">
+    <div className="fixed bottom-28 lg:bottom-4 left-4 right-4 z-[500] mx-auto max-w-md">
       <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-4 flex items-center gap-4">
         <div className="flex-shrink-0">
           <LogoMobile width={40} height={56} />

@@ -4,7 +4,7 @@ import { OrderHistoryCardSkeleton } from "@/components/orders/OrderHistoryCardSk
 // Mismo contenedor que la página: saludo + email + botón, pedidos y bloques de sección
 export function ProfileSkeleton() {
     return (
-        <div role="status" aria-label="Cargando perfil" className="mt-[130px] min-h-screen bg-white py-8 px-4">
+        <div role="status" aria-label="Cargando perfil" className="mt-8 lg:mt-[130px] min-h-screen bg-white py-8 px-4">
             <div className="max-w-2xl mx-auto">
                 <div className="flex items-start justify-between mb-8">
                     <div>
