@@ -31,7 +31,7 @@ export default function ProfilePage() {
 
     return (
         <CheckoutFormProvider>
-            <div className="mt-[130px] min-h-screen bg-white py-8 px-4">
+            <div className="mt-8 lg:mt-[130px] min-h-screen bg-white py-8 px-4">
                 <div className="max-w-2xl mx-auto">
                     <ProfileHeader />
                     <WorkSection />

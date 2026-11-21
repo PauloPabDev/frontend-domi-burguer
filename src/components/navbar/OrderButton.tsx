@@ -1,14 +1,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { HamburgerIcon } from "@/components/ui/icons";
-import { useAuth } from "@/contexts/AuthContext";
-import { useUserProfile } from "@/hooks/useUserProfile";
 
-export const OrderButton = () => {
-  const { user } = useAuth();
-  const { userProfile } = useUserProfile();
-  const balance = user && userProfile ? (userProfile.pointsBalance ?? 0) : null;
-
+export const OrderButton = ({ balance }: { balance: number | null }) => {
   return (
     <div className="w-[300px] items-center flex justify-end gap-2">
       <Link

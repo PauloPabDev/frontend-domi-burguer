@@ -15,7 +15,7 @@ export default function AvisosPage() {
   }, []);
 
   return (
-    <div className="mt-[130px] min-h-[60vh] pb-16">
+    <div className="mt-8 lg:mt-[130px] min-h-[60vh] pb-16">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex items-center justify-center w-11 h-11 rounded-full bg-accent-yellow-40 shrink-0">

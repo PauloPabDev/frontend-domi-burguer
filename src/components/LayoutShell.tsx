@@ -37,7 +37,11 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       )}
-      {showPublicChrome && <Footer />}
+      {showPublicChrome && (
+        <div className="bg-primary-red pb-28 lg:pb-0">
+          <Footer />
+        </div>
+      )}
       {showPublicChrome && <GoogleSignInBanner />}
       {showPublicChrome && <InstallBanner />}
       {showPublicChrome && <AnnouncementsHost />}

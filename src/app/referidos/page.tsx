@@ -60,7 +60,7 @@ const jsonLd = {
 
 export default function ReferidosPage() {
   return (
-    <main className="mt-[130px] min-h-[60vh] pb-16">
+    <main className="mt-8 lg:mt-[130px] min-h-[60vh] pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div className="max-w-2xl mx-auto flex flex-col gap-8">

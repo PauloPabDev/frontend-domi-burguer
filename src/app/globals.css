@@ -383,3 +383,7 @@ html[data-account="photo"] .acc-photo {
   height: calc(100% - 2 * var(--acc-inset));
   aspect-ratio: 1;
 }
+/* Cuenta de la barra inferior del cliente: reutiliza las etiquetas de arriba */
+.dock-avatar { display: none; }
+html[data-account="photo"] .dock-avatar { display: block; }
+html[data-account="photo"] .dock-user-icon { display: none; }
