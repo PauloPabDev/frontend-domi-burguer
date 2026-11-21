@@ -10,6 +10,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useServerNow } from "@/hooks/kitchen/useKitchensStatus";
 import { getKitchenStatusLabel } from "@/utils/kitchenStatusLabel";
 
+const CLOSING_SOON_MIN = 30;
+
 // Lazy load modal pesado
 const ModalAddress = dynamic(
     () => import("./modalAddress").then(mod => mod.ModalAddress),
@@ -40,8 +42,10 @@ export function AddressSection() {
 
     const { user } = useAuth();
     const nowMs = useServerNow(kitchenStatus?.serverNow);
-    // Abierto / «cerramos en N min» / «Cerrado · abrimos hoy a las X · en 1 h 20 min»
-    const statusLabel = kitchenStatus ? getKitchenStatusLabel(kitchenStatus, nowMs, { showCountdown: true }) : null;
+    // «Cerrado · abrimos hoy a las X · en 1 h 20 min»; abierto solo se avisa en la última media hora
+    const closesInMin = kitchenStatus?.open && kitchenStatus.closesAt ? (new Date(kitchenStatus.closesAt).getTime() - nowMs) / 60_000 : null;
+    const hideOpenStatus = kitchenStatus?.open === true && (closesInMin === null || closesInMin > CLOSING_SOON_MIN);
+    const statusLabel = kitchenStatus && !hideOpenStatus ? getKitchenStatusLabel(kitchenStatus, nowMs, { showCountdown: true }) : null;
     const [isListModalOpen, setIsListModalOpen] = useState(false);
 
     const hasMultipleLocations = listLocationsClient && listLocationsClient.length > 0;

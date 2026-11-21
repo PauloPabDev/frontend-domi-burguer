@@ -8,7 +8,7 @@ import { useMenu } from "@/hooks/home/useMenu";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { QuantitySelector } from "@/components/ui/quantitySelector";
 import { showFoodToast } from "../toastFood";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useEmblaCarousel from "embla-carousel-react";
 import { useAddToCart } from "@/hooks/cart/useAddToCart";
 import { ComplementsLarge } from "../ui/complementsLarge";
@@ -39,6 +39,7 @@ export default function MenuSection() {
     resetCurrentProduct,
   } = useMenu();
 
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { handleAddToCart } = useAddToCart();
   const menuSectionRef = useTrackSectionView('menu_products');
@@ -113,7 +114,7 @@ export default function MenuSection() {
       isFirstRender.current = false;
       return;
     }
-    window.history.replaceState(null, "", `#${MENU_HASH_SECTIONS[0]}#${products[actualProduct].slug}`);
+    window.history.replaceState(window.history.state, "", `#${MENU_HASH_SECTIONS[0]}#${products[actualProduct].slug}`);
   }, [actualProduct, products]);
 
   const handleEditProduct = () => {
@@ -245,21 +246,20 @@ export default function MenuSection() {
             </Button>
           ) : (
           <div className="flex flex-col sm:flex-row w-full max-w-[720px] items-center justify-center gap-3 sm:gap-6">
-            <Link href={"/cart"}>
-              <Button
-                variant="primary"
-                size="lg"
-                leftIcon={<HamburgerIcon className="w-6 h-6" />}
-                className="w-[199px] transition-all hover:scale-105 active:scale-95"
-                onClick={() => {
-                  handleAddToCart(currentProduct);
-                  showFoodToast(currentProduct);
-                  resetCurrentProduct();
-                }}
-              >
-                PAGAR AHORA
-              </Button>
-            </Link>
+            <Button
+              variant="primary"
+              size="lg"
+              leftIcon={<HamburgerIcon className="w-6 h-6" />}
+              className="w-[199px] transition-all hover:scale-105 active:scale-95"
+              onClick={() => {
+                handleAddToCart(currentProduct);
+                showFoodToast(currentProduct);
+                resetCurrentProduct();
+                router.push("/cart");
+              }}
+            >
+              PAGAR AHORA
+            </Button>
             <Button
               variant="yellow"
               size="lg"

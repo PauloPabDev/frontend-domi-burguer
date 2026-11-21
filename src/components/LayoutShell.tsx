@@ -38,9 +38,11 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
       {showPublicChrome && (
-        <div className="bg-primary-red pb-28 lg:pb-0">
+        <>
           <Footer />
-        </div>
+          {/* Relleno rojo bajo el footer para que el dock móvil no tape el contenido; las olas de arriba son transparentes y no deben quedar sobre rojo */}
+          <div className="h-28 bg-primary-red lg:hidden" />
+        </>
       )}
       {showPublicChrome && <GoogleSignInBanner />}
       {showPublicChrome && <InstallBanner />}

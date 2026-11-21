@@ -76,6 +76,7 @@ export function getKitchenStatusLabel(
       tone: "open",
       headline: "Abierto",
       detail: closeAt[0].toUpperCase() + closeAt.slice(1),
+      countdown: showCountdown ? `en ${formatTimeUntil(minutes)}` : undefined,
     };
   }
 
