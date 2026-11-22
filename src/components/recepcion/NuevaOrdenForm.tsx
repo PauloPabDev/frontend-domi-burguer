@@ -109,9 +109,8 @@ export function NuevaOrdenForm() {
   useEffect(() => {
     if (form.submitSuccess) {
       notify.success('¡Orden creada!', 'La orden fue enviada a cocina.');
-      form.resetForm();
     }
-  }, [form.submitSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [form.submitSuccess]);
 
   const handleOpenComplementEditor = useCallback((item: OrderItem) => {
     console.log('Opening complement editor for item:', item);

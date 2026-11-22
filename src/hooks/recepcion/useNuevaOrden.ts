@@ -361,6 +361,7 @@ export function useNuevaOrden() {
     if (orderItems.length === 0) { setSubmitError('Agrega al menos un producto'); return; }
 
     setSubmitError(null);
+    setSubmitSuccess(false); // el form ya no se limpia: sin esto una 2.ª orden no re-dispararía el aviso
     setIsSubmitting(true);
     try {
       const token = await getToken();
