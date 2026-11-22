@@ -13,7 +13,7 @@ import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
 import { OrderComment } from '@/components/ui/OrderComment';
 import { OrderActionButtons } from '@/components/ui/OrderActionButtons';
 import { OrderNumberChip, OrderClientChip, getClientOriginKey, cardOriginColorMap, type ClientNotesTarget } from '@/components/ui/OrderClientChips';
-import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
+import { OrderPaymentRow, getCashChange } from '@/components/ui/OrderPaymentRow';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/lib/dates';
 
@@ -57,6 +57,7 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
   const cardColor = cardOriginColorMap[getClientOriginKey(isUser, order?.origin)];
   const phone = order.client?.phone ?? order.user?.phone;
   const paid = order.payment?.status === 'approved';
+  const cashChange = order.paymentMethod === 'cash' && order.totalPrice > 0 ? getCashChange(order.totalPrice) : null;
   const itemCount = order.orderItems.reduce((acc, item) => acc + item.quantity, 0);
   const navigationUrl = getNavigationUrl(order);
   // Las notas del cliente cuelgan del cliente de recepción o, si pidió con cuenta, del usuario de la app
@@ -169,6 +170,13 @@ export const CourierOrderCard: React.FC<CourierOrderCardProps> = ({
             className={cn('text-neutral-black-100 shrink-0 transition-transform', showPrices && 'rotate-180')}
           />
         </button>
+        {/* Vueltas en efectivo: lo que el domiciliario debe devolver (misma lógica que recepción) */}
+        {cashChange && !paid && (
+          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-dashed border-neutral-black-10 text-xs tabular-nums">
+            <span className="text-neutral-black-100">Con {formatCOP(cashChange.bill)}</span>
+            <span className="font-semibold text-amber-600">Devolver {formatCOP(cashChange.change)}</span>
+          </div>
+        )}
         {showPrices && <OrderPriceBreakdown items={order.orderItems} deliveryPrice={order.deliveryPrice} />}
       </div>
 
