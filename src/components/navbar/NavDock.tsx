@@ -14,17 +14,23 @@ interface NavDockProps {
   navShadow?: string;
   /** Sube el dock para dejar libre el botón flotante del modo colapsado. */
   raised?: boolean;
+  /** Accesos que siempre van en el panel «Más» (p. ej. el perfil, cuando no hay navbar arriba). */
+  extra?: NavItem[];
+  /** Texto del botón del panel. */
+  moreLabel?: string;
 }
 
 const slotClass = 'flex h-14 max-w-24 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-3xl text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-red/50';
 
 /** Dock flotante inferior para móvil: hasta 5 accesos (4 + «Más» si hay más) al alcance del pulgar. */
-export const NavDock: React.FC<NavDockProps> = ({ items, navShadow, raised }) => {
+export const NavDock: React.FC<NavDockProps> = ({ items, navShadow, raised, extra = [], moreLabel = 'Más' }) => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const { visible, hidden } = splitByCapacity(items, items.length <= 5 ? items.length : 4);
+  const split = splitByCapacity(items, extra.length || items.length > 5 ? Math.min(items.length, 4) : items.length);
+  const visible = split.visible;
+  const hidden = [...split.hidden, ...extra];
   const hiddenBadges = hidden.reduce((s, i) => s + (i.badge ?? 0), 0);
   const hasActiveHidden = hidden.some((i) => i.isActive);
 
@@ -78,7 +84,7 @@ export const NavDock: React.FC<NavDockProps> = ({ items, navShadow, raised }) =>
               className={cn(slotClass, open || hasActiveHidden ? 'font-extrabold text-primary-red' : 'text-neutral-black-50')}
             >
               {icon(open, LayoutGrid, hiddenBadges)}
-              <span>Más</span>
+              <span className="max-w-full truncate">{moreLabel}</span>
             </button>
           )}
         </nav>
