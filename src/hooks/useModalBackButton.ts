@@ -48,63 +48,56 @@ export function useModalBackButton({
   const generatedId = useRef(providedStateId || `modal-${Math.random().toString(36).substr(2, 9)}`);
   const stateId = generatedId.current;
 
-  // Ref para trackear si el modal fue cerrado via back button
-  const closedViaBackButton = useRef(false);
-  // Ref para trackear si ya hicimos push al history
+  // onClose suele ser una función inline nueva en cada render: va por ref para que el
+  // efecto no se re-ejecute (y no empuje otra entrada al history) con cada render del modal.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
+  // Si ya empujamos nuestra entrada al history, y el back diferido pendiente
   const historyPushed = useRef(false);
-
-  // Handler estable para popstate
-  const handlePopState = useCallback(() => {
-    // Ignore popstate events fired by cleanup calls to history.back() from
-    // previously unmounted modal instances (race condition on quick reopen).
-    if (_pendingCleanupBacks > 0) {
-      _pendingCleanupBacks--;
-      return;
-    }
-    if (historyPushed.current) {
-      closedViaBackButton.current = true;
-      historyPushed.current = false;
-      onClose();
-    }
-  }, [onClose]);
+  const backTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !open) return;
 
-    if (open) {
-      // Modal se abrio - push state al history
-      const stateKey = `modal_${stateId}`;
-      window.history.pushState({ [stateKey]: true }, "");
+    // Re-ejecución inmediata (StrictMode, cierre y reapertura rápidos): se cancela el back
+    // pendiente y se reutiliza la entrada ya empujada, en vez de apilar o retroceder de más.
+    clearTimeout(backTimer.current);
+    if (!historyPushed.current) {
+      window.history.pushState({ [`modal_${stateId}`]: true }, "");
       historyPushed.current = true;
-      closedViaBackButton.current = false;
-
-      window.addEventListener("popstate", handlePopState);
-
-      return () => {
-        window.removeEventListener("popstate", handlePopState);
-      };
-    } else {
-      // Modal se cerro
-      if (historyPushed.current && !closedViaBackButton.current) {
-        // Cerrado programaticamente (no via back) - limpiar history
-        window.history.back();
-        historyPushed.current = false;
-      }
-      // Reset flags
-      closedViaBackButton.current = false;
     }
-  }, [open, enabled, stateId, handlePopState]);
 
-  // Cleanup al desmontar
-  useEffect(() => {
-    return () => {
+    const handlePopState = () => {
+      // popstate provocado por un history.back() de limpieza de otro modal: no es del usuario
+      if (_pendingCleanupBacks > 0) {
+        _pendingCleanupBacks--;
+        return;
+      }
       if (historyPushed.current) {
-        _pendingCleanupBacks++;
-        window.history.back();
         historyPushed.current = false;
+        onCloseRef.current();
       }
     };
-  }, []);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      // Diferido: un envío rápido o el doble montaje de StrictMode no deben encolar dos back()
+      // (el segundo sacaba al usuario de la página). Si el modal se cerró con el botón atrás,
+      // historyPushed ya es false y no hay nada que limpiar.
+      backTimer.current = setTimeout(() => {
+        if (!historyPushed.current) return;
+        historyPushed.current = false;
+        _pendingCleanupBacks++;
+        // Si nadie escucha ese popstate, el contador no debe quedar colgado
+        window.addEventListener("popstate", () => setTimeout(() => { _pendingCleanupBacks = 0; }, 0), { once: true });
+        window.history.back();
+      }, 0);
+    };
+  }, [open, enabled, stateId]);
 
   return { stateId };
 }

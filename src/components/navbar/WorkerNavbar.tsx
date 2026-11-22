@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, UserRound, X } from 'lucide-react';
 import { useSocket } from '@/contexts/SocketContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { WorkerKitchen } from '@/types/worker';
 import { PaymentRequestsInbox } from '@/components/admin/PaymentRequestsInbox';
 import { NAV_CONFIG, NavEntry, NavItem, NavRole } from './navConfig';
@@ -30,6 +31,8 @@ interface WorkerNavbarProps {
   showInbox?: boolean;
   /** Pantallas de trabajo continuo: el nav se pliega en un botón flotante. */
   collapsible?: boolean;
+  /** En móvil no hay pill arriba (ahorra espacio): el perfil pasa al botón «Más opciones» del dock. */
+  dockOnlyOnMobile?: boolean;
 }
 
 function isActive(entry: NavEntry, pathname: string) {
@@ -52,8 +55,10 @@ export const WorkerNavbar: React.FC<WorkerNavbarProps> = ({
   onKitchenChange,
   showInbox = false,
   collapsible = false,
+  dockOnlyOnMobile = false,
 }) => {
   const { connectionStatus } = useSocket();
+  const { user } = useAuth();
   const navShadow = useNavShadow(connectionStatus);
   const pathname = usePathname();
   const tier = useNavTier();
@@ -97,8 +102,20 @@ export const WorkerNavbar: React.FC<WorkerNavbarProps> = ({
   // Con la bandeja de solicitudes a la vista, en tablet caben menos accesos sueltos
   const cap = [0, showInbox ? 3 : 4, 5, 5, 6][tier];
 
+  const profile: NavItem = {
+    key: 'perfil',
+    label: 'Mi perfil',
+    Icon: UserRound,
+    group: 'Cuenta',
+    description: user?.displayName ?? 'Tu cuenta y sesión',
+    href: '/profile',
+    isActive: pathname.startsWith('/profile'),
+  };
+
   const nav =
-    tier === 0 ? (
+    tier === 0 && dockOnlyOnMobile ? (
+      <NavDock items={items} navShadow={navShadow} extra={[profile]} moreLabel="Más opciones" />
+    ) : tier === 0 ? (
       <>
         <NavPillShell navShadow={navShadow}>
           <div className="flex-1 min-w-0 flex items-center gap-1.5">

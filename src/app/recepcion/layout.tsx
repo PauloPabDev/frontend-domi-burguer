@@ -1,19 +1,43 @@
 "use client";
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { SocketProvider } from '@/contexts/SocketContext';
+import { SocketProvider, useSocket } from '@/contexts/SocketContext';
 import { CourierPanelProvider } from '@/contexts/CourierPanelContext';
 import { RecepcionNavbar } from '@/components/recepcion/RecepcionNavbar';
 import { RecepcionKanbanSkeleton } from '@/components/recepcion/RecepcionBoardSkeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CourierManagerPanel } from '@/components/recepcion/CourierManagerPanel';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
+import { KitchenSelector } from '@/components/cocina/KitchenSelector';
+import { WorkerKitchen } from '@/types/worker';
+
+// Sin cocina elegida el tablero llegaría vacío; se pide elegir una (mismo flujo que el dropdown del navbar)
+function NoKitchenNotice({ kitchens, onSelect }: { kitchens: WorkerKitchen[]; onSelect: (id: string) => void }) {
+  const { changeKitchen } = useSocket();
+  return (
+    <div className="flex flex-col items-center">
+      <p className="rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-sm font-semibold px-4 py-3 text-center">
+        No tienes cocina seleccionada. Selecciona una para ver los pedidos de esa cocina.
+      </p>
+      <KitchenSelector
+        kitchens={kitchens}
+        loading={false}
+        onSelect={(id) => {
+          onSelect(id);
+          changeKitchen(id);
+        }}
+      />
+    </div>
+  );
+}
 
 function RecepcionLayoutInner({ children }: { children: React.ReactNode }) {
-  const { kitchens, selectedKitchenId, selectedKitchen, selectKitchen } = useKitchenSelector();
+  const { kitchens, selectedKitchenId, selectedKitchen, selectKitchen, loading } = useKitchenSelector();
+  // Solo en el tablero de pedidos; contabilidad, historial, etc. no dependen de la cocina
+  const needsKitchen = usePathname() === '/recepcion' && !loading && !selectedKitchen && kitchens.length > 0;
 
   return (
     <SocketProvider role="reception" kitchenId={selectedKitchenId}>
@@ -23,7 +47,9 @@ function RecepcionLayoutInner({ children }: { children: React.ReactNode }) {
           selectedKitchen={selectedKitchen}
           onKitchenChange={selectKitchen}
         />
-        <main className="w-full px-4 mt-[100px] pt-4 pb-28 md:pb-4">{children}</main>
+        <main className="w-full px-4 mt-[100px] pt-4 pb-28 md:pb-4">
+          {needsKitchen ? <NoKitchenNotice kitchens={kitchens} onSelect={selectKitchen} /> : children}
+        </main>
         <CourierManagerPanel />
       </CourierPanelProvider>
     </SocketProvider>
