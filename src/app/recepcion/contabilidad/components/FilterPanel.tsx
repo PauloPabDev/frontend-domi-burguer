@@ -48,6 +48,11 @@ export function FilterPanel({
       {/* Cocina */}
       <div>
         <label className="block text-xs font-semibold text-neutral-black-50 mb-1">Cocina</label>
+        {kitchens.length === 1 ? (
+          <div className="w-full h-10 rounded-full border-[1.5px] border-neutral-black-20 px-4 text-sm font-semibold text-neutral-black-80 flex items-center">
+            {kitchens[0].name}
+          </div>
+        ) : (
         <select
           value={selectedKitchenId ?? ''}
           onChange={(e) => onSelectKitchen(e.target.value || null)}
@@ -58,6 +63,7 @@ export function FilterPanel({
             <option key={k.id} value={k.id}>{k.name}</option>
           ))}
         </select>
+        )}
       </div>
 
       {/* Rango de fechas */}

@@ -50,6 +50,29 @@ export const NavKitchenDropdown: React.FC<NavKitchenDropdownProps> = ({
 
   if (!kitchens.length) return null;
 
+  // Una sola cocina: solo se muestra cuál es, sin desplegable
+  if (kitchens.length === 1) {
+    const only = kitchens[0];
+    return variant === 'pill' ? (
+      <div
+        className={cn(
+          'flex items-center gap-2 rounded-full h-10 lg:h-12 shrink-0 border border-neutral-black-20 bg-white text-neutral-black-80',
+          compact ? 'px-2.5 lg:px-4' : 'px-4',
+        )}
+      >
+        <ChefHat className="w-4 h-4 text-primary-red shrink-0" />
+        <span className={cn('max-w-[90px] truncate text-xs md:text-sm font-semibold', compact && 'hidden lg:inline')}>
+          {only.name}
+        </span>
+      </div>
+    ) : (
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-black-80">
+        <Store size={13} className="text-primary-red shrink-0" />
+        <span className="max-w-[110px] truncate">{only.name}</span>
+      </div>
+    );
+  }
+
   return (
     <div ref={containerRef} className="relative">
       {variant === 'pill' ? (

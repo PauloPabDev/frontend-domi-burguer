@@ -57,11 +57,14 @@ export const useKitchenSelector = () => {
   }, []);
 
   // Si la cocina seleccionada (p.ej. persistida de una sesión previa) ya no
-  // está entre las cocinas permitidas, se limpia la selección.
+  // está entre las cocinas permitidas, se limpia la selección. Con una sola
+  // cocina permitida, se selecciona sola; con varias, el usuario debe elegir.
   useEffect(() => {
     if (loading) return;
     if (selectedKitchenId && !kitchens.some((k) => k.id === selectedKitchenId)) {
-      selectKitchen(null);
+      selectKitchen(kitchens.length === 1 ? kitchens[0].id : null);
+    } else if (!selectedKitchenId && kitchens.length === 1) {
+      selectKitchen(kitchens[0].id);
     }
   }, [loading, kitchens, selectedKitchenId, selectKitchen]);
 
