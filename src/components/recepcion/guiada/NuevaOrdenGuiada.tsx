@@ -49,8 +49,10 @@ export function NuevaOrdenGuiada() {
   useEffect(() => {
     if (form.submitSuccess) {
       notify.success('¡Orden creada!', 'La orden fue enviada a cocina.');
+      form.resetForm();
+      setStep(1);
     }
-  }, [form.submitSuccess]);
+  }, [form.submitSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const goToStep = useCallback((target: StepId) => {
     if (canGoToStep(target, form)) setStep(target);
