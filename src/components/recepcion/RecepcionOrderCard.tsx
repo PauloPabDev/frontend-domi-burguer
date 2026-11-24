@@ -438,6 +438,7 @@ export const RecepcionOrderCard: React.FC<RecepcionOrderCardProps> = ({
           onDelete={readOnly ? undefined : () => onDelete(order.id)}
           paymentChangeMode={readOnly ? undefined : paymentChangeMode}
           onOpenPaymentChange={() => setShowPaymentModal(true)}
+          detailHref={`/recepcion/orden/${order.id}`}
         />
       )}
 

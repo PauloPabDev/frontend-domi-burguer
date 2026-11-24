@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ChefHat, Copy, Check, CreditCard, Trash2, Send, Loader2, X } from 'lucide-react';
+import Link from 'next/link';
+import { ChefHat, Copy, Check, CreditCard, ExternalLink, Trash2, Send, Loader2, X } from 'lucide-react';
 import { WorkerOrder } from '@/types/worker';
 import { Modal, ModalHeader } from '@/components/ui/modal';
 import { OrderStatusTimeline } from '@/components/ui/OrderStatusTimeline';
@@ -17,6 +18,8 @@ export interface OrderNumberMenuProps {
   /** apply: admin cambia el pago · request: recepción solicita el cambio. Sin valor no se muestra. */
   paymentChangeMode?: 'apply' | 'request';
   onOpenPaymentChange?: () => void;
+  /** Con valor se muestra "Ver orden completa" (página propia de la orden) */
+  detailHref?: string;
 }
 
 interface ActionRowProps {
@@ -53,6 +56,7 @@ export function OrderNumberMenu({
   onDelete,
   paymentChangeMode,
   onOpenPaymentChange,
+  detailHref,
 }: OrderNumberMenuProps) {
   const [copied, setCopied] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -95,6 +99,18 @@ export function OrderNumberMenu({
         <OrderStatusTimeline status={order.status} timeLapseStatus={order.timeLapseStatus} createdAt={order.createdAt} />
 
         <div className="flex flex-col divide-y divide-neutral-100">
+          {detailHref && (
+            <Link
+              href={detailHref}
+              className="flex items-center gap-3 px-4 py-3.5 text-sm font-medium text-neutral-black-80 hover:bg-neutral-50 transition-colors"
+            >
+              <span className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-sky-50">
+                <ExternalLink size={15} className="text-sky-600" />
+              </span>
+              Ver orden completa
+            </Link>
+          )}
+
           <ActionRow
             onClick={handleCopyId}
             iconBg="bg-neutral-100"
