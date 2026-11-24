@@ -1,0 +1,236 @@
+"use client";
+
+import { useRef, useState } from 'react';
+import { Bike, ChefHat, CreditCard, Loader2, Trash2 } from 'lucide-react';
+import { WorkerOrder, WorkerKitchen } from '@/types/worker';
+import { OrderStatus } from '@/types/orders';
+import { PaymentChange, PaymentChangeRequestInput } from '@/types/paymentChangeRequest';
+import { OrderStatusStrip } from '@/components/ui/OrderStatusStrip';
+import { OrderStatusTimeline } from '@/components/ui/OrderStatusTimeline';
+import { OrderStatusPicker } from '@/components/ui/OrderStatusPicker';
+import { OrderItemsList } from '@/components/ui/OrderItemsList';
+import { OrderPaymentRow } from '@/components/ui/OrderPaymentRow';
+import { OrderAddressRow } from '@/components/ui/OrderAddressRow';
+import { OrderComment } from '@/components/ui/OrderComment';
+import { OrderClientChip } from '@/components/ui/OrderClientChips';
+import { AssignCourierPopover } from '@/components/recepcion/AssignCourierPopover';
+import { AssignKitchenModal } from '@/components/recepcion/AssignKitchenModal';
+import { PaymentChangeModal } from '@/components/recepcion/PaymentChangeModal';
+
+interface AdminOrderPanelProps {
+  order: WorkerOrder;
+  kitchens: WorkerKitchen[];
+  /** Se llama tras cancelar la orden (cerrar el modal o volver a la lista) */
+  onClose: () => void;
+  onStatusChange: (orderId: string, prev: OrderStatus, next: OrderStatus) => Promise<void>;
+  onAssignCourier: (orderId: string, courierId: string | null) => Promise<void>;
+  onAssignKitchen: (orderId: string, kitchenId: string) => Promise<void>;
+  /** Cobro normal: método mientras el pago no esté aprobado */
+  onPaymentMethodChange: (orderId: string, previousMethod: string, method: string) => Promise<void>;
+  onMarkPaid: (orderId: string) => Promise<void>;
+  /** Corrección de admin: método aunque el pago esté aprobado y cualquier estado */
+  onAdminPaymentChange: (orderId: string, previousMethod: string, change: PaymentChange) => Promise<void>;
+  onDelete: (orderId: string) => Promise<void>;
+}
+
+const SECTION = 'border-t border-neutral-black-10 px-5 py-4';
+
+/**
+ * Contenido del panel de administración de una orden: consolida los procesos de cocina, recepción
+ * y courier en un único lugar con permisos de admin — puede saltar a cualquier
+ * estado (incluso retroceder) y corregir el estado de pago. El backend es quien
+ * valida en última instancia que el usuario tenga rol admin.
+ */
+export function AdminOrderPanel({
+  order,
+  kitchens,
+  onClose,
+  onStatusChange,
+  onAssignCourier,
+  onAssignKitchen,
+  onPaymentMethodChange,
+  onMarkPaid,
+  onAdminPaymentChange,
+  onDelete,
+}: AdminOrderPanelProps) {
+  const [showCourierPopover, setShowCourierPopover] = useState(false);
+  const [showKitchenModal, setShowKitchenModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const courierButtonRef = useRef<HTMLButtonElement>(null);
+
+  const clientName = order.client?.name ?? order.user?.name;
+  const clientPhone = order.client?.phone ?? order.user?.phone;
+  const isUser = !order.clientId && !!order.userId;
+
+  // El motivo solo se usa en las solicitudes; la corrección envía tipo y valor
+  const handlePaymentChange = (change: PaymentChangeRequestInput) =>
+    onAdminPaymentChange(order.id, order.paymentMethod, change);
+
+  const handleDelete = async () => {
+    if (!confirmingDelete) { setConfirmingDelete(true); return; }
+    setDeleting(true);
+    try {
+      await onDelete(order.id);
+      onClose();
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <>
+      <div>
+        <OrderStatusStrip status={order.status} />
+
+        <OrderStatusTimeline status={order.status} timeLapseStatus={order.timeLapseStatus} createdAt={order.createdAt} />
+
+        {/* Cliente */}
+        <div className={SECTION}>
+          <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide mb-2">Cliente</p>
+          <OrderClientChip
+            name={clientName}
+            phone={clientPhone}
+            clientId={order.clientId}
+            avatarSrc={order.clientId ? order.client?.photoURL : order.user?.photoURL}
+            isUser={isUser}
+            origin={order.origin}
+            phoneVisible
+          />
+        </div>
+
+        {/* Dirección */}
+        <div className={SECTION}>
+          <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide mb-2">Dirección</p>
+          <OrderAddressRow
+            location={order.location}
+            address={order.deliveryAddress?.address}
+            floor={order.deliveryAddress?.floor}
+          />
+        </div>
+
+        {order.comment && (
+          <div className={SECTION}>
+            <OrderComment comment={order.comment} />
+          </div>
+        )}
+
+        {/* Productos */}
+        <div className={SECTION}>
+          <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide mb-3">Productos</p>
+          <OrderItemsList items={order.orderItems} deliveryPrice={order.deliveryPrice} />
+        </div>
+
+        {/* Pago */}
+        <div className={SECTION}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide">Pago</p>
+            <button
+              type="button"
+              onClick={() => setShowPaymentModal(true)}
+              className="flex items-center gap-1 text-xs font-semibold text-neutral-black-80 hover:text-primary-red transition-colors"
+            >
+              <CreditCard size={13} />
+              Cambiar método o estado
+            </button>
+          </div>
+          <OrderPaymentRow
+            paymentMethod={order.paymentMethod}
+            paid={order.payment?.status === 'approved'}
+            total={order.totalPrice}
+            recepcionMode
+            onPaymentMethodChange={(method) => onPaymentMethodChange(order.id, order.paymentMethod, method)}
+            onMarkPaid={() => onMarkPaid(order.id)}
+            onMarkPending={() =>
+              onAdminPaymentChange(order.id, order.paymentMethod, { type: 'paymentStatus', value: 'pending' })
+            }
+          />
+        </div>
+
+        {/* Cocina y domiciliario */}
+        <div className={`${SECTION} flex flex-wrap gap-2`}>
+          <button
+            type="button"
+            onClick={() => setShowKitchenModal(true)}
+            className="flex items-center gap-2 text-xs font-semibold text-neutral-black-80 hover:text-primary-red border border-neutral-black-20 rounded-xl px-3 py-2 transition-colors"
+          >
+            <ChefHat size={13} />
+            {order.kitchen?.name ?? 'Asignar cocina'}
+          </button>
+          <button
+            ref={courierButtonRef}
+            type="button"
+            onClick={() => setShowCourierPopover((v) => !v)}
+            className="flex items-center gap-2 text-xs font-semibold text-neutral-black-80 hover:text-primary-red border border-neutral-black-20 rounded-xl px-3 py-2 transition-colors"
+          >
+            <Bike size={13} />
+            {order.courier?.name ?? 'Asignar domiciliario'}
+          </button>
+        </div>
+
+        {/* Cambiar estado (override de admin) */}
+        <div className={SECTION}>
+          <p className="text-[10px] font-bold text-neutral-black-50 uppercase tracking-wide mb-2">
+            Forzar estado (admin)
+          </p>
+          <OrderStatusPicker
+            currentStatus={order.status}
+            onSelect={(next) => onStatusChange(order.id, order.status, next)}
+          />
+        </div>
+
+        {/* Cancelar orden */}
+        <div className={SECTION}>
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleting}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 ${
+              confirmingDelete ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'text-neutral-black-50 hover:bg-neutral-black-5'
+            }`}
+          >
+            {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+            {confirmingDelete ? 'Confirmar cancelación de la orden' : 'Cancelar orden'}
+          </button>
+          {confirmingDelete && !deleting && (
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(false)}
+              className="w-full text-center text-xs text-neutral-black-50 hover:text-neutral-black-80 mt-1.5"
+            >
+              No cancelar
+            </button>
+          )}
+        </div>
+      </div>
+
+    {showCourierPopover && (
+      <AssignCourierPopover
+        anchorRef={courierButtonRef}
+        currentCourierId={order.courierId}
+        onAssign={(id) => onAssignCourier(order.id, id)}
+        onClose={() => setShowCourierPopover(false)}
+      />
+    )}
+
+    {showKitchenModal && (
+      <AssignKitchenModal
+        kitchens={kitchens}
+        currentKitchenId={order.kitchenId}
+        onAssign={(id) => onAssignKitchen(order.id, id)}
+        onClose={() => setShowKitchenModal(false)}
+      />
+    )}
+
+    {showPaymentModal && (
+      <PaymentChangeModal
+        order={order}
+        mode="apply"
+        onSubmit={handlePaymentChange}
+        onClose={() => setShowPaymentModal(false)}
+      />
+    )}
+    </>
+  );
+}
