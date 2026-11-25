@@ -20,9 +20,9 @@ export const NavWorkerAvatar: React.FC<NavWorkerAvatarProps> = ({ compact = fals
       onClick={() => router.push('/profile')}
       variant="yellow"
       size="md"
-      className="rounded-full p-2 lg:h-12 lg:px-5 shrink-0"
+      className="rounded-full p-1 lg:h-12 lg:pl-1 lg:pr-5 shrink-0"
     >
-      <Avatar className="w-7 h-7 md:w-8 md:h-8">
+      <Avatar className="h-full w-auto aspect-square">
         {user?.photoURL && (
           <AvatarImage src={user.photoURL} alt={user.displayName ?? ''} />
         )}

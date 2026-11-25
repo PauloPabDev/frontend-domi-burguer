@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { GoogleMap, OverlayView, useLoadScript } from "@react-google-maps/api";
 import { silverMapStyle } from "@/utils/mapStyles";
 
@@ -16,8 +16,8 @@ export interface MapMarker {
   isUnassigned?: boolean;
   courierAvatarUrl?: string;
   courierName?: string;
-  /** 'courier' renderiza un pin de ubicación en vivo (Traccar) en vez del pin de pedido */
-  type?: 'order' | 'courier';
+  /** 'courier' renderiza un pin de ubicación en vivo (Traccar); 'kitchen', el ícono de Domi Burguer de una sede */
+  type?: 'order' | 'courier' | 'kitchen';
   /** Solo para type: 'courier' — atenúa el pin cuando el dispositivo no está online */
   isOffline?: boolean;
   /** Contenido a mostrar flotando sobre el pin mientras esté seleccionado (p. ej. detalle del domiciliario) */
@@ -241,10 +241,74 @@ function CourierPin({ label, avatarUrl, isSelected, isOffline, onClick }: Courie
   );
 }
 
+interface KitchenPinProps {
+  label: string;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+// /Pin.png mide 70x78 y su punta (el último píxel opaco) está en x=35, y=48.5; debajo solo hay sombra transparente.
+const PIN_W = 70;
+const PIN_H = 78;
+const PIN_TIP_X = 35;
+const PIN_TIP_Y = 48.5;
+
+function KitchenPin({ label, isSelected, onClick }: KitchenPinProps) {
+  const scale = (isSelected ? 60 : 48) / PIN_W;
+
+  return (
+    // Ancla de tamaño cero sobre la coordenada: la punta del pin queda exactamente ahí
+    <div style={{ position: "relative", width: 0, height: 0, zIndex: isSelected ? 998 : 3 }}>
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        title={label}
+        style={{
+          position: "absolute",
+          left: -PIN_TIP_X * scale,
+          top: -PIN_TIP_Y * scale,
+          width: PIN_W * scale,
+          height: PIN_H * scale,
+          cursor: "pointer",
+          transition: "all 0.15s ease",
+        }}
+      >
+        {/* Mismo pin del mapa de /orders/[id] */}
+        <img src="/Pin.png" alt={label} style={{ display: "block", width: "100%", height: "100%" }} />
+        {isSelected && (
+          <span
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: "100%",
+              transform: "translateX(-50%)",
+              marginBottom: 2,
+              fontSize: 11,
+              fontWeight: 600,
+              color: "#111827",
+              backgroundColor: "white",
+              padding: "1px 6px",
+              borderRadius: 6,
+              whiteSpace: "nowrap",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
+            }}
+          >
+            {label}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface MultiMarkerMapProps {
   markers: MapMarker[];
   selectedMarkerId?: string;
   center?: { lat: number; lng: number };
+  /** Se centra una sola vez, cuando el mapa carga y el punto está disponible (p. ej. la cocina del usuario) */
+  initialFocus?: { lat: number; lng: number } | null;
   onMarkerClick?: (markerId: string) => void;
   /** Click en el mapa fuera de cualquier pin — se usa para cerrar el popover abierto */
   onBackgroundClick?: () => void;
@@ -260,6 +324,7 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
   markers,
   selectedMarkerId,
   center,
+  initialFocus,
   onMarkerClick,
   onBackgroundClick,
   minHeight = "200px",
@@ -273,6 +338,8 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
   });
 
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [mapReady, setMapReady] = useState(false);
+  const focusedRef = useRef(false);
   // Centro inicial: se calcula una sola vez, al montar. De ahí en adelante el
   // mapa es "no controlado" — nunca se recentra como efecto secundario de que
   // lleguen nuevas ubicaciones de domiciliarios (eso era lo que causaba el
@@ -298,6 +365,12 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center?.lat, center?.lng]);
 
+  useEffect(() => {
+    if (!mapReady || !initialFocus || focusedRef.current) return;
+    focusedRef.current = true;
+    mapRef.current?.setCenter(initialFocus);
+  }, [mapReady, initialFocus]);
+
   if (!isLoaded) {
     return (
       <div
@@ -313,8 +386,8 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
     <GoogleMap
       mapContainerStyle={{ width: "100%", height: "100%", minHeight }}
       mapContainerClassName={className}
-      onLoad={(map) => { mapRef.current = map; }}
-      onUnmount={() => { mapRef.current = null; }}
+      onLoad={(map) => { mapRef.current = map; setMapReady(true); }}
+      onUnmount={() => { mapRef.current = null; setMapReady(false); }}
       onClick={() => onBackgroundClick?.()}
       center={initialCenterRef.current}
       zoom={defaultZoom}
@@ -338,7 +411,13 @@ export const MultiMarkerMap: React.FC<MultiMarkerMapProps> = ({
               mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
               getPixelPositionOffset={() => ({ x: 0, y: 0 })}
             >
-              {marker.type === "courier" ? (
+              {marker.type === "kitchen" ? (
+                <KitchenPin
+                  label={marker.label || ""}
+                  isSelected={isSelected}
+                  onClick={() => handleMarkerClick(marker.id)}
+                />
+              ) : marker.type === "courier" ? (
                 <CourierPin
                   label={marker.label || ""}
                   avatarUrl={marker.avatarUrl}

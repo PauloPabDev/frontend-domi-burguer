@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useEnrichedOrders } from '@/hooks/useEnrichedOrders';
 import { useKitchenSelector } from '@/hooks/kitchen/useKitchenSelector';
+import { useKitchenCoordinates } from '@/hooks/kitchen/useKitchenCoordinates';
 import { useCourierDevicePhotos } from '@/hooks/reception/useCourierDevicePhotos';
 import { MultiMarkerMap, MapMarker } from '@/components/map/MultiMarkerMap';
 import { RecepcionOrderCard } from '@/components/recepcion/RecepcionOrderCard';
@@ -25,7 +26,8 @@ const MAP_STATUSES: OrderStatus[] = ['fresh', 'preparing', 'ready_for_pickup', '
 export default function RecepcionMapaPage() {
   const { user } = useAuth();
   const { orders, connectionStatus, courierLocations } = useSocket();
-  const { kitchens } = useKitchenSelector();
+  const { kitchens, selectedKitchen } = useKitchenSelector();
+  const kitchenCoords = useKitchenCoordinates(kitchens);
   const enrichedOrders = useEnrichedOrders(orders, kitchens);
   const { userProfile } = useUserProfile();
   const isAdmin = userProfile?.roles?.includes('admin') ?? false;
@@ -113,7 +115,14 @@ export default function RecepcionMapaPage() {
       })
     : [];
 
-  const markers: MapMarker[] = [...orderMarkers, ...courierMarkers];
+  const kitchenMarkers: MapMarker[] = kitchens.flatMap((k) => {
+    const position = kitchenCoords.get(k.id);
+    return position ? [{ id: `kitchen-${k.id}`, position, label: k.name, type: 'kitchen' as const }] : [];
+  });
+
+  const markers: MapMarker[] = [...kitchenMarkers, ...orderMarkers, ...courierMarkers];
+
+  const kitchenFocus = selectedKitchen ? kitchenCoords.get(selectedKitchen.id) ?? null : null;
 
   const selectedOrder = visibleOrders.find((o) => o.id === selectedId);
   const selectedCenter = selectedOrder?.deliveryAddress?.coordinates;
@@ -176,6 +185,7 @@ export default function RecepcionMapaPage() {
           markers={markers}
           selectedMarkerId={selectedId ?? undefined}
           center={selectedCenter}
+          initialFocus={kitchenFocus}
           onMarkerClick={(id) => setSelectedId((prev) => (prev === id ? null : id))}
           onBackgroundClick={() => setSelectedId(null)}
           minHeight="100%"
