@@ -10,7 +10,10 @@ import { MultiMarkerMap, MapMarker } from '@/components/map/MultiMarkerMap';
 import { CourierService } from '@/services/courierService';
 import { OrderStatus } from '@/types/orders';
 import { STATUS_CONFIG } from '@/types/worker';
-import { Bike } from 'lucide-react';
+import { Bike, Focus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { getCourierView, setCourierView } from '@/hooks/courier/useCourierView';
+import { track } from '@/utils/analytics';
 
 export default function DomiciliarioPage() {
   const { user } = useAuth();
@@ -19,6 +22,20 @@ export default function DomiciliarioPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const router = useRouter();
+  // Hasta leer la preferencia no se pinta nada, para no mostrar la vista que se va a reemplazar
+  const [viewChecked, setViewChecked] = useState(false);
+
+  useEffect(() => {
+    if (getCourierView() === 'focus') router.replace('/domiciliario/enfoque');
+    else setViewChecked(true);
+  }, [router]);
+
+  const switchToFocus = () => {
+    setCourierView('focus');
+    track('courier_view_switch', { to: 'focus' });
+    router.push('/domiciliario/enfoque');
+  };
 
   // Auto-scroll to selected card (e.g. when tapping a map marker)
   useEffect(() => {
@@ -74,10 +91,20 @@ export default function DomiciliarioPage() {
   // Con la conexión caída no se deja el skeleton para siempre
   const showSkeleton = !ordersReady && connectionStatus !== 'DISCONNECTED' && connectionStatus !== 'OFFLINE';
 
+  if (!viewChecked) return null;
+
   return (
     <div className="h-full flex flex-col lg:flex-row py-3 gap-3">
       {/* Map */}
-      <div className="rounded-2xl overflow-hidden shadow-sm border border-neutral-black-20 h-[45%] shrink-0 lg:h-full lg:flex-1">
+      <div className="relative rounded-2xl overflow-hidden shadow-sm border border-neutral-black-20 h-[45%] shrink-0 lg:h-full lg:flex-1">
+        <button
+          type="button"
+          onClick={switchToFocus}
+          className="absolute left-2 top-2 z-10 flex min-h-11 items-center gap-1.5 rounded-full bg-white/95 px-3 text-xs font-bold text-neutral-black-80 shadow-md"
+        >
+          <Focus size={16} />
+          Vista enfocada
+        </button>
         <MultiMarkerMap
           markers={markers}
           selectedMarkerId={selectedId ?? undefined}
