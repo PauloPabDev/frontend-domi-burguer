@@ -26,6 +26,7 @@ const GAP = 2;
 const OVER_R0 = 176;
 const OVER_STEP = 11;
 const OVER_SW = 7;
+const OVER_STATUS_SW = 10; // línea del color del estado, un poco más gruesa que la roja
 
 interface Stage {
   status: OrderStatus;
@@ -194,6 +195,21 @@ export function OrderStatusTimeline({ status, timeLapseStatus = [], createdAt }:
                     className="stroke-primary-red"
                     strokeDasharray={`${Math.max((len / DIAL_MIN) * c, 2)} ${c}`}
                   />
+                  {/* Encima del rojo: el color de la etapa en la que cayeron esos minutos de más */}
+                  {arcs.map(({ s, i, a }) => {
+                    const from = Math.max(a, (k + 1) * DIAL_MIN);
+                    const to = Math.min(a + s.min, (k + 2) * DIAL_MIN);
+                    // Facturada: ya no interesa ver "Entregado" ni "Facturado", queda solo el rojo
+                    if (to <= from || s.status === 'invoiced' || (status === 'invoiced' && s.status === 'delivered')) return null;
+                    return (
+                      <circle
+                        key={i} cx={CX} cy={CX} r={r} fill="none" strokeWidth={OVER_STATUS_SW}
+                        stroke={STATUS_CONFIG[s.status].hex}
+                        strokeDasharray={`${((to - from) / DIAL_MIN) * c} ${c}`}
+                        strokeDashoffset={-((from - (k + 1) * DIAL_MIN) / DIAL_MIN) * c}
+                      />
+                    );
+                  })}
                 </g>
               );
             })}
