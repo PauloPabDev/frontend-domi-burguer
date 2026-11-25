@@ -100,7 +100,7 @@ export const WorkerNavbar: React.FC<WorkerNavbarProps> = ({
   const inbox = showInbox && <PaymentRequestsInbox kitchens={kitchens} labelClassName="hidden" />;
 
   // Con la bandeja de solicitudes a la vista, en tablet caben menos accesos sueltos
-  const cap = [0, showInbox ? 3 : 4, 5, 5, 6][tier];
+  const cap = [0, showInbox ? 3 : 4, 4, 4, 5][tier];
 
   const profile: NavItem = {
     key: 'perfil',
@@ -133,8 +133,8 @@ export const WorkerNavbar: React.FC<WorkerNavbarProps> = ({
         <div className="shrink-0">
           <NavPillLogo href={home} />
         </div>
-        <div className="flex-1 min-w-0 flex justify-center">
-          <NavSegment items={items} cap={cap} labelAll={tier >= 3} wideMore={tier >= 2} />
+        <div className="flex-1 min-w-0 flex justify-center px-3">
+          <NavSegment items={items} cap={cap} labelAll={tier >= 4} wideMore={tier >= 2} />
         </div>
         <div className="shrink-0 flex items-center gap-1.5 lg:gap-2">
           {inbox}

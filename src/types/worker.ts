@@ -94,6 +94,7 @@ export interface WorkerKitchen {
   id: string;
   name: string;
   location?: string;
+  locationId?: string;
 }
 
 export interface WorkerUser {
