@@ -24,7 +24,7 @@ interface CourierOrderCardProps {
   onStatusChange?: (orderId: string, prev: OrderStatus, next: OrderStatus) => Promise<void>;
 }
 
-const STATUS_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: string }>> = {
+export const STATUS_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label: string }>> = {
   ready_for_pickup: { next: 'dispatched', label: 'Iniciar entrega' },
   dispatched: { next: 'delivered', label: 'Marcar entregado' },
 };
@@ -34,7 +34,7 @@ const STATUS_TRANSITIONS: Partial<Record<OrderStatus, { next: OrderStatus; label
 // El radio de la card (24px) = radio de los botones (8px) + padding lateral (16px), para que sean concéntricos.
 const SECTION = 'border-t border-neutral-black-10 px-4 py-3';
 
-function getNavigationUrl(order: CourierOrder) {
+export function getNavigationUrl(order: CourierOrder) {
   const coords = order.location?.coordinates;
   if (coords?.lat != null && coords?.lng != null) {
     return `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`;

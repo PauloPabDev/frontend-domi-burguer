@@ -35,6 +35,8 @@ export interface NavEntry {
   action?: boolean;
   /** Activo solo en la ruta exacta (las rutas raíz como /recepcion). */
   exact?: boolean;
+  /** Otras rutas exactas que también lo activan (vistas alternativas de la misma pantalla). */
+  alsoActive?: string[];
 }
 
 /**
@@ -47,7 +49,7 @@ export const NAV_CONFIG: Record<NavRole, NavEntry[]> = {
     { key: 'docs', label: 'Documentos', short: 'Guías', Icon: BookOpen, group: 'Ayuda', description: 'Recetas y procesos', href: '/cocina/documentos' },
   ],
   domiciliario: [
-    { key: 'ordenes', label: 'Órdenes', Icon: MapPin, group: 'Operación', description: 'Entregas asignadas', href: '/domiciliario', exact: true },
+    { key: 'ordenes', label: 'Órdenes', Icon: MapPin, group: 'Operación', description: 'Entregas asignadas', href: '/domiciliario', exact: true, alsoActive: ['/domiciliario/enfoque'] },
     { key: 'historial', label: 'Historial', Icon: ClipboardList, group: 'Operación', description: 'Entregas y ganancias', href: '/domiciliario/historial' },
     { key: 'docs', label: 'Documentos', short: 'Guías', Icon: BookOpen, group: 'Ayuda', description: 'Guías de reparto', href: '/domiciliario/documentos' },
   ],

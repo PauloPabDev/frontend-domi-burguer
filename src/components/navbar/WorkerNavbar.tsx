@@ -37,6 +37,7 @@ interface WorkerNavbarProps {
 
 function isActive(entry: NavEntry, pathname: string) {
   if (!entry.href) return false;
+  if (entry.alsoActive?.includes(pathname)) return true;
   return entry.exact ? pathname === entry.href : pathname === entry.href || pathname.startsWith(`${entry.href}/`);
 }
 
