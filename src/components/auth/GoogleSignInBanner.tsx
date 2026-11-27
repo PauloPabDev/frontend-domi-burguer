@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useConsentStore } from "@/store/consentStore";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogoMobile } from "@/components/ui/icons";
-import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { FloatingPrompt } from "@/components/prompts/FloatingPrompt";
+import { useDismissal, usePromptSlot } from "@/hooks/usePromptSlot";
+import { trackPrompt } from "@/utils/analytics";
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -18,46 +17,22 @@ const GoogleIcon = () => (
 );
 
 export function GoogleSignInBanner() {
-  // Primero la decisión de cookies; los demás avisos esperan para no apilarse.
-  const consentPending = useConsentStore((s) => s.analytics === null);
   const { user, loading, signInWithGoogle } = useAuth();
-  const { isInstallable, isInstalled } = usePWAInstall();
-  const [isDismissed, setIsDismissed] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [dismissed, dismiss] = useDismissal("google-signin-banner-dismissed", 3);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [pwaBannerDismissed, setPwaBannerDismissed] = useState(false);
+  const visible = usePromptSlot("signin", !loading && !user && !dismissed);
 
-  useEffect(() => {
-    setMounted(true);
-    const dismissed = localStorage.getItem("google-signin-banner-dismissed");
-    if (dismissed) {
-      const dismissedTime = parseInt(dismissed, 10);
-      // Mostrar de nuevo después de 3 días
-      if (Date.now() - dismissedTime < 3 * 24 * 60 * 60 * 1000) {
-        setIsDismissed(true);
-      }
-    }
-    // Verificar si el banner de PWA fue descartado
-    const pwaDismissed = localStorage.getItem("pwa-banner-dismissed");
-    if (pwaDismissed) {
-      const dismissedTime = parseInt(pwaDismissed, 10);
-      if (Date.now() - dismissedTime < 7 * 24 * 60 * 60 * 1000) {
-        setPwaBannerDismissed(true);
-      }
-    }
-  }, []);
-
-  const handleDismiss = () => {
-    setIsDismissed(true);
-    localStorage.setItem("google-signin-banner-dismissed", Date.now().toString());
+  const handleClose = () => {
+    trackPrompt("signin", "dismissed");
+    dismiss();
   };
 
   const handleSignIn = async () => {
     setIsSigningIn(true);
     try {
       await signInWithGoogle();
-      setIsDismissed(true);
-      localStorage.setItem("google-signin-banner-dismissed", Date.now().toString());
+      trackPrompt("signin", "accepted");
+      dismiss();
     } catch (error) {
       console.error("Error signing in with Google:", error);
     } finally {
@@ -65,53 +40,18 @@ export function GoogleSignInBanner() {
     }
   };
 
-  // Verificar si el banner de PWA está visible (instalable y no descartado)
-  const isPwaBannerVisible = isInstallable && !isInstalled && !pwaBannerDismissed;
-
-  // No mostrar si: no está montado, está cargando, ya hay usuario, fue descartado, o el banner de PWA está visible
-  if (!mounted || consentPending || loading || user || isDismissed || isPwaBannerVisible) {
-    return null;
-  }
+  if (!visible) return null;
 
   return (
-    <div className="fixed bottom-28 lg:bottom-4 left-4 right-4 z-[500] mx-auto max-w-md">
-      <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-4 flex items-center gap-4">
-        <div className="flex-shrink-0">
-          <LogoMobile width={40} height={56} />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <p className="font-bold text-sm text-neutral-black-80">
-            Inicia sesión y acumula puntos
-
-          </p>
-          <p className="text-xs text-neutral-600 mt-0.5">
-            {/* Y acumula puntos */}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handleSignIn}
-            variant="outline"
-            size="sm"
-            leftIcon={<GoogleIcon />}
-            disabled={isSigningIn}
-          >
-            <span className="hidden sm:inline">
-              {isSigningIn ? "..." : "Google"}
-            </span>
-          </Button>
-
-          <button
-            onClick={handleDismiss}
-            className="p-1.5 hover:bg-neutral-100 rounded-full transition-colors"
-            aria-label="Cerrar"
-          >
-            <X className="w-5 h-5 text-neutral-500" />
-          </button>
-        </div>
-      </div>
-    </div>
+    <FloatingPrompt
+      title="Inicia sesión y acumula puntos"
+      description="Es rápido, con tu cuenta de Google."
+      onClose={handleClose}
+      actions={
+        <Button onClick={handleSignIn} variant="outline" size="sm" leftIcon={<GoogleIcon />} disabled={isSigningIn}>
+          {isSigningIn ? "..." : "Continuar con Google"}
+        </Button>
+      }
+    />
   );
 }

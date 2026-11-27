@@ -6,46 +6,46 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Modal } from "@/components/ui/modal";
 import { useConsentStore } from "@/store/consentStore";
-import { track } from "@/utils/analytics";
+import { FloatingPrompt } from "@/components/prompts/FloatingPrompt";
+import { usePromptSlot } from "@/hooks/usePromptSlot";
+import { trackPrompt } from "@/utils/analytics";
 
 export function CookieConsent() {
   const { analytics, settingsOpen, setAnalytics, openSettings, closeSettings } = useConsentStore();
-  const [mounted, setMounted] = useState(false);
   const [draft, setDraft] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  const visible = usePromptSlot("cookies", analytics === null);
   useEffect(() => {
     if (settingsOpen) setDraft(analytics === true);
   }, [settingsOpen, analytics]);
 
-  if (!mounted) return null;
-
-  const decide = (value: boolean) => {
+  const decide = (value: boolean, via?: string) => {
     // Umami no usa cookies ni datos personales, por eso puede medir la decisión.
-    track(value ? "cookies_accepted" : "cookies_rejected");
+    trackPrompt("cookies", value ? "accepted" : "dismissed", via);
     setAnalytics(value);
   };
 
   return (
     <>
-      {analytics === null && !settingsOpen && (
-        <div
-          role="dialog"
-          aria-label="Preferencias de cookies"
-          className="fixed bottom-28 lg:bottom-4 left-4 right-4 z-[600] mx-auto max-w-md"
-        >
-          <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-4">
-            <p className="text-sm text-neutral-black-80">
+      {visible && !settingsOpen && (
+        <FloatingPrompt
+          title="Cookies"
+          description={
+            <>
               Usamos cookies analíticas para entender cómo usas Domi Burguer y mejorarla.{" "}
               <Link href="/legal#politicas" className="underline font-semibold">
                 Más info
               </Link>
-            </p>
-            <div className="mt-3 flex items-center gap-2">
+            </>
+          }
+          closeLabel="Cerrar y rechazar"
+          onClose={() => decide(false, "close")}
+          actions={
+            <>
               <Button variant="primary" size="sm" onClick={() => decide(true)}>
                 Aceptar
               </Button>
-              <Button variant="outline" size="sm" onClick={() => decide(false)}>
+              <Button variant="outline" size="sm" onClick={() => decide(false, "reject")}>
                 Rechazar
               </Button>
               <button
@@ -55,9 +55,9 @@ export function CookieConsent() {
               >
                 Configurar
               </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        />
       )}
 
       <Modal
