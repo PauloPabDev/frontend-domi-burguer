@@ -85,7 +85,7 @@ export default function LegalPageClient({
                 <div className="lg:col-span-8 xl:col-span-9">
                     <article className="rounded-2xl bg-white p-6 px-2">
                         <p className="text-xs font-semibold tracking-wide text-neutral-500 mb-4">
-                            ÚLTIMA ACTUALIZACIÓN, 7 DE ABRIL DE 2026
+                            ÚLTIMA ACTUALIZACIÓN, 26 DE NOVIEMBRE DE 2026
                         </p>
 
                         {tab === "tos" && tosContent}

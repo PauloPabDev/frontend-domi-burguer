@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useConsentStore } from "@/store/consentStore";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogoMobile } from "@/components/ui/icons";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
@@ -17,6 +18,8 @@ const GoogleIcon = () => (
 );
 
 export function GoogleSignInBanner() {
+  // Primero la decisión de cookies; los demás avisos esperan para no apilarse.
+  const consentPending = useConsentStore((s) => s.analytics === null);
   const { user, loading, signInWithGoogle } = useAuth();
   const { isInstallable, isInstalled } = usePWAInstall();
   const [isDismissed, setIsDismissed] = useState(false);
@@ -66,7 +69,7 @@ export function GoogleSignInBanner() {
   const isPwaBannerVisible = isInstallable && !isInstalled && !pwaBannerDismissed;
 
   // No mostrar si: no está montado, está cargando, ya hay usuario, fue descartado, o el banner de PWA está visible
-  if (!mounted || loading || user || isDismissed || isPwaBannerVisible) {
+  if (!mounted || consentPending || loading || user || isDismissed || isPwaBannerVisible) {
     return null;
   }
 

@@ -16,6 +16,7 @@
     "@heroui/system": "^2.4.22",
     "@heroui/theme": "^2.4.22",
     "@heroui/toast": "^2.0.16",
+    "@microsoft/clarity": "^1.0.2",
     "@neoconfetti/react": "^1.0.0",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",
