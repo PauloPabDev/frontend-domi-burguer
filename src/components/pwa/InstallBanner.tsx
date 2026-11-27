@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react";
 import { X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useConsentStore } from "@/store/consentStore";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { track } from "@/utils/analytics";
 import { LogoMobile } from "@/components/ui/icons";
 
 export function InstallBanner() {
+  // Primero la decisión de cookies; los demás avisos esperan para no apilarse.
+  const consentPending = useConsentStore((s) => s.analytics === null);
   const { isInstallable, isInstalled, installApp } = usePWAInstall();
   const [isDismissed, setIsDismissed] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -38,7 +41,7 @@ export function InstallBanner() {
     }
   };
 
-  if (!mounted || !isInstallable || isInstalled || isDismissed) {
+  if (!mounted || consentPending || !isInstallable || isInstalled || isDismissed) {
     return null;
   }
 

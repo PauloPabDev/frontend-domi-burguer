@@ -7,6 +7,8 @@ import { GoogleSignInBanner } from "@/components/auth/GoogleSignInBanner";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { AnnouncementsHost } from "@/components/announcements/AnnouncementsHost";
 import { StoreStatusAlert } from "@/components/announcements/StoreStatusAlert";
+import { CookieConsent } from "@/components/consent/CookieConsent";
+import { ClarityLoader } from "@/components/consent/ClarityLoader";
 import { ClientSocketProvider } from "@/contexts/ClientSocketContext";
 import { USING_MOCK_PRICES } from "@/data/products";
 
@@ -44,6 +46,8 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           <div className="h-28 bg-primary-red lg:hidden" />
         </>
       )}
+      {showPublicChrome && <CookieConsent />}
+      {showPublicChrome && <ClarityLoader />}
       {showPublicChrome && <GoogleSignInBanner />}
       {showPublicChrome && <InstallBanner />}
       {showPublicChrome && <AnnouncementsHost />}

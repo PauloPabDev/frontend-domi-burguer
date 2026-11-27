@@ -9,8 +9,10 @@ import {
 } from "./ui/icons";
 import Image from "next/image";
 import Link from "next/link";
+import { useConsentStore } from "@/store/consentStore";
 
 export const Footer = () => {
+  const openCookieSettings = useConsentStore((s) => s.openSettings);
   const clickCount = useRef(0);
   const yearClickCount = useRef(0);
   const [showAdminLink, setShowAdminLink] = useState(false);
@@ -111,6 +113,13 @@ export const Footer = () => {
               {legal.name}
             </Link>
           ))}
+          <button
+            type="button"
+            onClick={openCookieSettings}
+            className="relative self-stretch text-right font-semibold text-accentmikado-10 text-lg tracking-[0] leading-6 cursor-pointer"
+          >
+            COOKIES
+          </button>
         </nav>
 
         <div className="flex lg:w-[394px] w-full items-center gap-3 justify-center">

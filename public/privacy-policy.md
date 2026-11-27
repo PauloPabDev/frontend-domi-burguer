@@ -19,6 +19,8 @@ Podemos recolectar la siguiente información:
 - Información de pedidos  
 - Datos de navegación dentro de la plataforma  
 
+**Cookies y analítica.** Usamos cookies necesarias para que el sitio funcione (sesión, carrito, preferencias). Solo si tú lo aceptas, usamos Microsoft Clarity para ver mapas de calor y grabaciones anónimas de la navegación (los campos de formulario se enmascaran) y así mejorar la experiencia; Clarity puede guardar cookies propias (`_clck`, `_clsk`). Puedes aceptar, rechazar o cambiar tu decisión cuando quieras desde "COOKIES" en el pie de página. Además usamos Umami, una medición agregada que no usa cookies ni identifica personas.  
+
 ---
 
 ## 3. Uso de la información
