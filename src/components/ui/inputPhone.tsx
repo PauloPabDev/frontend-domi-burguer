@@ -26,10 +26,6 @@ interface InternalInputProps extends InputProps {
 
 const PhoneNumberInput = React.forwardRef<HTMLDivElement, CustomPhoneInputProps>(
   ({ className, inputClassName, onKeyDown, ...props }, ref) => {
-    // Ref para evitar recrear el componente interno cuando onKeyDown cambia
-    const onKeyDownRef = React.useRef(onKeyDown);
-    onKeyDownRef.current = onKeyDown;
-
     // Wrapper que recibe las props del PhoneInput y las reenvía a tu Input
     const InternalInput = React.useMemo(() => {
       const InputComponent = React.forwardRef<HTMLInputElement, InternalInputProps>(
@@ -39,7 +35,6 @@ const PhoneNumberInput = React.forwardRef<HTMLDivElement, CustomPhoneInputProps>
             <Input
               ref={inputRef}
               className={cn(innerClassName, inputClassName)}
-              onKeyDown={(e) => onKeyDownRef.current?.(e)}
               {...rest}
             />
           );
@@ -53,6 +48,8 @@ const PhoneNumberInput = React.forwardRef<HTMLDivElement, CustomPhoneInputProps>
       <div className={cn("phone-input-container", className)} ref={ref}>
         <PhoneInput
           {...props}
+          // La librería sobrescribe el onKeyDown del input; solo respeta el que recibe aquí
+          onKeyDown={onKeyDown}
           defaultCountry="CO"
           inputComponent={InternalInput}
           onChange={props.onChange}
